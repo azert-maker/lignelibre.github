@@ -11,6 +11,10 @@ const GEAR={
     {id:'top98',name:'Topmount 98',desc:'Planche de descente polyvalente, 98 cm.',st:{Vitesse:.7,Adhérence:.7,Stabilité:.75,Slide:.65},phys:{alat:9.0,tuck:.00135,len:.98,wob:0}},
     {id:'drop105',name:'Drop-through 105',desc:'Plus basse et plus longue : stable, très accrocheuse.',st:{Vitesse:.6,Adhérence:.85,Stabilité:.9,Slide:.8},phys:{alat:9.6,tuck:.00145,len:1.05,wob:0},cost:1},
     {id:'speed85',name:'Speedboard 85',desc:'Courte et rigide, la plus rapide en tuck. Nerveuse au-delà de 100 km/h.',st:{Vitesse:.95,Adhérence:.6,Stabilité:.5,Slide:.55},phys:{alat:8.6,tuck:.00118,len:.85,wob:1},cost:2}],
+  bmx:[
+    {id:'street',name:'Street 20,5"',desc:'Cadre polyvalent et réactif. Le bon point de départ.',st:{Accélération:.7,Rotation:.75,Stabilité:.7},phys:{acc:5,spin:1,turn:1,whip:1}},
+    {id:'park',name:'Park 20,75"',desc:'Plus long : réceptions plus stables, tourne un peu moins vite.',st:{Accélération:.65,Rotation:.68,Stabilité:.9},phys:{acc:4.8,spin:.93,turn:.94,whip:.95},cost:1},
+    {id:'flat',name:'Flatland Light',desc:'Ultra léger : rotations et tailwhips plus rapides, moins pardonnant.',st:{Accélération:.85,Rotation:.95,Stabilité:.5},phys:{acc:5.4,spin:1.12,turn:1.08,whip:1.15},cost:2}],
   wheel:[
     {id:'w80',name:'Grip 80A',desc:'Gomme tendre, colle en courbe, slide plus dur.',st:{Adhérence:.9,Slide:.45,Roulement:.55},phys:{alat:.5,slide:5.0,rr:.16}},
     {id:'w83',name:'Freeride 83A',desc:'Compromis grip et slide.',st:{Adhérence:.7,Slide:.75,Roulement:.65},phys:{alat:0,slide:5.8,rr:.15}},
@@ -27,6 +31,8 @@ const SHOP=[
   {id:'speed85',price:1600,kind:'Équipement',slot:'board',name:'Speedboard 85',effect:'Traînée en tuck −13 %, jusqu\'à ~130 km/h. Moins d\'adhérence.',ads:2},
   {id:'drop105',price:800,kind:'Équipement',slot:'board',name:'Drop-through 105',effect:'Adhérence +7 %, slides plus stables.',ads:1},
   {id:'w86',price:700,kind:'Équipement',slot:'wheel',name:'Roues Race 86A',effect:'Résistance au roulement −33 %.',ads:1},
+  {id:'park',price:700,kind:'Équipement',slot:'bmx',name:'BMX Park 20,75"',effect:'Cadre long : réception plus stable (même tolérance, moins de rebond).',ads:1},
+  {id:'flat',price:1400,kind:'Équipement',slot:'bmx',name:'BMX Flatland Light',effect:'Rotations +12 %, tailwhip +15 %. Accélération +8 %.',ads:2},
   {id:'carbon',price:500,kind:'Cosmétique',slot:'helmet',name:'Casque carbone',effect:'Coque carbone brillante.',ads:1},
   {id:'neon',price:400,kind:'Cosmétique',name:'Pack couleurs néon',effect:'4 teintes fluo pour tout l\'équipement.',ads:1},
   {id:'smoke',price:400,kind:'Cosmétique',name:'Fumigènes couleur',effect:'Fumée aux couleurs de ta voilure en wingsuit.',ads:1},
@@ -107,7 +113,7 @@ function buildHuman(look){
     const ft=grp(sh,0,-.43,0,'foot');const shoe=new THREE.Mesh(new THREE.BoxGeometry(.28,.08,.12),mG);shoe.position.set(.05,0,0);ft.add(shoe);
     const sole=new THREE.Mesh(new THREE.BoxGeometry(.29,.025,.125),mSole);sole.position.set(.05,-.045,0);ft.add(sole);const strap=new THREE.Mesh(new THREE.BoxGeometry(.05,.085,.13),mT);strap.position.set(.02,.005,0);ft.add(strap);
     legs.push({th,sh,ft,side})}
-  const P={};for(const k of POSE_KEYS)P[k]=0;P.hd=0;P.stance=1;let hdSide=1,lastT=-1e9,imp=0;
+  const P={};for(const k of POSE_KEYS)P[k]=0;P.hd=0;P.stance=1;let hdSide=1,lastT=-1e9,imp=0,gA=0,gPh=0,gK=0;/* gA/gPh : cycle de jambes (course, pédalage) ; gK = 0 course, 1 pédalage */
   function apply(now){const k=Math.min(1.1,P.crouch+imp),kb=k*1.7,br=Math.sin(now*.0026),ls=P.legSpread||0,st=P.stance;
     for(const Lg of legs){Lg.th.rotation.z=kb*.5;Lg.th.rotation.x=-Lg.side*(st*.17+ls*.3);Lg.sh.rotation.z=-kb;Lg.ft.rotation.z=kb*.5;Lg.ft.rotation.x=Lg.side*(st*.17+ls*.3)}
     pelvis.position.y=.86*Math.cos(kb*.5)*Math.cos(st*.17+ls*.3)+.13;pelvis.position.x=-Math.sin(kb*.5)*.1;pelvis.position.z=P.side*.06;
@@ -117,13 +123,20 @@ function buildHuman(look){
     neck.rotation.z=P.lean*.45;head.rotation.z=P.lean*.3;head.rotation.y=-(P.twist+P.turn*.35)*.5+P.look+P.turn*.5;head.position.y=.08+br*.004;
     for(const A of arms){A.cl.rotation.x=-A.side*(.05+P.spread*.12+br*.012);
       A.ua.rotation.x=-A.side*(.22+P.spread*1.15);A.ua.rotation.z=P.back*1.3-P.reach;A.fa.rotation.z=-(.32+P.back*.45)+P.reach*.4;A.hand.rotation.z=-.2+P.spread*.2}
+    /* cycle de marche / course / pédalage : cuisses en opposition, genou plié au retour, bras en balancier (course) */
+    if(gA>.01){for(const Lg of legs){const ph=gPh+(Lg.side>0?0:Math.PI),sw=Math.sin(ph);
+        if(gK){Lg.th.rotation.z+=gA*(.55+.45*sw);Lg.sh.rotation.z-=gA*(.7+.6*sw);Lg.ft.rotation.z+=gA*.2*sw}
+        else{Lg.th.rotation.z+=gA*sw*.95;Lg.sh.rotation.z-=gA*Math.max(0,-Math.cos(ph))*1.5+gA*.2;Lg.ft.rotation.z+=gA*.25*sw}}
+      if(!gK)for(const A of arms){const ph=gPh+(A.side>0?Math.PI:0);A.ua.rotation.z+=gA*Math.sin(ph)*.8;A.fa.rotation.z-=gA*.6}}
     if(P.hd>.01){const A=arms[hdSide>0?1:0];A.ua.rotation.x=lerp(A.ua.rotation.x,-A.side*1.25,P.hd);A.ua.rotation.z=lerp(A.ua.rotation.z,-.2,P.hd);A.fa.rotation.z=lerp(A.fa.rotation.z,-.1,P.hd)}}
   g.pose=p=>{const now=performance.now(),gap=now-lastT;lastT=now;const dt=Math.min(.1,gap/1000),k=gap>400?1:1-Math.exp(-(g.poseRate||11)*dt);
     for(const key of POSE_KEYS){const tv=p[key]!=null?p[key]:key==='stance'?1:0;P[key]+=(tv-P[key])*k}
+    if(p.gA!=null){gA=p.gA;gPh=p.gPh||0;gK=p.gK||0}
     if(p.handDown)hdSide=p.handDown>0?1:-1;P.hd+=((p.handDown?1:0)-P.hd)*k;imp*=gap>400?0:Math.exp(-5*dt);apply(now)};
   g.snapPose=p=>{lastT=-1e9;g.pose(p);lastT=-1e9};
   g.impact=v=>{imp=Math.min(.6,Math.max(imp,v||.3))};
-  g.getPose=()=>{const o={};for(const k of POSE_KEYS)o[k]=P[k];o.handDown=P.hd>.5?hdSide:0;return o};
+  g.gait=(amp,phase,pedal)=>{gA=amp||0;gPh=phase||0;gK=pedal?1:0};
+  g.getPose=()=>{const o={};for(const k of POSE_KEYS)o[k]=P[k];o.handDown=P.hd>.5?hdSide:0;o.gA=gA;o.gPh=gPh;o.gK=gK;return o};
   g.setPose=(name,t,extra)=>{const a=POSES.idle,b=POSES[name]||a,w=t==null?1:clamp(t,0,1),o={};
     for(const k of POSE_KEYS){const av=a[k]!=null?a[k]:k==='stance'?1:0,bv=b[k]!=null?b[k]:k==='stance'?1:0;o[k]=lerp(av,bv,w)}o.handDown=w>.5?b.handDown||0:0;if(extra)Object.assign(o,extra);g.pose(o)};
   g.bones={root:g,pelvis,spine,torso,neck,head,legs:legs.map((l,i)=>{l.th.name='upperLeg'+i;l.sh.name='lowerLeg'+i;l.ft.name='foot'+i;return {upper:l.th,lower:l.sh,foot:l.ft}}),

@@ -13,6 +13,9 @@ const SPORTS={
   snowboard:{name:'Snowboard',place:'Combe des Arêtes',c:'#7fd6ff',desc:'Freeride en poudreuse : carve, saute les bosses, plaque des rotations.',facts:['carving 0,9 g','sauts et 360'],
     modes:{course:'Slalom géant',free:'Freeride'},len:{opts:[8,12,20],unit:'portes',def:1},yt:'snowboard freeride powder pov',
     params:[{k:'slope',label:'Pente',opts:['Douce','Normale','Raide'],def:1},{k:'trees',label:'Sapins',opts:['Peu','Normal','Forêt'],def:1},{k:'bumps',label:'Bosses et sauts',opts:['Aucune','Quelques','Beaucoup'],def:1},{k:'relief',label:'Relief',opts:['Doux','Alpin','Extrême'],def:1}]},
+  bmx:{name:'BMX freestyle',place:'Skatepark des Docks',c:'#b26bff',desc:'Ta ligne dans un skatepark fermé : gaps, quarters, spine, rails, box. Tailwhips, barspins, manuals.',facts:['35 km/h','combos ×4'],
+    modes:{course:'Ligne chrono',free:'Session jam'},len:{opts:[4,6,8],unit:'portes',def:1},yt:'bmx park run',
+    params:[{k:'size',label:'Taille du parc',opts:['Petit','Moyen','Grand'],def:1},{k:'height',label:'Hauteur des modules',opts:['Basse','Moyenne','Haute'],def:1}]},
 };
 const SPORT_IDS=Object.keys(SPORTS).filter(k=>MODES[k]);
 
