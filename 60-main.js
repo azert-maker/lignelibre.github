@@ -9,7 +9,7 @@ $$('[data-cam]').forEach(b=>b.onclick=()=>setCam(+b.dataset.cam));
 function defaultParams(id){const p={};SPORTS[id].params.forEach(x=>p[x.k]=x.bool?x.def===1:x.def);return p}
 /* aperçu en direct : le vrai mode piloté par son pilote automatique */
 let demo=null;
-function previewSport(id,w,force){w=w||(profile.last[id]&&profile.last[id].weather)||'soleil';
+function previewSport(id,w,force){if(!MODES[id])id=SPORT_IDS[0];w=w||(profile.last[id]&&profile.last[id].weather)||'soleil';
   if(!force&&cur&&!run&&demo&&previewId===id){if(previewW!==w){previewW=w;applyEnv(cur.env,w)}return}
   if(cur)cur.dispose();ghostsClear();run=null;previewId=id;previewW=w;quiet=true;
   const dctx=Object.assign({},DUMMY,{crash(){if(demo)demo.reset=.8},finish(){if(demo)demo.reset=.8}});
@@ -32,6 +32,7 @@ function paintMp(){const course=curCfg.mode==='course';E.mp.innerHTML=standings(
 
 /* ---------- lancement ---------- */
 async function startRun(cfg,opt={}){
+  if(!cfg||!MODES[cfg.sport]){toast('Sport indisponible',true);return}
   opt=opt||{};if(run&&!run.finalized&&state!=='menu')finalizeRun(true);
   touchStreakOnLaunch();profile.runs++;saveProfile();
   if(ADS_CONFIG.interstitialEvery&&!opt.multi&&profile.runs>1&&profile.runs%ADS_CONFIG.interstitialEvery===0&&Ads.available()){state='ad';await Ads.interstitial('Entre deux parties')}
@@ -53,7 +54,7 @@ function netPush(force){if(!run||!run.multi||!cur)return;const ns=cur.netState()
 /* ---------- chute / arrivée ---------- */
 /* Persos : chute = rotation amortie du rider + secousse caméra + choc sourd (rien de tout ça ne touche aux scores) */
 let crashFx=null;
-function startCrashFx(){camShake(.7);const r=cur&&cur._rig;const water=curCfg.sport==='foil'||curCfg.sport==='surf';if(!water)sfx.thud(1);
+function startCrashFx(){camShake(.7);const r=cur&&cur._rig;const water=curCfg.sport==='wakeboard';if(!water)sfx.thud(1);
   crashFx={t:0,r,cam:(camBase.ok?camBase.p:camera.position).clone(),w:V3((Math.random()-.5)*6,(Math.random()-.5)*3,(Math.random()<.5?-1:1)*(4+Math.random()*3))};
   const h=r&&(r.human||r);if(h&&h.setPose)h.setPose('crash',1);else if(h&&h.pose)h.pose(POSES.crash)}
 function crashFrame(dt){const c=crashFx;if(!c)return;c.t+=dt;const k=Math.exp(-2.6*c.t);
@@ -208,10 +209,10 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
   if(state==='play'||state==='count'||state==='demo'||state==='menu'){camBase.p.copy(camera.position);camBase.q.copy(camera.quaternion);camBase.ok=true}
   if(state==='over')crashFrame(dt);else if(crashFx&&state!=='pause')crashFx=null;
   applyLook(dt);E.vig.style.opacity=state==='play'?vigT:0;
-  waterUniforms.uTime.value+=dt;musicTick(state);if(state==='play'&&cur)wind(hudKmh/(cur.vScale||100),curCfg.sport==='wingsuit'||curCfg.sport==='paraglide');else wind(0,false);flakes.update(dt,camera.position);
+  waterUniforms.uTime.value+=dt;musicTick(state);if(state==='play'&&cur)wind(hudKmh/(cur.vScale||100),curCfg.sport==='wingsuit');else wind(0,false);flakes.update(dt,camera.position);
   sky.position.copy(camera.position);sunSprite.position.copy(camera.position).addScaledVector(sunDir,1000);stars.position.copy(camera.position);clouds.update(camera.position);
   renderer.render(scene,camera);if(RP.exp)exportDraw()}
 
 /* ---------- démarrage ---------- */
 resize();setCam(S().cam|0);previewSport(profile.last.sport||'wingsuit');go('home',false);requestAnimationFrame(frame);
-window.__ll={get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
+window.__ll={SPORT_IDS,SPORTS,MODES,get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};

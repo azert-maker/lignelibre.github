@@ -3,7 +3,7 @@
    Traînée ½ρ·CdA·v², adhérence selon planche + roues, slide −0,55 g
    Collisions exactes : 4 coins de la planche contre glissière et paroi rocheuse
 ===================================================================== */
-function makeRoadMode(variant){return function(cfg,look,ctx){const luge=variant==='luge';
+function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/* street luge retirée (refonte 7 sports) : variante neutralisée */
   const P_=cfg.params||{};const course=cfg.mode==='course';
   const env={fogNear:90,fogFar:520,hemiGround:0x3a3426,accent:luge?'#ff5a7a':'#ff9a3c',cloudY:160};
   const eco=S().quality==='eco';const seedI=strSeed(cfg.seed),R0=mulberry(seedI);const root=new THREE.Group();scene.add(root);
@@ -97,7 +97,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=variant=
     for(const [k,c] of chunks)if(k<kc-1||k>kc+4){root.remove(c.g);c.geo.dispose();c.rg.dispose();c.g.traverse(n=>{if(n.isSprite||(n.material&&n.material.map&&n.material.map!==chevTex)){if(n.material.map&&n.material.map!==chevTex)n.material.map.dispose();if(n.material!==signMat)n.material.dispose()}});chunks.delete(k)}}
   const peaks=mountainRing(root,18,560,760,180,420,0x6b6e78,0xf4f4f0,new THREE.Color(WEATHER[cfg.weather].horizon),mulberry(seedI+3));
 
-  const rig=luge?buildLuge(look):buildLongboard(look);castAll(rig,true,false);root.add(rig);const human=rig.human;
+  const rig=buildLongboard(look);castAll(rig,true,false);root.add(rig);const human=rig.human;
   const dust=makeParticles(eco?36:120,.9,.5,root);const blob=makeBlob(root,luge?1.5:1.3);let leanS=0,camY=null;const _t=V3(),_sd=V3(),_n=V3();const dustFade=new THREE.Color(WEATHER[cfg.weather].horizon);
   const half=rig.len/2,hwid=luge?.225:.125,CORN=[[-hwid,-half],[hwid,-half],[-hwid,half],[hwid,half]];
   const wv=WIND[cfg.wind|0].v,wa=(seedI%628)/100;
@@ -202,17 +202,10 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=variant=
     snapshot(){return {s:L.s,v:L.v}},
     restore(s){L.s=s.s;L.o=0;L.r=0;L.v=Math.min(s.v,10);slideVis=0},
     netState(){const a=at(L.s,L.o);return {p:[+a[0].toFixed(2),+a[1].toFixed(2),+a[2].toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
-    ghost(lk){const o=luge?buildLuge(lk):buildLongboard(lk);if(!luge)o.human.pose({crouch:.6,lean:.7,twist:.8,back:.5});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.4;o.add(tag);root.add(o);return o},
+    ghost(lk){const o=buildLongboard(lk);if(!luge)o.human.pose({crouch:.6,lean:.7,twist:.8,back:.5});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.4;o.add(tag);root.add(o);return o},
     overStats(){return [['Distance',(stats.dist/1000).toFixed(2)+' km'],['Vitesse max',Math.round(stats.vmax)+' km/h'],['Virages propres',stats.turnsClean],['Slides',stats.slides],['Temps',fmtT(stats.time)]]},
     _rig:rig,_L:()=>L,_recX:()=>L.s,_world:(f,all)=>{updateChunks(f.e,!!all);peaks.position.set(f.p.x,f.p.y-160,f.p.z)},dispose(){scene.remove(root);disposeTree(root)}
   };
 }};
 MODES.longboard=makeRoadMode('board');
-MODES.luge=makeRoadMode('luge');
-function buildLuge(look){const g=new THREE.Group();const sm=new THREE.MeshLambertMaterial({color:look.deck});
-  const sled=new THREE.Mesh(new THREE.BoxGeometry(.45,.05,1.9),sm);sled.position.y=.1;g.add(sled);
-  const rest=new THREE.Mesh(new THREE.BoxGeometry(.4,.12,.3),new THREE.MeshLambertMaterial({color:0x15191e}));rest.position.set(0,.18,.8);g.add(rest);
-  const tm=new THREE.MeshLambertMaterial({color:0x9aa0a6}),wm=new THREE.MeshLambertMaterial({color:look.wheel});
-  for(const z of [-.7,.7]){const tr=new THREE.Mesh(new THREE.BoxGeometry(.4,.04,.06),tm);tr.position.set(0,.06,z);g.add(tr);
-    for(const x of [-.21,.21]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.05,10),wm);w.rotation.z=Math.PI/2;w.position.set(x,.04,z);g.add(w)}}
-  const human=buildHuman(look);human.rotation.set(0,Math.PI/2,Math.PI/2,'YXZ');human.position.set(0,.3,-.85);human.pose({crouch:0,spread:0,back:.2});g.add(human);g.human=human;g.len=1.9;return g}
+

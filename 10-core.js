@@ -34,7 +34,7 @@ if(ACC.active&&!ACC.list[ACC.active])ACC.active='';
 const PROFILE_KEY=ACC.active?'ll3_profile_'+ACC.active:'ll3_profile';
 const PROFILE_DEFAULT={
   look:{name:'Rider',skin:0xd9a77f,suit:0x1d2731,accent:0xff5a36,helmet:0xf2f2ee,wing1:0xff5a36,wing2:0xffb000,pattern:1,deck:0x2a1f17,wheel:0xf0b84a,fcol:0x3fe0c5,boardCol:0xf3f1ea,
-    gear:{helmet:'full',wing:'proxy',board:'top98',wheel:'w83',fwing:'glide',fboard:'b48',mast:'m80'}},
+    gear:{helmet:'full',wing:'proxy',board:'top98',wheel:'w83'}},
   coins:0,xp:{},ach:{},achP:{},owned:{},adp:{},cons:{revive:0,boost:0,x15:0},
   records:{},medals:{},history:[],runs:0,
   settings:{quality:'normal',vol:.8,music:true,ghost:true,autoQ:true,sbAssist:true,spinSens:1,invert:false,cam:0,adsDemo:true,haptics:true,assist:true},
@@ -46,6 +46,13 @@ function deepMerge(a,b){for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Arra
 const profile=deepMerge(load(PROFILE_KEY,{}),JSON.parse(JSON.stringify(PROFILE_DEFAULT)));
 /* filets : champs ajoutés après coup (profils anciens) */
 for(const k of ['streak','bestStreak','tutorialStep'])if(typeof profile[k]!=='number')profile[k]=0;for(const k of ['lastPlayDay','dailyDone','classCode'])if(typeof profile[k]!=='string')profile[k]='';
+/* MIGRATION v4 (refonte « 7 sports ») : luge, parapente, foil et surf foil sont retirés.
+   On garde tout le reste (pièces, XP, records, cosmétiques, réglages, identifiants) ; les données des sports
+   retirés restent dans le profil mais ne sont plus lues ; le dernier sport choisi est ramené sur un sport existant. */
+const REMOVED_SPORTS=['luge','paraglide','foil','surf'];
+if(!profile.last||typeof profile.last!=='object')profile.last={};
+if(REMOVED_SPORTS.includes(profile.last.sport))profile.last.sport='wingsuit';
+if((profile.v|0)<4){profile.v=4;if(profile.cons&&typeof profile.cons==='object')for(const k of ['revive','boost','x15'])profile.cons[k]=Math.max(0,profile.cons[k]|0)}
 if(!profile.account||typeof profile.account!=='object')profile.account={pseudo:'',pinHash:'',syncedAt:0,recoveryCode:''};
 if(!profile.settings.qChosen){const weak=matchMedia('(pointer:coarse)').matches||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4;profile.settings.quality=weak?'eco':'normal';profile.settings.qChosen=true}
 let saveT=null,profileFrozen=false;/* gelé pendant un changement de compte / import pour ne pas réécrire l'ancien profil */

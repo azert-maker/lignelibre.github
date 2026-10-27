@@ -14,19 +14,7 @@ const GEAR={
   wheel:[
     {id:'w80',name:'Grip 80A',desc:'Gomme tendre, colle en courbe, slide plus dur.',st:{Adhérence:.9,Slide:.45,Roulement:.55},phys:{alat:.5,slide:5.0,rr:.16}},
     {id:'w83',name:'Freeride 83A',desc:'Compromis grip et slide.',st:{Adhérence:.7,Slide:.75,Roulement:.65},phys:{alat:0,slide:5.8,rr:.15}},
-    {id:'w86',name:'Race 86A',desc:'Gomme dure : roule plus vite, accroche moins.',st:{Adhérence:.55,Slide:.7,Roulement:.95},phys:{alat:-.4,slide:5.4,rr:.10},cost:1}],
-  fwing:[
-    {id:'glide',name:'Glide 1100',desc:'Grand allongement : glisse longtemps, pompe facile.',st:{Glisse:.9,Pompage:.8,Virage:.55,'Vitesse mini':.6},phys:{drag:.016,pump:1.1,turn:.6,stall:3.2}},
-    {id:'carve',name:'Carve 900',desc:'Compacte et vive, pour carver sur la vague.',st:{Glisse:.6,Pompage:.65,Virage:.95,'Vitesse mini':.45},phys:{drag:.019,pump:.95,turn:.95,stall:3.5}},
-    {id:'surf',name:'Surf 1400',desc:'Grosse surface : décolle à 10 km/h, idéale pour débuter.',st:{Glisse:.7,Pompage:.95,Virage:.7,'Vitesse mini':.95},phys:{drag:.021,pump:1.2,turn:.75,stall:2.7},cost:2}],
-  fboard:[
-    {id:'b42',name:"Prone 4'2",desc:'Légère et maniable, moins stable.',st:{Stabilité:.5,Maniabilité:.9},phys:{assist:.5,len:1.28,turn:1.1}},
-    {id:'b48',name:"Mid 4'8",desc:'Le bon compromis.',st:{Stabilité:.7,Maniabilité:.7},phys:{assist:.7,len:1.42,turn:1}},
-    {id:'b52',name:"Pump 5'2",desc:'Longue et stable, tient la hauteur toute seule.',st:{Stabilité:.92,Maniabilité:.5},phys:{assist:.9,len:1.58,turn:.9},cost:1}],
-  mast:[
-    {id:'m70',name:'Mât 70 cm',desc:'Moins de marge de hauteur, plus réactif.',len:.7},
-    {id:'m80',name:'Mât 80 cm',desc:'Standard.',len:.8},
-    {id:'m90',name:'Mât 90 cm',desc:'Plus de marge dans les creux de houle.',len:.9,cost:1}]
+    {id:'w86',name:'Race 86A',desc:'Gomme dure : roule plus vite, accroche moins.',st:{Adhérence:.55,Slide:.7,Roulement:.95},phys:{alat:-.4,slide:5.4,rr:.10},cost:1}]
 };
 const gearOf=(slot,id)=>GEAR[slot].find(g=>g.id===id)||GEAR[slot][0];
 const PALETTE=[0xff5a36,0xffb000,0xf5e663,0x7ee08a,0x3fe0c5,0x8fd3ff,0x2b6cff,0x6a5cff,0xff4f9a,0xd23c3c,0xf2f2ee,0x9aa3ab,0x1d2731,0x111418,0x2a1f17,0x8a6b4a];
@@ -39,9 +27,6 @@ const SHOP=[
   {id:'speed85',price:1600,kind:'Équipement',slot:'board',name:'Speedboard 85',effect:'Traînée en tuck −13 %, jusqu\'à ~130 km/h. Moins d\'adhérence.',ads:2},
   {id:'drop105',price:800,kind:'Équipement',slot:'board',name:'Drop-through 105',effect:'Adhérence +7 %, slides plus stables.',ads:1},
   {id:'w86',price:700,kind:'Équipement',slot:'wheel',name:'Roues Race 86A',effect:'Résistance au roulement −33 %.',ads:1},
-  {id:'surf',price:1500,kind:'Équipement',slot:'fwing',name:'Aile Surf 1400',effect:'Vitesse de décrochage 10 km/h au lieu de 11,5. Pompage +20 %.',ads:2},
-  {id:'b52',price:800,kind:'Équipement',slot:'fboard',name:"Planche Pump 5'2",effect:'Maintien de hauteur assisté à 90 %.',ads:1},
-  {id:'m90',price:600,kind:'Équipement',slot:'mast',name:'Mât 90 cm',effect:'+10 cm de marge avant ventilation.',ads:1},
   {id:'carbon',price:500,kind:'Cosmétique',slot:'helmet',name:'Casque carbone',effect:'Coque carbone brillante.',ads:1},
   {id:'neon',price:400,kind:'Cosmétique',name:'Pack couleurs néon',effect:'4 teintes fluo pour tout l\'équipement.',ads:1},
   {id:'smoke',price:400,kind:'Cosmétique',name:'Fumigènes couleur',effect:'Fumée aux couleurs de ta voilure en wingsuit.',ads:1},
@@ -78,8 +63,6 @@ const POSES={idle:{crouch:.12,lean:.05,twist:.2,spread:.22,look:.2},
 const POSE_KEYS=['crouch','lean','side','twist','turn','spread','back','look','reach','legSpread','stance'];
 function applyStance(h,sport,I,v){if(!h||!h.setPose)return;I=I||NEUTRAL;const sp=clamp((v||0)/25,0,1);
   if(sport==='wingsuit')return h.setPose(I.y>0?'wingsuit_dive':'wingsuit_glide',1);
-  if(sport==='foil'||sport==='surf')return h.setPose(I.a?'foil_pump':'foil_neutral',1,{side:I.x*.15,turn:I.x*.4});
-  if(sport==='paraglide')return h.setPose('idle',1,{crouch:.95,lean:-.25,spread:.15});
   if(I.y<0)return h.setPose('tuck',1,{side:I.x*.12});if(I.a)return h.setPose('slide',1,{handDown:I.x>=0?-1:1});if(I.y>0)return h.setPose('stand',1);
   if(I.x)return h.setPose(I.x<0?'carve_L':'carve_R',.5+sp*.5);h.setPose('carve',.6+sp*.4)}
 function buildHuman(look){
@@ -186,23 +169,9 @@ function buildLongboard(look){
     for(const x of [-.13,.13]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.05,10),wm);w.rotation.z=Math.PI/2;w.position.set(x,.035,z);g.add(w)}}
   const human=buildHuman(L);human.position.y=deck.position.y+.02;g.add(human);g.human=human;g.len=len;return g}
 
-/* ---------- foil + rider ---------- */
-function buildFoil(look){
-  const L=look,fb=gearOf('fboard',L.gear.fboard),fw=gearOf('fwing',L.gear.fwing),ms=gearOf('mast',L.gear.mast),g=new THREE.Group();
-  const bm=new THREE.MeshLambertMaterial({color:L.boardCol}),dm=new THREE.MeshLambertMaterial({color:0x1a2a33}),am=new THREE.MeshLambertMaterial({color:L.fcol});
-  const len=fb.phys.len,M=ms.len,span=fw.id==='surf'?.95:fw.id==='carve'?.7:.85;
-  const b=new THREE.Mesh(new THREE.BoxGeometry(.5,.1,len),bm);b.position.y=.05;g.add(b);
-  const nose=new THREE.Mesh(new THREE.BoxGeometry(.36,.09,.18),bm);nose.position.set(0,.05,-len/2-.06);g.add(nose);
-  const st=new THREE.Mesh(new THREE.BoxGeometry(.51,.02,.3),am);st.position.set(0,.1,-len*.3);g.add(st);
-  const mast=new THREE.Mesh(new THREE.BoxGeometry(.035,M,.13),dm);mast.position.set(0,-M/2,.18);g.add(mast);
-  const fus=new THREE.Mesh(new THREE.BoxGeometry(.04,.04,.75),dm);fus.position.set(0,-M,.25);g.add(fus);
-  const wing=new THREE.Mesh(new THREE.BoxGeometry(span,.025,.2),am);wing.position.set(0,-M,-.05);g.add(wing);
-  const stab=new THREE.Mesh(new THREE.BoxGeometry(.34,.02,.1),dm);stab.position.set(0,-M,.58);g.add(stab);
-  const human=buildHuman(L);human.position.y=.1;g.add(human);g.human=human;g.mast=M;g.len=len;return g}
-
 /* look compact pour le réseau (≤ 300 octets) */
 function packLook(L){return {n:String(L.name||'Rider').slice(0,16),s:L.skin,u:L.suit,a:L.accent,h:L.helmet,w1:L.wing1,w2:L.wing2,pt:L.pattern,d:L.deck,wh:L.wheel,f:L.fcol,b:L.boardCol,g:L.gear}}
 function unpackLook(k){k=k||{};const num=(v,d)=>Number.isFinite(v)?v>>>0&0xffffff:d;const D=PROFILE_DEFAULT.look;const gr=k.g&&typeof k.g==='object'?k.g:{};
-  const gear={};for(const s of ['helmet','wing','board','wheel','fwing','fboard','mast'])gear[s]=GEAR[s].some(x=>x.id===gr[s])?gr[s]:D.gear[s];
+  const gear={};for(const s of Object.keys(GEAR))gear[s]=GEAR[s].some(x=>x.id===gr[s])?gr[s]:D.gear[s];
   return {name:String(k.n||'Rider').slice(0,16),skin:num(k.s,D.skin),suit:num(k.u,D.suit),accent:num(k.a,D.accent),helmet:num(k.h,D.helmet),wing1:num(k.w1,D.wing1),wing2:num(k.w2,D.wing2),
     pattern:clamp(k.pt|0,0,3),deck:num(k.d,D.deck),wheel:num(k.wh,D.wheel),fcol:num(k.f,D.fcol),boardCol:num(k.b,D.boardCol),gear}}
