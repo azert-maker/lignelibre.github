@@ -1,5 +1,16 @@
 # Journal des versions · Ligne Libre
 
+## 0.19.0 · 28 octobre 2026 · Réceptions motocross et parkour, moto fournie intégrée
+
+Ajouts
+- Réceptions qualifiées en motocross (assiette, whip, impact) et en parkour (roulade, grosse chute, précision) via le système commun.
+- Moto de motocross fournie par Jean : nettoyée par script (`assets/blender/moto.py`), intégrée sur les groupes animés du jeu (carrosserie recolorée, fourche et direction sur le vrai pivot, roues, plaque au numéro du joueur).
+- Mains sur les poignées en motocross (IK) et position d'attaque revue.
+- Inventaire et statut de licence de tous les assets reçus (`docs/ASSETS.md`).
+
+Tests
+- `tests/glb.js` : 18 contrôles ; `tests/land.js` : 14 contrôles (attend la fin de la chute au lieu d'un délai fixe).
+
 ## 0.18.0 · 27 octobre 2026 · Game feel : réceptions, chutes, casque intégral v2
 
 Ajouts
