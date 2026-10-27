@@ -1,0 +1,155 @@
+
+<div id="stage"></div>
+<canvas id="speedlines"></canvas>
+<div id="vignette"></div>
+<div id="demoTag" hidden></div>
+
+<section class="screen" id="home">
+  <div class="home-top">
+    <h1 class="logo">Ligne<br><span>Libre</span></h1>
+    <p class="tag">Wingsuit, downhill, luge, snowboard, parapente, foil et surf foil. Physique calée sur les vraies valeurs, mondes générés, parcours chronométrés et multijoueur.</p>
+    <div id="homeEngage"></div>
+  </div>
+  <nav class="home-nav" aria-label="Menu principal">
+    <button class="navbtn primary" data-go="play"><b>Jouer</b><small>parcours ou monde libre</small></button>
+    <button class="navbtn" data-go="multi"><b>Multijoueur</b><small id="netState">courses en direct entre amis</small></button>
+    <button class="navbtn" data-go="garage"><b>Garage</b><small>perso, ailes, planches, foils</small></button>
+    <button class="navbtn" data-go="shop"><b>Boutique</b><small>objets à débloquer</small></button>
+    <button class="navbtn" data-go="prog"><b>Progression</b><small>niveaux, défis, matériel</small></button>
+    <button class="navbtn" data-go="ranking"><b>Classement</b><small>records et médailles</small></button>
+    <button class="navbtn" data-go="settings"><b>Réglages</b><small>graphismes, son, contrôles</small></button>
+  </nav>
+  <button class="profile-chip" id="profileChip" data-go="garage" aria-label="Profil"></button>
+</section>
+
+<section class="screen sheetwrap" id="play" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Choisis ta glisse</h2></header>
+  <div class="sh-body" id="playBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="setup" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2 id="setupTitle">Réglages de la partie</h2></header>
+  <div class="sh-body" id="setupBody"></div>
+  <footer class="sh-foot"><button class="btn primary" id="btnLaunch">Lancer</button><span class="note" id="setupNote"></span></footer>
+</div></section>
+
+<section class="screen sheetwrap" id="garage" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Garage</h2></header>
+  <div class="tabs" role="tablist" id="garageTabs"></div>
+  <div class="sh-body" id="garageBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="shop" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Boutique</h2></header>
+  <div class="sh-body" id="shopBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="ranking" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Classement</h2></header>
+  <div class="tabs" role="tablist" id="rankTabs"></div>
+  <div class="sh-body" id="rankBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="prog" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Progression</h2></header>
+  <div class="tabs" role="tablist" id="progTabs"></div>
+  <div class="sh-body" id="progBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="settings" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Réglages</h2></header>
+  <div class="sh-body" id="settingsBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="multi" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" data-back aria-label="Retour">←</button><h2>Multijoueur</h2></header>
+  <div class="sh-body" id="multiBody"></div>
+</div></section>
+
+<section class="screen sheetwrap" id="lobby" hidden><div class="sheet">
+  <header class="sh-head"><button class="back" id="lobbyBack" aria-label="Quitter le salon">←</button><h2>Salon</h2></header>
+  <div class="sh-body" id="lobbyBody"></div>
+  <footer class="sh-foot"><button class="btn primary" id="btnLobbyGo">Prêt</button><span class="note" id="lobbyNote"></span></footer>
+</div></section>
+
+<div id="vig"></div>
+<div id="nmFlash"></div>
+<div class="replay" id="replay" hidden><div class="rp-top"><span class="eyebrow">Replay · 15 dernières secondes</span><div class="rp-bar" id="rpBar"><i></i></div></div>
+  <div class="row"><button class="btn primary" id="rpExp">Exporter le clip 9:16</button><button class="btn" id="rpClose">Fermer<kbd>Échap</kbd></button></div></div>
+<div class="rpcover" id="rpCover" hidden><b>Enregistrement du clip…</b><small>Reste sur cet onglet : ça dure le temps du replay.</small></div>
+<div id="hud" hidden>
+  <div class="hud-tl">
+    <div class="r1"><button class="pbtn" id="btnPause" aria-label="Pause">II</button>
+      <div><div class="mname" id="hMode">Wingsuit</div><div class="timer" id="hTime">0:00.0</div></div></div>
+    <div class="prog" id="hProg" hidden></div>
+    <div class="goal" id="hGoal" hidden></div>
+    <div class="mp" id="hMp"></div>
+  </div>
+  <div class="hud-tr"><div class="score" id="hScore">0</div><div class="mult" id="hMult"></div><div class="flowbar" title="Flow"><i id="hFlow"></i></div><div class="feed" id="feed"></div></div>
+  <div class="spd">
+    <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="trk" cx="60" cy="60" r="52" pathLength="100"/><circle class="fil" id="spdArc" cx="60" cy="60" r="52" pathLength="100"/></svg>
+    <div class="spd-n"><b id="hSpeed">0</b><span>km/h</span><em id="hVmax">max 0</em></div>
+  </div>
+  <div class="inst" id="inst"></div>
+  <div class="keys" id="keys"></div>
+  <div class="toast" id="toast"></div>
+  <div class="count" id="count" hidden></div>
+</div>
+
+<div id="touch" hidden>
+  <div class="pad left">
+    <button class="tb" data-k="l" aria-label="Gauche"><b>◀</b></button>
+    <button class="tb" data-k="r" aria-label="Droite"><b>▶</b></button>
+  </div>
+  <div class="pad right">
+    <div class="col">
+      <button class="tb" data-k="u" id="tU"><b>▲</b><span>Haut</span></button>
+      <button class="tb" data-k="d" id="tD"><b>▼</b><span>Bas</span></button>
+    </div>
+    <button class="tb act" data-k="a" id="tA">Action</button>
+  </div>
+</div>
+
+<div class="panel" id="pause" hidden>
+  <div class="box">
+    <span class="eyebrow" id="pMode">Pause</span>
+    <h3>On souffle un coup.</h3>
+    <div class="ctl-list" id="pCtl"></div>
+    <div class="grp"><span class="lbl">Caméra</span>
+      <div class="chips"><button class="chip" data-cam="0">Poursuite</button><button class="chip" data-cam="1">Casque</button><button class="chip" data-cam="2">Drone</button></div></div>
+    <div class="row">
+      <button class="btn primary" id="btnResume">Reprendre<kbd>Échap</kbd></button>
+      <button class="btn" id="btnRestart">Rejouer<kbd>R</kbd></button>
+      <button class="btn" id="btnQuit">Menu</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="over" hidden>
+  <div class="box">
+    <span class="eyebrow" id="oMode">Wingsuit</span>
+    <h3 id="oTitle">Impact</h3>
+    <p id="oText"></p>
+    <div class="stats" id="oStats"></div>
+    <div id="oMulti"></div>
+    <div class="row" id="oRow">
+      <button class="btn" id="btnContinue" hidden style="border-color:var(--gold);color:var(--gold)">Continuer</button>
+      <button class="btn primary" id="btnAgain">Encore une<kbd>R</kbd></button>
+      <button class="btn" id="btnReplay">Replay</button>
+      <button class="btn" id="btnMenu2">Menu</button>
+    </div>
+  </div>
+</div>
+
+<div id="admodal" hidden role="dialog" aria-modal="true" aria-label="Publicité">
+  <div>
+    <div class="adbox">
+      <span class="k" id="adKind">Publicité · démonstration</span>
+      <h4 id="adTitle">Emplacement publicitaire</h4>
+      <p id="adText">Cet espace sera remplacé par la régie publicitaire choisie à l'intégration (Poki, CrazyGames, Google H5 Games…).</p>
+      <div class="cd" id="adCd">5</div>
+    </div>
+    <div class="adbar"><span class="note" id="adNote">Regarde jusqu'au bout pour la récompense.</span>
+      <button class="btn small" id="adSkip">Passer</button><button class="btn small primary" id="adClose" disabled>Récupérer</button></div>
+  </div>
+</div>
