@@ -75,7 +75,7 @@ MODES.parkour=function(cfg,look,ctx){
   const stats={score:0,dist:0,vmax:0,time:0,moves:0,best:'',bestPts:0,tricks:0,flowMax:0,vaults:0,wallruns:0,gaps:0,maxGap:0,gates:0,pen:0};
   let gates=null,finishT=0;
   if(course){const list=[];let len=0,px=St.pos.x,pz=St.pos.z;for(let r=2;r<ROWS;r+=2){const b=roofs.find(o=>o.r===r&&o.c===Math.floor(COLS/2)+(r%4===0?0:(R()<.5?-1:1)*(COLS>2?1:0)))||roofs.find(o=>o.r===r);const x=(b.x0+b.x1)/2,z=(b.z0+b.z1)/2;list.push({x,z,y:b.y1,yaw:0,hw:BW/2-.3,h:3.6});len+=Math.hypot(x-px,z-pz);px=x;pz=z}
-    gates=makeGates(root,list,0xff3fbf);finishT=len/5.6+list.length*1.2+3}
+    gates=makeGates(root,list,0xff3fbf);finishT=len/7.6+1.5}
   const spots=course?null:makeSpots(root,{rng:rngAt(seedI,4,6),n:2,mods:()=>boxes.filter(b=>b.t==='vault'||b.wr||b.t==='beam'||b.t==='bar'),ok:()=>true,pos:b=>({x:(b.x0+b.x1)/2,y:b.y1-(b.wr?3:0),z:(b.z0+b.z1)/2}),
     pick:(b,r)=>{const T=b.t==='vault'?[['Kong vault',/Kong/],['Speed vault',/vault/i]]:b.wr?[['Wallrun',/Wallrun/],['Wall jump',/Wall jump/]]:b.t==='bar'?[['Glissade sous la barre',/Glissade/]]:[['Précision',/Précision/]];const c=T[Math.floor(r()*T.length)];return {label:c[0],bonus:400,r:7,test:n=>c[1].test(n)}}});
   /* ---------- rider ---------- */
