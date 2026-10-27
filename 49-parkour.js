@@ -138,7 +138,11 @@ MODES.parkour=function(cfg,look,ctx){
       if(gt<.05){if(live)return ['Tombé dans la rue','Chute de '+Math.round(drop)+' m entre deux immeubles. Saute plus tôt, au bord du toit.'];St.mode='run';return null}
       const rollIn=I.y<0||(ASS&&drop>4.5&&drop<=8.5);
       if(drop>8.5&&live)return ['Chute trop haute','Réception de '+drop.toFixed(1)+' m : vise un toit plus proche en hauteur.'];
-      if(live){land=clamp(drop/4,.2,1);human.impact(land*.6);camShake(Math.min(.5,drop*.06));sfx.thud(.15+land*.35);for(let i=0;i<(eco?3:8);i++)dust.spawn(St.pos.x,St.pos.y+.05,St.pos.z,(Math.random()-.5)*2,.4+Math.random(),(Math.random()-.5)*2,.6,.6,.55,.7)}
+      /* qualité : roulade sur une grosse chute = propre (parfaite si déclenchée à la main) ; grosse chute sans roulade = limite ;
+         saut de précision au centre d'un muret étroit = parfaite */
+      let lq=drop>3.2?(rollIn?(I.y<0?'perfect':'clean'):'sketchy'):'clean';
+      if(fromB&&toB&&fromB!==toB&&St.fromPos&&Math.min(toB.x1-toB.x0,toB.z1-toB.z0)<1.3){const cx=(toB.x0+toB.x1)/2,cz=(toB.z0+toB.z1)/2,off=toB.x1-toB.x0<toB.z1-toB.z0?Math.abs(St.pos.x-cx):Math.abs(St.pos.z-cz);if(off<.18)lq='perfect'}
+      if(live&&drop>.6){land=clamp(drop/4,.2,1);ctx.land(lq,{k:land,pos:St.pos,human,air:Math.sqrt(2*Math.max(drop,0)/G),trick:drop>3.2});for(let i=0;i<(eco?3:8);i++)dust.spawn(St.pos.x,St.pos.y+.05,St.pos.z,(Math.random()-.5)*2,.4+Math.random(),(Math.random()-.5)*2,.6,.6,.55,.7)}
       St.mode='run';
       if(drop>3.2){if(rollIn){St.mode='roll';St.roll=.45;St.sp=Math.max(St.sp*.92,3);if(live)name('Roulade',90+drop*20,{land:'clean'})}else{St.sp=0;St.stun=.6;if(live){toast('Réception lourde',true);if(ctx.comboBreak)ctx.comboBreak()}}}
       /* saut entre deux toits / précision */
@@ -176,7 +180,7 @@ MODES.parkour=function(cfg,look,ctx){
       St.phase+=(St.mode==='run'?St.sp*dt*1.15:0);const run=St.mode==='run'&&St.sp>.3;
       const ps=St.mode==='slide'?{crouch:.7,lean:-.7,spread:.5,back:.2,stance:0,look:.2}:St.mode==='vault'?{crouch:.75,lean:.7,spread:.1,back:.3,stance:0,handDown:1}:St.mode==='climb'?{crouch:.6,lean:.4,back:1.3,stance:0}:
         St.mode==='wallrun'?{crouch:.3,lean:.25,spread:.8,side:St.wr&&St.wr.nx>0?-.5:.5,stance:0}:St.mode==='roll'?{crouch:1.1,lean:1.3,back:.5,stance:0}:St.mode==='air'?{crouch:St.vel.y>0?.55:.35,lean:.35,spread:.5,back:.25,stance:0,legSpread:.2}:
-        {crouch:.12+clamp(St.sp/8.6,0,1)*.18+land*.4,lean:.12+clamp(St.sp/8.6,0,1)*.4,spread:.12,stance:0,look:0};
+        {crouch:.12+clamp(St.sp/8.6,0,1)*.18+land*.15,lean:.12+clamp(St.sp/8.6,0,1)*.4,spread:.12,stance:0,look:0};
       human.pose(ps);human.gait(run?clamp(St.sp/7,.25,1)*.85:0,St.phase,false);
       human.rotation.set(0,Math.PI/2-St.h,0);if(St.mode==='roll'){human.rotation.z=0;human.rotateZ(-(1-St.roll/.45)*Math.PI*2)}if(St.mode==='wallrun'&&St.wr)human.rotateX(St.wr.nx*-.35);
       human.position.copy(St.pos);if(St.mode==='roll')human.position.y+=.45;

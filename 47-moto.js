@@ -176,7 +176,7 @@ MODES.motocross=function(cfg,look,ctx){
           if(vn>(GP.susp||15.5))return ['Réception trop violente','Impact à '+vn.toFixed(1)+' m/s : la suspension a talonné. Vise la descente du saut.']}
         St.pos.y=g.h;St.vel.addScaledVector(n,-St.vel.dot(n));St.vel.multiplyScalar(1-pd*.25-(vn>11?.12:0));St.air=false;nSm.copy(n);HITm=g.m;St.compV+=vn*.22;
         const T=airTrick();const lq=pd<.18&&Math.abs(St.whip)<.2&&vn<9?'perfect':pd<.45&&vn<12.5?'clean':'sketchy';St.pitch=0;
-        if(live){land=clamp(vn/10,.25,1);human.impact(land*.6);camShake(land*.55);sfx.thud(.3+land*.5);for(let i=0;i<(eco?8:24);i++)roost.spawn(St.pos.x,St.pos.y+.1,St.pos.z,(Math.random()-.5)*5,.5+Math.random()*2*land,(Math.random()-.5)*5,1,.55,.4,.28);
+        if(live){land=clamp(vn/10,.25,1);ctx.land(lq,{k:land,pos:St.pos,n,human,air:St.airT,trick:St.airT>.55});for(let i=0;i<(eco?8:24);i++)roost.spawn(St.pos.x,St.pos.y+.1,St.pos.z,(Math.random()-.5)*5,.5+Math.random()*2*land,(Math.random()-.5)*5,1,.55,.4,.28);
           for(let i=0;i<(eco?2:6);i++)dust.spawn(St.pos.x,St.pos.y+.3,St.pos.z,(Math.random()-.5)*3,.5+Math.random(),(Math.random()-.5)*3,2.4,.85,.78,.66);
           if(St.airT>.55){stats.airs++;stats.maxAir=Math.max(stats.maxAir,St.airT);stats.maxH=Math.max(stats.maxH,St.hmax);stats.maxDist=Math.max(stats.maxDist,T.dist);stats.flips+=T.flips;if(St.whipMax>.75)stats.whips++;
             if(T.big){stats.bigAir++;if(ctx.slowmo)ctx.slowmo(.35,.45);toast('BIG AIR · '+St.hmax.toFixed(1)+' m',true);nearMissFx()}
@@ -218,7 +218,7 @@ MODES.motocross=function(cfg,look,ctx){
       const rollW=sp*dt/.41;if(!St.air){MK.wF.rotation.x-=rollW;MK.wR.rotation.x-=rollW}else if(St.thr>0)MK.wR.rotation.x-=dt*40;
       /* pilote : debout sur les cale-pieds, buste en avant ; en freestyle, poses dédiées */
       const ps=St.fmx==='Superman'?{crouch:0,lean:1.2,back:1.1,spread:.2,stance:0,legSpread:.4}:St.fmx==='Nac-nac'?{crouch:.3,lean:.4,back:.9,spread:.3,stance:0,side:.5,legSpread:1}:St.fmx==='Heel clicker'?{crouch:.1,lean:-.2,back:1,spread:.1,stance:0,legSpread:.8}:
-        St.air?{crouch:.45,lean:.55+(I.y>0?.3:I.y<0?-.3:0),back:.9,spread:.15,stance:0}:{crouch:.45+land*.4+(St.preload||0)*.3,lean:.6,back:.9,spread:.18,stance:0,turn:-St.steer*.4,side:St.steer*.25};
+        St.air?{crouch:.45,lean:.55+(I.y>0?.3:I.y<0?-.3:0),back:.9,spread:.15,stance:0}:{crouch:.45+land*.15+(St.preload||0)*.3,lean:.6,back:.9,spread:.18,stance:0,turn:-St.steer*.4,side:St.steer*.25};
       human.pose(ps);
       const gyB=groundH(St.pos.x,St.pos.z);blob.set(St.pos.x,gyB,St.pos.z,St.pos.y-gyB);
       if(live)trail.push(St.pos.x,gyB,St.pos.z,Math.cos(St.yaw),Math.sin(St.yaw),!St.air);trail.update(dt);roost.update(dt,9,roostFade);dust.update(dt,-.2,dustFade);
@@ -229,7 +229,7 @@ MODES.motocross=function(cfg,look,ctx){
       human.visible=ctx.cam()!==1;
       if(ctx.cam()===1){camera.position.copy(St.pos).addScaledVector(up,1.7);camera.rotation.set(-.12+(St.air?St.pitch*.5:0),-camYaw,-St.steer*.08,'YXZ')}
       else{const ab=St.air?clamp((St.airT-.2)*2,0,3.5):0;airCam+=(ab-airCam)*(1-Math.exp(-2.5*dt));const D=(ctx.cam()===2?18:7.2)+airCam*1.3,Hh=(ctx.cam()===2?10:2.8)+airCam*.8;
-        camera.position.set(St.pos.x-Math.sin(camYaw)*D,Math.max(St.pos.y,0)+Hh-land*.4,St.pos.z+Math.cos(camYaw)*D);const gc=groundH(camera.position.x,camera.position.z);if(camera.position.y<gc+1.2)camera.position.y=gc+1.2;
+        camera.position.set(St.pos.x-Math.sin(camYaw)*D,Math.max(St.pos.y,0)+Hh-land*.15,St.pos.z+Math.cos(camYaw)*D);const gc=groundH(camera.position.x,camera.position.z);if(camera.position.y<gc+1.2)camera.position.y=gc+1.2;
         look3.set(St.pos.x+Math.sin(camYaw)*6,St.pos.y+1,St.pos.z-Math.cos(camYaw)*6);camera.lookAt(look3);if(!St.air)camera.rotateZ(-St.steer*.03)}
       camera.fov=62+clamp((sp-8)*.65,0,16)+overdrive()*4;camera.updateProjectionMatrix();shadowFollow(St.pos);speedLines(clamp((sp-16)/12,0,1)*.7,dt);
       if(!St.air&&sp>14){const k=clamp((sp-14)/14,0,1)*.006*(S().shake??1);camera.rotation.x+=(Math.random()-.5)*k;camera.rotation.z+=(Math.random()-.5)*k}
