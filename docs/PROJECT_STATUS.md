@@ -22,7 +22,7 @@ Légende des statuts (utilisée dans tous les documents) :
 | Build | `build.sh` assemble 21 modules JS + HTML en un fichier ; embarque les GLB en base64 ; `node --check` OK | ✅ |
 | Tests | Playwright + Chromium (rendu logiciel) : 61/61 régression, 15/15 modèles Blender, figures BMX, wallrun parkour, clavier, tactile, fuites mémoire | ✅ |
 | Git | dépôt local `v3/` avec historique ; `.gitignore`, `CONTRIBUTING.md`, CI GitHub Actions prêts | ✅ |
-| GitHub | le jeton de l'environnement est refusé (« token invalid ») ; aucun dépôt distant créé | ⛔ (voir §5) |
+| GitHub | dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC (identifiants de ton poste) | ✅ |
 | Blender sur ton PC | l'outil Blender du PC répond « Cannot connect to Blender at localhost:9876 » (Blender non lancé ou extension MCP inactive) | ⛔ contourné |
 | Blender dans l'environnement cloud | Blender 5.1.2 installé comme module Python (`bpy`) : modélisation, rig, pondération, animation, export GLB et rendus Cycles fonctionnent | ✅ |
 | Discord | aucun accès (pas de connecteur, pas de jeton bot) ; configuration complète préparée dans `docs/DISCORD_SETUP.md` | ⛔ (préparé, non créé) |

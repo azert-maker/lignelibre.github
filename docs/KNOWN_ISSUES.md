@@ -12,11 +12,12 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 6 | 🟡 | Clip « celebrate » disponible mais pas encore branché sur l'écran de fin | brancher `human.clip('celebrate')` sur l'écran de résultats |
 | 7 | 🟡 | IK des mains seulement sur le BMX (moto, wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains en P2 |
 | 8 | ⚪ | Réceptions : motocross, wakeboard, downhill et parkour gardent leur ancien retour (le ressort et la caméra ne sont branchés que sur BMX et snowboard) | brancher `ctx.land` sport par sport |
+| 17 | ⚪ | Downhill longboard, wakeboard et wingsuit gardent l'ancienne chute (pas de fonction de relief exportée pour le longboard ; eau et vol traités à part) | exporter `_h` dans le longboard |
 | 15 | 🟡 | Chute physique : corps rigide (pas de vrai ragdoll membre par membre) ; le rider peut traverser un mur ou un module vertical | v2 : collisions avec les boîtes du parc |
 | 16 | ⚪ | Le replay ne rejoue pas la compression de réception (pose enregistrée sans le ressort) | enregistrer `landState` dans les images du replay |
 | 9 | ⚪ | Pas de clignement des yeux ni d'expressions | P1, visage v2 |
 | 10 | 🟡 | Ressenti des commandes jamais validé par un joueur humain | sessions de test |
-| 11 | ⛔ | Pas de dépôt GitHub distant (jeton invalide, accord requis) | voir `PROJECT_STATUS.md` §5 |
+| 11 | ✅ | Dépôt GitHub : résolu, dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC | CI à vérifier dans l'onglet Actions |
 | 12 | ⛔ | Pas de serveur Discord (aucun accès) | configuration prête dans `DISCORD_SETUP.md` |
 | 13 | 🟡 | Multijoueur limité au réseau local (serveur Node à lancer soi-même) | serveur hébergé en P3, dépense soumise à ton accord |
 | 14 | ⚪ | Les rendus Blender sont écrits en PNG puis convertis à la main en JPG pour le dépôt | automatiser la conversion dans `common.render` |
