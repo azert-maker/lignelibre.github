@@ -151,15 +151,17 @@ function buildHuman(look){
       _qp.multiply(A.ua.quaternion);_qi.copy(_qp).invert();
       _q.setFromUnitVectors(DOWN,_f.applyQuaternion(_qi));A.fa.quaternion.slerp(_q,w)})}
   const P={};for(const k of POSE_KEYS)P[k]=0;P.hd=0;P.stance=1;let hdSide=1,lastT=-1e9,imp=0,gA=0,gPh=0,gK=0;/* gA/gPh : cycle de jambes (course, pédalage) ; gK = 0 course, 1 pédalage */
-  function apply(now){const k=Math.min(1.1,P.crouch+imp),kb=k*1.7,br=Math.sin(now*.0026),ls=P.legSpread||0,st=P.stance;
+  /* réception : ressort amorti (compression des jambes, buste qui plonge, petit rebond) + roulis de déséquilibre pour une réception limite */
+  const LS={x:0,v:0,w:0,ph:0,q:''};
+  function apply(now){const lx=Math.max(0,LS.x),wb=LS.w*Math.sin(LS.ph),k=Math.min(1.25,P.crouch+imp+lx*1.1),kb=k*1.7,br=Math.sin(now*.0026),ls=P.legSpread||0,st=P.stance;
     for(const Lg of legs){Lg.th.rotation.z=kb*.5;Lg.th.rotation.x=-Lg.side*(st*.17+ls*.3);Lg.sh.rotation.z=-kb;Lg.ft.rotation.z=kb*.5;Lg.ft.rotation.x=Lg.side*(st*.17+ls*.3)}
     pelvis.position.y=.86*Math.cos(kb*.5)*Math.cos(st*.17+ls*.3)+.13;pelvis.position.x=-Math.sin(kb*.5)*.1;pelvis.position.z=P.side*.06;
-    spine.rotation.z=-P.lean*.5;spine.rotation.x=P.side*.55;spine.rotation.y=P.twist*.35+P.turn*.15;
-    torso.rotation.z=-P.lean*.5;torso.rotation.x=P.side*.45;torso.rotation.y=P.twist*.65+P.turn*.35;
+    spine.rotation.z=-(P.lean+lx*.45)*.5;spine.rotation.x=(P.side+wb*.5)*.55;spine.rotation.y=P.twist*.35+P.turn*.15;
+    torso.rotation.z=-(P.lean+lx*.35)*.5;torso.rotation.x=(P.side+wb)*.45;torso.rotation.y=P.twist*.65+P.turn*.35+wb*.25;
     chest.scale.y=1+br*.014;
-    neck.rotation.z=P.lean*.45;head.rotation.z=P.lean*.3;head.rotation.y=-(P.twist+P.turn*.35)*.5+P.look+P.turn*.5;head.position.y=.08+br*.004;
-    for(const A of arms){A.cl.rotation.x=-A.side*(.05+P.spread*.12+br*.012);
-      A.ua.rotation.x=-A.side*(.22+P.spread*1.15);A.ua.rotation.z=P.back*1.3-P.reach;A.fa.rotation.z=-(.32+P.back*.45)+P.reach*.4;A.hand.rotation.z=-.2+P.spread*.2}
+    neck.rotation.z=P.lean*.45+lx*.25;head.rotation.z=P.lean*.3;head.rotation.y=-(P.twist+P.turn*.35)*.5+P.look+P.turn*.5;head.position.y=.08+br*.004;
+    for(const A of arms){const sp=P.spread+Math.abs(LS.w)*(.6+.4*Math.sin(LS.ph*1.3+A.side))+lx*.15;A.cl.rotation.x=-A.side*(.05+sp*.12+br*.012);
+      A.ua.rotation.x=-A.side*(.22+sp*1.15);A.ua.rotation.z=P.back*1.3-P.reach;A.fa.rotation.z=-(.32+P.back*.45)+P.reach*.4;A.hand.rotation.z=-.2+P.spread*.2}
     /* cycle de marche / course / pédalage : cuisses en opposition, genou plié au retour, bras en balancier (course) */
     if(gA>.01){for(const Lg of legs){const ph=gPh+(Lg.side>0?0:Math.PI),sw=Math.sin(ph);
         if(gK){Lg.th.rotation.z+=gA*(.55+.45*sw);Lg.sh.rotation.z-=gA*(.7+.6*sw);Lg.ft.rotation.z+=gA*.2*sw}
@@ -168,11 +170,16 @@ function buildHuman(look){
     if(P.hd>.01){const A=arms[hdSide>0?1:0];A.ua.rotation.x=lerp(A.ua.rotation.x,-A.side*1.25,P.hd);A.ua.rotation.z=lerp(A.ua.rotation.z,-.2,P.hd);A.fa.rotation.z=lerp(A.fa.rotation.z,-.1,P.hd)}
     if(g.ik)ikArms()}
   g.pose=p=>{const now=performance.now(),gap=now-lastT;lastT=now;const dt=Math.min(.1,gap/1000),k=gap>400?1:1-Math.exp(-(g.poseRate||11)*dt);
+    if(gap>400){LS.x=LS.v=LS.w=0}else{const n=Math.ceil(dt/.008),h=dt/n;for(let i=0;i<n;i++){LS.v+=(-75*LS.x-12*LS.v)*h;LS.x+=LS.v*h}LS.x=clamp(LS.x,-.15,.95);LS.w*=Math.exp(-2.4*dt);LS.ph+=dt*12}
     for(const key of POSE_KEYS){const tv=p[key]!=null?p[key]:key==='stance'?1:0;P[key]+=(tv-P[key])*k}
     if(p.gA!=null){gA=p.gA;gPh=p.gPh||0;gK=p.gK||0}
     if(p.handDown)hdSide=p.handDown>0?1:-1;P.hd+=((p.handDown?1:0)-P.hd)*k;imp*=gap>400?0:Math.exp(-5*dt);apply(now)};
   g.snapPose=p=>{lastT=-1e9;g.pose(p);lastT=-1e9};
   g.impact=v=>{imp=Math.min(.6,Math.max(imp,v||.3))};
+  /* g.land(qualité, intensité 0..1) : parfaite = compression nette et courte ; propre = normale ; limite = forte + déséquilibre */
+  g.land=(q,kk)=>{kk=clamp(kk==null?.6:kk,0,1.2);const a={perfect:.85,clean:1,sketchy:1.3}[q]||1;LS.v+=6.6*kk*a;LS.q=q;
+    if(q==='sketchy'){LS.w=(Math.random()<.5?-1:1)*(.45+.35*kk);LS.ph=0}};
+  g.landState=()=>({x:LS.x,w:LS.w,q:LS.q});
   g.gait=(amp,phase,pedal)=>{gA=amp||0;gPh=phase||0;gK=pedal?1:0};
   g.getPose=()=>{const o={};for(const k of POSE_KEYS)o[k]=P[k];o.handDown=P.hd>.5?hdSide:0;o.gA=gA;o.gPh=gPh;o.gK=gK;return o};
   g.setPose=(name,t,extra)=>{const a=POSES.idle,b=POSES[name]||a,w=t==null?1:clamp(t,0,1),o={};

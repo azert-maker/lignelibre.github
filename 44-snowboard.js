@@ -196,9 +196,10 @@ MODES.snowboard=function(cfg,look,ctx){
         const ASS2=S().sbAssist!==false,fo=Math.abs(St.flip-Math.round(St.flip/(2*Math.PI))*2*Math.PI);if(live&&fo>(ASS2?1.2:.9))return ['Réception sur la tête','Rotation pas terminée : '+Math.round(fo*57)+'° de trop. Lâche la touche plus tôt, la fin de rotation est assistée.'];
         if(live&&off>(ASS2?1.45:1.3)&&St.airT>.5)return ['Réception de travers','La planche était à '+Math.round(off*57)+'° de la trajectoire à l\'atterrissage (75° max).'];
         St.pos.y=gy;St.vel.addScaledVector(n,-St.vel.dot(n));St.yaw+=nearestAxis(velYaw());St.vel.multiplyScalar(1-Math.sin(off)*.35);St.air=false;nSm.copy(n);
-        if(live&&St.airT>.3){land=clamp(vn/9,.25,1);human.impact(land*.55);camShake(land*.5);deep.crater(St.pos.x,St.pos.z,.45+land*.5);powderBurst(St.pos.x,St.pos.y,St.pos.z,eco?6:Math.round(10+land*16),2+land*3);sfx.thud(land*.45);sfx.crunch();for(let i=0;i<(eco?6:16);i++)spray.spawn(St.pos.x,St.pos.y+.1,St.pos.z,(Math.random()-.5)*4,1+Math.random()*2*land,(Math.random()-.5)*4,.9,1,1,1)}
+        /* qualité de réception : axe de la planche, rotation finie, violence de l'impact */const lq=off<.22&&fo<.2&&vn<9?'perfect':off<.65&&fo<.5&&vn<11.5?'clean':'sketchy';
+        if(live&&St.airT>.3){land=clamp(vn/9,.25,1);ctx.land(lq,{k:land,pos:St.pos,n,human,air:St.airT,trick:St.airT>.5});deep.crater(St.pos.x,St.pos.z,.45+land*.5);powderBurst(St.pos.x,St.pos.y,St.pos.z,eco?6:Math.round(10+land*16),2+land*3);sfx.crunch();for(let i=0;i<(eco?6:16);i++)spray.spawn(St.pos.x,St.pos.y+.1,St.pos.z,(Math.random()-.5)*4,1+Math.random()*2*land,(Math.random()-.5)*4,.9,1,1,1)}
         if(St.airT>.5&&live){const T=airTrick();stats.airs++;if(St.grab)stats.grabs=(stats.grabs||0)+1;stats.maxAir=Math.max(stats.maxAir,St.airMax);
-          if(!stats.bestPts||T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}ctx.trick(T.name,T.pts)}
+          if(!stats.bestPts||T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}ctx.trick(T.name,T.pts,{land:lq})}
         St.flip=0;
         St.airMax=0}
       if(St.air&&rails.length){railCheck(live,h);if(St.grind){orient(h);return null}}}
@@ -237,7 +238,7 @@ MODES.snowboard=function(cfg,look,ctx){
       const sp=St.vel.length(),kmh=sp*3.6;if(live){stats.vmax=Math.max(stats.vmax,kmh);stats.time+=dt}
       const d=Math.hypot(St.pos.x-prev.x,St.pos.z-prev.z);if(live)stats.dist+=d;stats.score+=d*.3*Math.max(1,sp/12);
       const ps=!St.air&&St.charge>0?{crouch:.55+St.charge*.45,lean:.35,twist:.7,spread:.25+St.charge*.2,look:.5}:St.grind?{crouch:.5,spread:1,twist:.85,look:.3}:St.air&&St.airT>.15&&Math.abs(St.flip%(2*Math.PI))>.4?{crouch:1,lean:.5,twist:.6,back:.8}:St.air&&St.airT>.15?(St.grab?{crouch:1,lean:.4,twist:.6,handDown:1}:{crouch:.6,lean:.2,twist:.6,spread:.8}):I.a?{crouch:.55,lean:-.3,twist:.4,spread:.5}:I.y<0?{crouch:.9,lean:.8,twist:.8,back:.6}:{crouch:.45,lean:.25,twist:.7,spread:.35};
-      if(land>0)ps.crouch=Math.min(1,ps.crouch+land*.55);ps.spread=(ps.spread||0)+Math.abs(rollS)*.8;if(!St.air){ps.turn=I.x*.55;ps.side=-rollS*.5}human.pose(ps);
+      if(land>0)ps.crouch=Math.min(1,ps.crouch+land*.2);ps.spread=(ps.spread||0)+Math.abs(rollS)*.8;if(!St.air){ps.turn=I.x*.55;ps.side=-rollS*.5}human.pose(ps);
       const gyB=groundH(St.pos.x,St.pos.z);blob.set(St.pos.x,gyB,St.pos.z,St.pos.y-gyB,n);
       if(live)trail.push(St.pos.x,gyB,St.pos.z,rgt.x,rgt.z,!St.air);trail.update(dt);
       spray.update(dt,5,sprayFade);deep.update(St.pos.x,St.pos.z);animLift();ringFx();

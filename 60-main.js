@@ -3,7 +3,7 @@
    récompenses, fantômes multijoueur
 ===================================================================== */
 let state='menu',cur=null,curCfg=null,camMode=S().cam|0,runT=0,countT=0,run=null,previewId=null,previewW=null,hudAcc=1;
-const DUMMY={slowmo(){},trick(){},crash(){},finish(){},bonus(){},checkpoint(){},hud(){},keep(){},comboBreak(){},cam:()=>0,boost:false};
+const DUMMY={land:(q,o)=>{if(o&&o.human&&o.human.land)o.human.land(q,o.k)},slowmo(){},trick(){},crash(){},finish(){},bonus(){},checkpoint(){},hud(){},keep(){},comboBreak(){},cam:()=>0,boost:false};
 function setCam(m){camMode=m;$$('[data-cam]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.cam===m))}
 $$('[data-cam]').forEach(b=>b.onclick=()=>setCam(+b.dataset.cam));
 function defaultParams(id){const p={};SPORTS[id].params.forEach(x=>p[x.k]=x.bool?x.def===1:x.def);return p}
@@ -42,7 +42,7 @@ async function startRun(cfg,opt={}){
   ghostStop();if(cur)cur.dispose();ghostsClear();previewId=null;demo=null;quiet=false;$('#demoTag').hidden=true;
   curCfg=cfg;run={cfg,use:opt.use||{},multi:!!opt.multi,pen:0,continues:0,snaps:[],snapT:0,finished:false,dnf:false,cp:0,final:0,finalized:false,coins:0,netT:0,doubled:false,engageBits:[]};run.goal=pickSessionGoal(cfg);
   const ctx={boost:!!run.use.boost,crash:onCrash,finish:onFinish,cam:()=>camMode,hud:setHud,
-    bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,comboBreak,slowmo,keep:()=>{if(combo.n>0)combo.t=runT}};SLOW.t=0;combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
+    bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,land:landFx,comboBreak,slowmo,keep:()=>{if(combo.n>0)combo.t=runT}};SLOW.t=0;combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
   cur=MODES[cfg.sport](cfg,profile.look,ctx);flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
   $('#hMode').textContent=cur.name;E.inst.innerHTML=cur.inst;E.feed.innerHTML='';E.mp.innerHTML='';
   $('#keys').innerHTML=cur.keys.slice(0,4).map(k=>'<div><kbd>'+k[0]+'</kbd>'+k[1]+'</div>').join('');
@@ -56,12 +56,91 @@ function netPush(force){if(!run||!run.multi||!cur)return;const ns=cur.netState()
 /* ---------- chute / arrivée ---------- */
 /* Persos : chute = rotation amortie du rider + secousse caméra + choc sourd (rien de tout ça ne touche aux scores) */
 let crashFx=null;
+/* ---------- réceptions : un seul système pour tous les sports ----------
+   ctx.land(q, {k, pos, n, human, air, trick}) avec q = 'perfect' | 'clean' | 'sketchy' et k = intensité 0..1 (vitesse d'impact).
+   - rider : ressort de compression (human.land), déséquilibre en réception limite
+   - caméra : plongée amortie (ressort) + secousse dosée selon la qualité
+   - son : impact sourd + « clac » net (parfaite) ou frottement (limite)
+   - visuel : onde au sol pour une réception parfaite, message pour une réception limite hors figure */
+const LANDQ={perfect:{dip:.8,shake:.1},clean:{dip:1.1,shake:.22},sketchy:{dip:1.5,shake:.48}};
+function landFx(q,o){o=o||{};const L=LANDQ[q]||LANDQ.clean,k=clamp(o.k??.6,0,1.2);if(o.human&&o.human.land)o.human.land(q,k);
+  if(state!=='play')return;const sh=S().shake??1;LOOK.dv+=L.dip*k*sh;camShake(L.shake*k);if(sfx.land)sfx.land(q,k);
+  if(q==='perfect'&&o.pos&&(o.air||0)>.4)ringFx(o.pos,o.n);
+  if(q==='sketchy'&&!o.trick&&(o.air||0)>.45)feed('Réception limite')}
+const RINGS=[];
+function ringFx(p,n){if(S().quality==='eco'&&RINGS.length>=1&&RINGS.every(r=>r.t<.5))return;let r=RINGS.find(x=>x.t>=.5);
+  if(!r){const m=new THREE.Mesh(new THREE.RingGeometry(.55,.7,40),new THREE.MeshBasicMaterial({color:0xbff6ff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));
+    m.renderOrder=3;r={m,t:1};RINGS.push(r)}
+  if(r.m.parent!==scene)scene.add(r.m);r.t=0;r.m.position.set(p.x,p.y+.04,p.z);r.m.quaternion.setFromUnitVectors(V3(0,0,1),n?V3(n.x,n.y,n.z):V3(0,1,0));r.m.visible=true}
+function ringsTick(dt){for(const r of RINGS){if(r.t>=.5){r.m.visible=false;continue}r.t+=dt;const e=r.t/.5;r.m.scale.setScalar(1+e*3.2);r.m.material.opacity=.75*(1-e)*(1-e)}}
 function startCrashFx(){camShake(.7);const r=cur&&cur._rig;const water=curCfg.sport==='wakeboard';if(!water)sfx.thud(1);
   crashFx={t:0,r,cam:(camBase.ok?camBase.p:camera.position).clone(),w:V3((Math.random()-.5)*6,(Math.random()-.5)*3,(Math.random()<.5?-1:1)*(4+Math.random()*3))};
-  const h=r&&(r.human||r);if(h&&h.setPose)h.setPose('crash',1);else if(h&&h.pose)h.pose(POSES.crash)}
+  const h=r&&(r.human||(r.isHuman?r:null));
+  /* chute « physique » (sports au sol avec relief connu) : le rider est éjecté, culbute, rebondit et s'immobilise ;
+     le véhicule glisse et se couche de son côté. Wingsuit et wakeboard gardent la chute d'origine. */
+  if(h&&cur._h&&curCfg.sport!=='wingsuit'&&!water){try{crashFx.sim=crashSimStart(r,h)}catch(e){crashFx.sim=null}}
+  if(h&&h.setPose)h.setPose('crash',1);else if(h&&h.pose)h.pose(POSES.crash)}
+const RIGV=V3(),_rgP=V3(),_rgPrev=V3(),_cv=V3();let _rgOk=false;
+/* vitesse du rider estimée image par image (toutes disciplines, sans toucher aux modes) */
+function trackRig(dt){if(state!=='play'||!cur||!cur._rig||!(dt>0)){_rgOk=false;return}cur._rig.getWorldPosition(_rgP);
+  if(_rgOk){_cv.copy(_rgP).sub(_rgPrev).divideScalar(dt);if(_cv.length()<45)RIGV.lerp(_cv,.4)}else RIGV.set(0,0,0);_rgPrev.copy(_rgP);_rgOk=true}
+let CRASH_UNDO=null;
+/* remet le rider et le véhicule dans l'état d'avant la chute (Continuer, replay) */
+function crashUndo(){const u=CRASH_UNDO;if(!u)return;CRASH_UNDO=null;u.h.position.copy(u.hp);u.h.quaternion.copy(u.hq);if(u.r!==u.h){u.r.position.copy(u.rp);u.r.quaternion.copy(u.rq)}
+  if(u.ik!=null&&u.h.ik)u.h.ik.w=u.ik;if(u.h.snapPose)u.h.snapPose({});if(crashFx){crashFx.sim=null;crashFx.simDone=false}}
+function crashSimStart(r,h){
+  crashUndo();CRASH_UNDO={h,hp:h.position.clone(),hq:h.quaternion.clone(),r,rp:r.position.clone(),rq:r.quaternion.clone(),ik:h.ik?h.ik.w:null};if(h.ik)h.ik.w=0;
+  h.updateWorldMatrix(true,false);const Q=new THREE.Quaternion();h.getWorldQuaternion(Q);
+  const C=h.localToWorld(V3(0,.9,0));const v=RIGV.clone();const sp=v.length();if(sp>22)v.multiplyScalar(22/sp);
+  const V=v.clone().multiplyScalar(.85);V.y=Math.max(V.y,0)+2+Math.min(3,sp*.12);
+  /* culbute vers l'avant autour de l'axe latéral du rider (+ un peu de vrille) */
+  const side=V3(0,0,1).applyQuaternion(Q),up=V3(0,1,0).applyQuaternion(Q);
+  const W=side.multiplyScalar(-(4+Math.min(7,sp*.45))).addScaledVector(up,(Math.random()-.5)*3);
+  const sim={h,r,C,V,Q,W,t:0,rest:0,bounces:0,ground:(x,z)=>{const g=cur&&cur._h?cur._h(x,z):NaN;return isFinite(g)?g:C.y-.9},
+    rv:r!==h?v.clone().setY(0).multiplyScalar(.75):null,roll:0,rollT:(Math.random()<.5?-1:1)*1.35,rq0:r.quaternion.clone(),rfx:V3(0,0,1)};
+  return sim}
+const _sq=new THREE.Quaternion(),_sv=V3(),_sm=new THREE.Matrix4(),_sm2=new THREE.Matrix4(),_sup=V3(),_sw=V3();
+function crashSimStep(S_,dt){
+  const n=Math.max(1,Math.ceil(dt/.01)),h=dt/n;
+  for(let i=0;i<n;i++){S_.t+=h;
+    /* rider : corps rigide centré sur le bassin */
+    S_.V.y-=9.81*h;S_.C.addScaledVector(S_.V,h);
+    const wl=S_.W.length();if(wl>1e-4){_sq.setFromAxisAngle(_sw.copy(S_.W).divideScalar(wl),wl*h);S_.Q.premultiply(_sq).normalize()}
+    _sup.set(0,1,0).applyQuaternion(S_.Q);const reach=.16+.72*Math.abs(_sup.y);/* debout : bassin à .9 du sol ; couché : .16 */
+    const gy=S_.ground(S_.C.x,S_.C.z);
+    if(S_.C.y<gy+reach){S_.C.y=gy+reach;
+      if(S_.V.y<-1.2){S_.bounces++;S_.V.y*=-.32;S_.V.x*=.62;S_.V.z*=.62;S_.W.multiplyScalar(.55);if(state==='over'){sfx.thud(Math.min(1,.25+Math.abs(S_.V.y)*.12));camShake(.18)}
+        if(typeof dust!=='undefined'&&dust&&dust.spawn)for(let k=0;k<6;k++)dust.spawn(S_.C.x,gy+.05,S_.C.z,(Math.random()-.5)*2,.5+Math.random(),(Math.random()-.5)*2,.7,.8,.78,.72)}
+      else{S_.V.y=Math.max(0,S_.V.y);const f=Math.exp(-4.5*h);S_.V.x*=f;S_.V.z*=f;S_.W.multiplyScalar(Math.exp(-8*h));
+        /* une fois posé, le corps bascule à plat (dos ou ventre) */
+        S_.onG=true}}
+    /* au sol : le corps bascule à plat comme un bâton qui tombe (accélère en s'inclinant), vers le côté où il penche */
+    if(S_.onG&&Math.abs(_sup.y)>.06){const ax=_sw.set(-_sup.z,0,_sup.x);/* = haut × Y */let s_=ax.length();if(s_<.05){ax.set(-S_.V.z,0,S_.V.x);s_=ax.length();if(s_<1e-3){ax.set(1,0,0);s_=1}}ax.divideScalar(s_);
+      S_.tv=(S_.tv||0)+(2.5+11*Math.sqrt(Math.max(0,1-_sup.y*_sup.y)))*h;_sq.setFromAxisAngle(ax,-Math.sign(_sup.y)*S_.tv*h);S_.Q.premultiply(_sq).normalize()}else if(S_.onG)S_.tv=0
+    /* véhicule : glisse en ralentissant et se couche */
+    if(S_.rv){S_.rv.multiplyScalar(Math.exp(-1.6*h));S_.r.position.addScaledVector(S_.rv,h);S_.roll+=(S_.rollT-S_.roll)*(1-Math.exp(-5*h))}}
+  if(S_.rv){const rg=S_.ground(S_.r.position.x,S_.r.position.z);if(isFinite(rg))S_.r.position.y+=(rg+.05-S_.r.position.y)*.3;
+    _sq.setFromAxisAngle(S_.rfx,S_.roll);S_.r.quaternion.copy(S_.rq0).multiply(_sq)}
+  /* rider : transformée monde -> locale dans son parent (le véhicule bouge aussi) */
+  const H=S_.h,par=H.parent;_sv.set(0,.9,0).applyQuaternion(S_.Q);const P0=_sv.negate().add(S_.C);
+  _sm.compose(P0,S_.Q,V3(1,1,1));if(par){par.updateWorldMatrix(true,false);_sm2.copy(par.matrixWorld).invert().multiply(_sm)}else _sm2.copy(_sm);
+  const sc=V3();_sm2.decompose(H.position,H.quaternion,sc);
+  /* pose : bras et jambes qui battent en l'air, corps relâché au sol */
+  const air=S_.bounces===0,k=Math.exp(-1.2*S_.t);
+  if(H.pose)H.pose(air?{crouch:.35+.25*Math.sin(S_.t*9),lean:-.3,spread:.9+.3*Math.sin(S_.t*11),back:.8+.4*Math.sin(S_.t*7),twist:.3*Math.sin(S_.t*5),side:.2*k,stance:1,look:0}:
+    {crouch:.12,lean:-.1,spread:.55,back:.35,twist:.15,side:0,stance:.6,look:.2});
+  S_.rest=S_.V.length()<.25&&S_.W.length()<.4?S_.rest+dt:0;return S_.rest>.6}
 function crashFrame(dt){const c=crashFx;if(!c)return;c.t+=dt;const k=Math.exp(-2.6*c.t);
+  if(c.simDone)return;
+  if(c.sim){const done=c.t>5||crashSimStep(c.sim,dt);
+    /* caméra : reste en place, tourne vers le rider et recule si besoin pour le garder cadré */
+    const S_=c.sim;_sv.copy(S_.C).sub(c.cam);const d=_sv.length();if(d>6.5)c.cam.addScaledVector(_sv,(1-6.5/d)*(1-Math.exp(-3*dt)));
+    const gy=S_.ground(c.cam.x,c.cam.z);if(isFinite(gy)&&c.cam.y<gy+1.2)c.cam.y+=(gy+1.2-c.cam.y)*.2;
+    _sm.lookAt(c.cam,S_.C,V3(0,1,0));_sq.setFromRotationMatrix(_sm);camBase.q.slerp(_sq,1-Math.exp(-4*dt));
+    const a=.3*Math.exp(-5*c.t);camBase.p.set(c.cam.x+(Math.random()-.5)*a,c.cam.y+(Math.random()-.5)*a,c.cam.z+(Math.random()-.5)*a);
+    if(done){c.sim=null;c.simDone=true}return}
   if(c.r&&c.t<1.6){c.r.rotation.x+=c.w.x*k*dt;c.r.rotation.y+=c.w.y*k*dt;c.r.rotation.z+=c.w.z*k*dt;const h=c.r.human||c.r;if(h.setPose)h.setPose('crash',1,{side:Math.sin(c.t*6)*.3*k})}
-  const a=.35*Math.exp(-5*c.t);if(a>.003)camBase.p.set(c.cam.x+(Math.random()-.5)*a,c.cam.y+(Math.random()-.5)*a,c.cam.z+(Math.random()-.5)*a);else{camBase.p.copy(c.cam);if(c.t>1.6)crashFx=null}}
+  const a=.35*Math.exp(-5*c.t);if(a>.003)camBase.p.set(c.cam.x+(Math.random()-.5)*a,c.cam.y+(Math.random()-.5)*a,c.cam.z+(Math.random()-.5)*a);else{camBase.p.copy(c.cam);if(c.t>1.6&&!CRASH_UNDO)crashFx=null}}
 /* =====================================================================
    SCORE · COMBO · OVERDRIVE : barème central et configurable, commun aux 7 sports.
    - ctx.trick(nom, points, opt) est l'unique entrée des figures. opt (facultatif) :
@@ -116,7 +195,7 @@ function trickFn(name,pts,opt){if(!run||!cur||state!=='play')return 0;opt=opt||{
    V = regarder derrière, stick droit de la manette. La caméra tourne autour du rider (rotation rigide :
    le cadrage du mode est gardé) et revient seule 0,7 s après qu'on lâche. Compte à rebours :
    travelling d'intro autour du rider. Au « Go » : coup de zoom, souffle, vibration. */
-const LOOK={yaw:0,pitch:0,zoom:1,drag:null,lastIn:-9,go:0,shake:0};
+const LOOK={yaw:0,pitch:0,zoom:1,drag:null,lastIn:-9,go:0,shake:0,dx:0,dv:0};
 /* secousse amortie (réceptions, frottements, chutes, frôlements) : camShake(0..1) */
 function camShake(a){const k=S().shake??1;if(k<=0)return;LOOK.shake=Math.min(1,Math.max(LOOK.shake,(a||.3)*k))}const camBase={p:V3(),q:new THREE.Quaternion(),ok:false};let vigT=0;
 const _LT=V3(),_LO=V3(),_LA=V3(),_LY=new THREE.Vector3(0,1,0),_Lq1=new THREE.Quaternion(),_Lq2=new THREE.Quaternion();
@@ -142,8 +221,12 @@ function applyLook(dt){if(!cur||!camBase.ok||state==='replay')return;const t=per
       camera.position.copy(_LT).add(_LO);camera.quaternion.premultiply(_Lq1).premultiply(_Lq2);
       if(cur._h){const gy=cur._h(camera.position.x,camera.position.z);if(isFinite(gy)&&camera.position.y<gy+.7)camera.position.y=gy+.7}}}
   if(state==='play'&&LOOK.go>0){camera.fov+=18*LOOK.go*LOOK.go;camera.updateProjectionMatrix();LOOK.go=Math.max(0,LOOK.go-dt*1.6)}
+  /* plongée de réception : ressort amorti, la caméra « encaisse » puis revient */
+  {const n=Math.ceil(dt/.01)||1,h=dt/n;for(let i=0;i<n;i++){LOOK.dv+=(-90*LOOK.dx-13*LOOK.dv)*h;LOOK.dx+=LOOK.dv*h}
+   if(state!=='play'){LOOK.dx*=.9;LOOK.dv*=.9}if(Math.abs(LOOK.dx)>1e-4&&camMode!==1){camera.position.y-=LOOK.dx*.22;camera.rotateX(-LOOK.dx*.05)}}
   if(LOOK.shake>.003&&(state==='play'||state==='over')){const a=LOOK.shake*.3;camera.position.x+=(Math.random()-.5)*a;camera.position.y+=(Math.random()-.5)*a;camera.position.z+=(Math.random()-.5)*a;camera.rotateZ((Math.random()-.5)*a*.12);LOOK.shake*=Math.exp(-6*dt)}}
-function onCrash(title,text){window.__llLastCrash={title,text};if(cur&&cur.silence)cur.silence();SLOW.t=0;combo.n=0;combo.m=1;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');if(state!=='play')return;state='over';startCrashFx();run.dnf=true;speedLines(0,0);showOver('crash',title,text);netPush(true)}
+function onCrash(title,text){window.__llLastCrash={title,text};if(cur&&cur.silence)cur.silence();SLOW.t=0;combo.n=0;combo.m=1;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');if(state!=='play')return;state='over';startCrashFx();run.dnf=true;speedLines(0,0);
+  /* le panneau de fin attend un peu : on voit la chute avant le bilan */const R=run,show=()=>{if(state==='over'&&run===R&&!R.finalized)showOver('crash',title,text)};if(crashFx&&crashFx.sim)setTimeout(show,1400);else show();netPush(true)}
 function onFinish(time){if(state!=='play')return;state='over';sfx.finish();run.finished=true;run.final=time+run.pen;finalizeRun();speedLines(0,0);
   const medal=medalOf(run.final,cur.target);const mtxt={g:'Médaille d\'or',s:'Médaille d\'argent',b:'Médaille de bronze',n:'Arrivée'}[medal];
   showOver('finish',mtxt,'Temps '+fmtT2(run.final)+(run.pen?' dont '+run.pen+' s de pénalités':'')+' · objectif or '+fmtT(cur.target)+'.',medal);netPush(true)}
@@ -179,7 +262,7 @@ function paintOverStats(kind){const st=cur.stats,course=curCfg.mode==='course';c
 $('#btnContinue').onclick=async()=>{if(!run||run.finalized)return;let ok=false;
   if(profile.cons.revive>0){profile.cons.revive--;saveProfile();ok=true}else ok=await Ads.rewarded('Continuer la partie');
   if(!ok){showOver('crash',$('#oTitle').textContent,$('#oText').textContent);return}
-  const now=runT;let s=null;for(const x of run.snaps)if(now-x.t>=2.5)s=x;if(!s)s=run.snaps[0];if(s)cur.restore(s.s);
+  const now=runT;let s=null;for(const x of run.snaps)if(now-x.t>=2.5)s=x;if(!s)s=run.snaps[0];crashUndo();crashFx=null;if(s)cur.restore(s.s);
   run.continues++;run.dnf=false;if(curCfg.mode==='course')run.pen+=3;$('#over').hidden=true;E.touch.hidden=!isTouch;
   countT=2;state='count';E.count.hidden=false;E.count.textContent='2';cur.update(0,NEUTRAL);feed(curCfg.mode==='course'?'Reprise · +3 s':'Reprise')};
 $('#btnReplay').onclick=()=>replayOpen();$('#rpExp').onclick=()=>exportStart();$('#rpClose').onclick=()=>replayClose();
@@ -240,7 +323,7 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
   if(toastT>0){toastT-=dt;if(toastT<=0)lastToast=''}
   if(state==='garage'){garageFrame(dt);renderer.render(gScene,gCam);return}
   if(!cur)return;
-  if(state==='play'){let pdt=dt;if(SLOW.t>0){SLOW.t-=dt;pdt=dt*SLOW.k}runT+=pdt;flowTick(pdt);cur.update(pdt,inp());if(state==='play'){recFrame(runT);ghostFrame(runT)}if(run&&state==='play'){run.snapT+=dt;if(run.snapT>1){run.snapT=0;run.snaps.push({t:runT,s:cur.snapshot()});if(run.snaps.length>8)run.snaps.shift()}
+  if(state==='play'){let pdt=dt;if(SLOW.t>0){SLOW.t-=dt;pdt=dt*SLOW.k}runT+=pdt;flowTick(pdt);cur.update(pdt,inp());trackRig(state==='play'?pdt:0);if(state==='play'){recFrame(runT);ghostFrame(runT)}if(run&&state==='play'){run.snapT+=dt;if(run.snapT>1){run.snapT=0;run.snaps.push({t:runT,s:cur.snapshot()});if(run.snaps.length>8)run.snaps.shift()}
       run.netT+=dt;if(run.netT>.066){run.netT=0;netPush()}}updateGhosts(dt)}
   else if(state==='count'){countT-=dt;cur.update(0,NEUTRAL);ghostFrame(0);const n=Math.ceil(countT);if(countT<=0){E.count.hidden=true;state='play';LOOK.go=1;sfx.whoosh();buzz([30]);toast('Go !',true);if(!run.cdS)ding(990,.25);maybeTutorial()}else if(E.count.textContent!==String(n)){E.count.textContent=n;if(!run.cdS)ding(440,.15)}updateGhosts(dt)}
   else if(state==='demo'&&demo){if(demo.reset>0){demo.reset-=dt;if(demo.reset<=0){previewSport(demo.sport,previewW,true);return}}else cur.update(dt,cur.auto?cur.auto():NEUTRAL)}
@@ -248,7 +331,7 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
   else if(state==='menu')cur.attract(dt);else if(state!=='ad'){if(cur.idle)cur.idle(dt);updateGhosts(dt)}
   if(state==='play'||state==='count'||state==='demo'||state==='menu'){camBase.p.copy(camera.position);camBase.q.copy(camera.quaternion);camBase.ok=true}
   if(state==='over')crashFrame(dt);else if(crashFx&&state!=='pause')crashFx=null;
-  applyLook(dt);E.vig.style.opacity=state==='play'?vigT:0;
+  applyLook(dt);ringsTick(dt);E.vig.style.opacity=state==='play'?vigT:0;
   waterUniforms.uTime.value+=dt;musicTick(state);if(state==='play'&&cur)wind(hudKmh/(cur.vScale||100),curCfg.sport==='wingsuit');else wind(0,false);flakes.update(dt,camera.position);
   sky.position.copy(camera.position);sunSprite.position.copy(camera.position).addScaledVector(sunDir,1000);stars.position.copy(camera.position);clouds.update(camera.position);
   renderer.render(scene,camera);if(RP.exp)exportDraw()}
