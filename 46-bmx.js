@@ -130,7 +130,7 @@ MODES.bmx=function(cfg,look,ctx){
       /* adhérence : la vitesse suit l'axe du vélo (avant ou arrière : on peut rouler en arrière après une montée de rampe) */
       if(sp>.2){const fsg=St.vel.dot(b)>=0?1:-1;tmp.copy(b).multiplyScalar(fsg*sp);St.vel.lerp(tmp,1-Math.exp(-9*h))}
       /* pédalage, freins, traînée */
-      if(I.y>0&&!St.man&&St.charge<=0){const f=St.vel.dot(b);const a=(GP.acc||5)*clamp(1-f/10.5,.15,1);St.vel.addScaledVector(b,a*h);St.crankA+=h*clamp(sp,2,9)*2.2}
+      St.stun-=h;if(I.y>0&&!St.man&&St.charge<=0&&St.stun<=0){const f=St.vel.dot(b);const a=(GP.acc||5)*clamp(1-f/10.5,.15,1);St.vel.addScaledVector(b,a*h);St.crankA+=h*clamp(sp,2,9)*2.2}
       else St.crankA+=0;
       if(I.y<0&&!St.man){const s2=St.vel.length();if(s2>.01)St.vel.multiplyScalar(Math.max(0,s2-7*h)/s2)}
       sp=St.vel.length();const dec=.22+.011*sp*sp;if(sp>1e-3)St.vel.multiplyScalar(Math.max(0,sp-dec*h)/sp);
@@ -153,10 +153,10 @@ MODES.bmx=function(cfg,look,ctx){
         if(g.m&&g.m.coping&&g.u>g.m.lipU-.22&&g.u<g.m.lipU+.05&&St.vel.y>2.2){const fx=g.fx,fz=g.fz;const vf=St.vel.x*fx+St.vel.z*fz,lat=V3t.set(St.vel.x-fx*vf,0,St.vel.z-fz*vf);const v=St.vel.length();
           St.vel.set(lat.x*.85-fx*.45,v*.97,lat.z*.85-fz*.45);St.pos.x-=fx*.12;St.pos.z-=fz*.12;St.pos.y=gy+.05;takeoff();St.vert={fx,fz,dir:Math.sign(I.x||((lat.x*-fz+lat.z*fx)>=0?1:-1))||1,m:g.m};if(live){sfx.whoosh();LOOK.go=Math.max(LOOK.go,.2)}}
         else if(gy-St.pos.y>.3&&gy-St.pos.y>Math.abs(St.vel.y*h)*3+.12){/* marche trop haute : flanc de module ou bord de deck → bonk */
-          St.pos.copy(prev);const hv=hsp();if(live&&hv>8.5)return ['Bonk','Flanc de module pris de face à '+Math.round(hv*3.6)+' km/h : arrive dans l\'axe des rampes.'];
-          St.vel.x*=-.3;St.vel.z*=-.3;if(live){sfx.thud(.4);toast('Bonk !');camShake(.25);if(ctx.comboBreak)ctx.comboBreak();land=.6}}
+          St.pos.copy(prev);const wn=park.wallNormal(g.m,prev.x,prev.z);const imp=wn?-(St.vel.x*wn.x+St.vel.z*wn.z):hsp();if(live&&imp>7.5)return ['Bonk','Flanc de module pris de face à '+Math.round(imp*3.6)+' km/h : arrive dans l\'axe des rampes.'];
+          if(wn&&imp>0){St.vel.x+=wn.x*(imp*1.4+1.2);St.vel.z+=wn.z*(imp*1.4+1.2);St.yaw+=wrapA(Math.atan2(St.vel.x,-St.vel.z)-St.yaw)*.5}else{St.vel.x*=-.3;St.vel.z*=-.3}St.vel.multiplyScalar(.85);St.stun=.35;if(live&&imp>1.5){sfx.thud(.3);toast('Bonk !');camShake(.2);if(imp>3&&ctx.comboBreak)ctx.comboBreak();land=.5}}
         else if(gy>=St.pos.y-.02){St.pos.y=gy;park.normal(St.pos.x,St.pos.z,n);const vn=-St.vel.dot(n);if(vn>0)St.vel.addScaledVector(n,vn)}
-        else if(St.pos.y-gy<Math.max(.07,hsp()*h*.35))St.pos.y=gy;
+        else if(St.pos.y-gy<Math.max(.07,hsp()*h*.35)&&St.vel.dot(park.normal(St.pos.x,St.pos.z,V3u))<.7){St.pos.y=gy;park.normal(St.pos.x,St.pos.z,n)}
         else{takeoff();if(live&&HITm&&HITm.type==='kicker')LOOK.go=Math.max(LOOK.go,.15)}}
       /* bornes du parc (garde-corps au bord des decks) */
       const lim=LIM;if(Math.abs(St.pos.x)>lim){St.pos.x=Math.sign(St.pos.x)*lim;St.vel.x*=-.2}if(Math.abs(St.pos.z)>lim){St.pos.z=Math.sign(St.pos.z)*lim;St.vel.z*=-.2}
@@ -198,7 +198,7 @@ MODES.bmx=function(cfg,look,ctx){
   function HIT_U(){const l=park.local(HITm,St.pos.x,St.pos.z,{u:0,v:0,fx:0,fz:0});return l?l.u:0}
   /* ---------- pilote automatique (aperçu des menus) : va chercher une ligne, charge, saute, tente une figure ---------- */
   let apT=null,apPhase=0,apTrick=0;
-  function auto(){const sp=hsp();if(gates&&gates.next()){const g=gates.next();const fx=Math.sin(g.yaw),fz=-Math.cos(g.yaw);const ah=(g.x-St.pos.x)*fx+(g.z-St.pos.z)*fz,lat=(St.pos.x-g.x)*g.cos+(St.pos.z-g.z)*g.sin;let tx,tz;
+  function auto(){const sp=hsp();/* coincé (contre un module) : petit détour */if(!St.air&&sp<1.2){St.apStuck=(St.apStuck||0)+1/60;if(St.apStuck>1){St.apStuck=0;St.yaw+=Math.PI*.6}}else St.apStuck=0;if(gates&&gates.next()){const g=gates.next();const fx=Math.sin(g.yaw),fz=-Math.cos(g.yaw);const ah=(g.x-St.pos.x)*fx+(g.z-St.pos.z)*fz,lat=(St.pos.x-g.x)*g.cos+(St.pos.z-g.z)*g.sin;let tx,tz;
       if(ah>3&&Math.abs(lat)>2){const k=Math.min(ah*.6,10);tx=g.x-fx*k;tz=g.z-fz*k}else if(ah>-1&&Math.abs(lat)<3){tx=g.x+fx*8;tz=g.z+fz*8}else if(ah>3){tx=g.x;tz=g.z}else{tx=g.x-fx*11;tz=g.z-fz*11}
       if(St.air)return {x:0,y:0,a:false,g:false};const dY=wrapA(Math.atan2(tx-St.pos.x,-(tz-St.pos.z))-St.yaw);return {x:clamp(dY*2.2,-1,1),y:Math.abs(dY)>1.1&&sp>4?-1:sp<7.5?1:0,a:false,g:false}}
     if(!apT||apPhase===2){const l=lines[Math.floor(Math.random()*lines.length)];apT=l;apPhase=0;apTrick=Math.floor(Math.random()*4)}

@@ -55,7 +55,7 @@ function replayFrame(dt){if(!RP.fr)return;rpSample(RP.t,_sa);let sp=1;
   else{_rp.copy(f.p).addScaledVector(_rd,-11);_rp.y+=14}
   if(cur._h){const g=cur._h(_rp.x,_rp.z);if(isFinite(g)&&_rp.y<g+.5)_rp.y=g+.5}
   camera.position.copy(_rp);camera.up.set(0,1,0);camera.lookAt(_rl);camera.fov=RP.shot===4?50:58;camera.updateProjectionMatrix();
-  sound(0,300,.6);surface('air',0,0);paintReplay()}
+  sound(0,300,.6);surface('air',0,0);if(cur.silence)cur.silence();paintReplay()}
 /* ---------- export du clip ---------- */
 async function exportStart(){if(RP.exp||state!=='replay')return;const cv0=renderer.domElement;
   if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){toast('Export vidéo non supporté par ce navigateur',true);return}

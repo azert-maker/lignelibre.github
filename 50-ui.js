@@ -16,6 +16,9 @@ const SPORTS={
   bmx:{name:'BMX freestyle',place:'Skatepark des Docks',c:'#b26bff',desc:'Ta ligne dans un skatepark fermé : gaps, quarters, spine, rails, box. Tailwhips, barspins, manuals.',facts:['35 km/h','combos ×4'],
     modes:{course:'Ligne chrono',free:'Session jam'},len:{opts:[4,6,8],unit:'portes',def:1},yt:'bmx park run',
     params:[{k:'size',label:'Taille du parc',opts:['Petit','Moyen','Grand'],def:1},{k:'height',label:'Hauteur des modules',opts:['Basse','Moyenne','Haute'],def:1}]},
+  motocross:{name:'Motocross',place:'Circuit de la Combe Rouge',c:'#ff6a1f',desc:'Terre, bosses, doubles et berms. Gère l\'assiette en l\'air, whippe, pose les gros sauts.',facts:['jusqu\'à 100 km/h','big airs'],
+    modes:{course:'Course sur circuit',free:'Arène freestyle'},len:{opts:[4,6,9],unit:'sections',def:1},yt:'motocross onboard',
+    params:[{k:'jumps',label:'Taille des sauts',opts:['Petits','Moyens','Gros'],def:1}]},
 };
 const SPORT_IDS=Object.keys(SPORTS).filter(k=>MODES[k]);
 
