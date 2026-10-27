@@ -371,3 +371,45 @@ def loft(name, rings, mats, n=16, caps=(True, True), fwd=(1, 0, 0), subsurf=1, m
     for p in ob.data.polygons:
         p.use_smooth = True
     return ob
+
+
+def surface_patch(name, target, mat, us, vs, ray, offset=0.0025, max_dist=None):
+    """Décalque posé sur une surface : grille (u, v) projetée par lancer de rayons sur `target`.
+    ray(u, v) -> (origine, direction) ; le premier impact est décalé de `offset` le long de la normale.
+    Évite l'effet « escalier » des zones de couleur peintes face par face."""
+    from mathutils.bvhtree import BVHTree
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    tree = BVHTree.FromObject(target, dg)
+    mw = target.matrix_world
+    inv = mw.inverted()
+    bm = bmesh.new()
+    grid = []
+    for u in us:
+        row = []
+        for v in vs:
+            o, d = ray(u, v)
+            o, d = Vector(o), Vector(d).normalized()
+            lo, ld = inv @ o, (inv.to_3x3() @ d).normalized()
+            hit = tree.ray_cast(lo, ld)
+            if hit[0] is None or (max_dist and hit[3] > max_dist):
+                row.append(None)
+                continue
+            p, n = mw @ hit[0], (mw.to_3x3() @ hit[1]).normalized()
+            if n.dot(d) > 0:
+                n = -n
+            row.append(bm.verts.new(p + n * offset))
+        grid.append(row)
+    for i in range(len(grid) - 1):
+        for j in range(len(grid[i]) - 1):
+            q = (grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1])
+            if all(q):
+                bm.faces.new(q)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(mat)
+    for f in me.polygons:
+        f.use_smooth = True
+    return link(bpy.data.objects.new(name, me))

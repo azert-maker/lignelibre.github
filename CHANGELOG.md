@@ -1,5 +1,17 @@
 # Journal des versions · Ligne Libre
 
+## 0.18.0 · 27 octobre 2026 · Game feel : réceptions, chutes, casque intégral v2
+
+Ajouts
+- Système de réception commun à tous les sports (`ctx.land`) : qualité parfaite / propre / limite, ressort de compression du rider, plongée amortie de la caméra, son par qualité, onde au sol sur les réceptions parfaites, message « Réception limite » hors figure.
+- Snowboard : la qualité de réception est maintenant calculée (axe de la planche, rotation finie, impact) et compte dans le score.
+- Chute physique (BMX, motocross, snowboard, parkour) : le rider est éjecté, culbute, rebondit et bascule au sol ; le véhicule glisse et se couche ; la caméra suit ; le bilan s'affiche après 1,4 s.
+- Casque intégral v2 (Blender) : coque modelée par anneaux avec épaisseur, mentonnière intégrée, ouverture de masque arrondie, décors projetés sur la coque (bande, mentonnière), visière ancrée, masque à écran bombé.
+- Test `tests/land.js` (12 contrôles).
+
+Corrections
+- « Continuer » et le replay remettent le rider sur son véhicule après une chute.
+
 ## 0.17.0 · 27 octobre 2026 · Vertical slice BMX, étape 1
 
 Ajouts

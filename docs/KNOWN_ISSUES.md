@@ -11,7 +11,9 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
 | 6 | 🟡 | Clip « celebrate » disponible mais pas encore branché sur l'écran de fin | brancher `human.clip('celebrate')` sur l'écran de résultats |
 | 7 | 🟡 | IK des mains seulement sur le BMX (moto, wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains en P2 |
-| 8 | ⚪ | Casque intégral : le masque et la mentonnière font un peu « robot » vus de face | casque v2 (P1) |
+| 8 | ⚪ | Réceptions : motocross, wakeboard, downhill et parkour gardent leur ancien retour (le ressort et la caméra ne sont branchés que sur BMX et snowboard) | brancher `ctx.land` sport par sport |
+| 15 | 🟡 | Chute physique : corps rigide (pas de vrai ragdoll membre par membre) ; le rider peut traverser un mur ou un module vertical | v2 : collisions avec les boîtes du parc |
+| 16 | ⚪ | Le replay ne rejoue pas la compression de réception (pose enregistrée sans le ressort) | enregistrer `landState` dans les images du replay |
 | 9 | ⚪ | Pas de clignement des yeux ni d'expressions | P1, visage v2 |
 | 10 | 🟡 | Ressenti des commandes jamais validé par un joueur humain | sessions de test |
 | 11 | ⛔ | Pas de dépôt GitHub distant (jeton invalide, accord requis) | voir `PROJECT_STATUS.md` §5 |
