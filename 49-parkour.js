@@ -58,7 +58,10 @@ MODES.parkour=function(cfg,look,ctx){
     /* éléments de jeu : couleurs codées (jaune = vault, magenta = glissade, cyan = wallrun, blanc = précision) + rayures */
     const cols={vault:0xffd23a,bar:0xff3fbf,post:0x5a2a5a,chim:0x6a6070,pad:0xf2f2ee,beam:0xe8d9b0,wall:0x2b2f4a};
     const geo=new THREE.BoxGeometry(1,1,1);const mats={};for(const k in cols)mats[k]=new THREE.MeshLambertMaterial({color:cols[k]});
-    for(const b of boxes){if(b.t==='roof')continue;const m=new THREE.Mesh(geo,mats[b.t]||mats.chim);m.scale.set(b.x1-b.x0,b.y1-b.y0,b.z1-b.z0);m.position.set((b.x0+b.x1)/2,(b.y0+b.y1)/2,(b.z0+b.z1)/2);m.castShadow=!eco;m.receiveShadow=true;root.add(m);
+    /* obstacles regroupés par type en InstancedMesh (un appel de dessin par type au lieu d'un par objet) */
+    const byT={};for(const b of boxes){if(b.t==='roof')continue;(byT[b.t]=byT[b.t]||[]).push(b)}
+    for(const t in byT){const L_=byT[t],im=new THREE.InstancedMesh(geo,mats[t]||mats.chim,L_.length);L_.forEach((b,i)=>{_dv.set((b.x0+b.x1)/2,(b.y0+b.y1)/2,(b.z0+b.z1)/2);_dq.identity();_ds.set(b.x1-b.x0,b.y1-b.y0,b.z1-b.z0);_dm.compose(_dv,_dq,_ds);im.setMatrixAt(i,_dm)});im.castShadow=!eco;im.receiveShadow=true;root.add(im)}
+    for(const b of boxes){if(b.t==='roof')continue;
       if(b.wr){/* panneau néon de wallrun, bien visible */const pm=new THREE.Mesh(new THREE.PlaneGeometry(b.z1-b.z0-1,4),new THREE.MeshBasicMaterial({color:0x2ee6ff,transparent:true,opacity:.85}));pm.rotation.y=b.face>0?Math.PI/2:-Math.PI/2;pm.position.set(b.face>0?b.x1+.02:b.x0-.02,b.y1-4.6,(b.z0+b.z1)/2);root.add(pm);
         const ar=textSprite('WALLRUN',0x2ee6ff,3);ar.position.set(b.face>0?b.x1+.4:b.x0-.4,b.y1-2,(b.z0+b.z1)/2);root.add(ar)}}
     /* rue en contrebas, enseignes, ciel nocturne de la ville au loin */
