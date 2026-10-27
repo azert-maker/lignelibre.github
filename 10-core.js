@@ -192,7 +192,7 @@ function toast(msg,force){if(!force&&msg===lastToast&&toastT>0){toastT=1.1;retur
 function feed(txt){const d=document.createElement('div');d.className='fi';d.textContent=txt;E.feed.prepend(d);while(E.feed.children.length>4)E.feed.lastChild.remove();
   setTimeout(()=>d.classList.add('out'),1900);setTimeout(()=>d.remove(),2500)}
 
-function disposeTree(o){o.traverse(n=>{if(n.geometry)n.geometry.dispose();if(n.material){(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(m.map&&m.map!==softTex)m.map.dispose();m.dispose()})}})}
+function disposeTree(o){const sks=new Set();o.traverse(n=>{if(n.isSkinnedMesh&&n.skeleton)sks.add(n.skeleton);if(n.geometry)n.geometry.dispose();if(n.material){(Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(m.map&&m.map!==softTex)m.map.dispose();m.dispose()})}});sks.forEach(k=>{if(k.dispose)k.dispose()})}
 function mountainRing(parent,count,rMin,rMax,hMin,hMax,rock,snow,haze,rnd){
   rnd=rnd||Math.random;const g=new THREE.Group();const c1=new THREE.Color(rock).lerp(haze,.55),c2=new THREE.Color(snow).lerp(haze,.35);
   const m1=new THREE.MeshBasicMaterial({color:c1,fog:false}),m2=new THREE.MeshBasicMaterial({color:c2,fog:false});

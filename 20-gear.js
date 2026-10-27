@@ -131,6 +131,25 @@ function buildHuman(look){
     const ft=grp(sh,0,-.43,0,'foot');const shoe=new THREE.Mesh(new THREE.BoxGeometry(.28,.08,.12),mShoe);shoe.position.set(.05,0,0);ft.add(shoe);
     const sole=new THREE.Mesh(new THREE.BoxGeometry(.29,.025,.125),mSole);sole.position.set(.05,-.045,0);ft.add(sole);const strap=new THREE.Mesh(new THREE.BoxGeometry(.05,.085,.13),mT);strap.position.set(.02,.005,0);ft.add(strap);
     legs.push({th,sh,ft,side})}
+  /* IK deux os des bras (mains sur le guidon, etc.) : g.ik={anchors:[Object3D,Object3D], w:0..1}.
+     Le coude est orienté vers l'extérieur et un peu en arrière ; si la cible est hors d'atteinte, le bras se tend vers elle. */
+  const _S=new THREE.Vector3(),_T=new THREE.Vector3(),_u=new THREE.Vector3(),_ud=new THREE.Vector3(),_n=new THREE.Vector3(),_pl=new THREE.Vector3(),_f=new THREE.Vector3(),
+    _qp=new THREE.Quaternion(),_qi=new THREE.Quaternion(),_q=new THREE.Quaternion(),_gq=new THREE.Quaternion(),DOWN=new THREE.Vector3(0,-1,0);
+  function ikArms(){const w=clamp(g.ik.w==null?1:g.ik.w,0,1);
+    for(const A of arms){A.ua.rotation.y=0;A.fa.rotation.x=0;A.fa.rotation.y=0}
+    if(w<.001)return;const L1=.3,L2=.36;g.updateWorldMatrix(true,false);g.getWorldQuaternion(_gq);
+    arms.forEach((A,i)=>{const an=g.ik.anchors[i];if(!an)return;
+      A.cl.updateWorldMatrix(true,false);_S.copy(A.ua.position).applyMatrix4(A.cl.matrixWorld);
+      an.updateWorldMatrix(true,false);_T.setFromMatrixPosition(an.matrixWorld);
+      _u.subVectors(_T,_S);const d=clamp(_u.length(),.08,L1+L2-.003);_u.normalize();
+      const a1=Math.acos(clamp((L1*L1+d*d-L2*L2)/(2*L1*d),-1,1));
+      _pl.set(-.35,-.15,A.side).applyQuaternion(_gq);_n.crossVectors(_u,_pl);if(_n.lengthSq()<1e-8)_n.set(0,0,1);_n.normalize();
+      _ud.copy(_u).applyAxisAngle(_n,a1);
+      _f.copy(_u).multiplyScalar(d).addScaledVector(_ud,-L1).normalize();
+      A.cl.getWorldQuaternion(_qp);_qi.copy(_qp).invert();
+      _q.setFromUnitVectors(DOWN,_ud.clone().applyQuaternion(_qi));A.ua.quaternion.slerp(_q,w);
+      _qp.multiply(A.ua.quaternion);_qi.copy(_qp).invert();
+      _q.setFromUnitVectors(DOWN,_f.applyQuaternion(_qi));A.fa.quaternion.slerp(_q,w)})}
   const P={};for(const k of POSE_KEYS)P[k]=0;P.hd=0;P.stance=1;let hdSide=1,lastT=-1e9,imp=0,gA=0,gPh=0,gK=0;/* gA/gPh : cycle de jambes (course, pédalage) ; gK = 0 course, 1 pédalage */
   function apply(now){const k=Math.min(1.1,P.crouch+imp),kb=k*1.7,br=Math.sin(now*.0026),ls=P.legSpread||0,st=P.stance;
     for(const Lg of legs){Lg.th.rotation.z=kb*.5;Lg.th.rotation.x=-Lg.side*(st*.17+ls*.3);Lg.sh.rotation.z=-kb;Lg.ft.rotation.z=kb*.5;Lg.ft.rotation.x=Lg.side*(st*.17+ls*.3)}
@@ -146,7 +165,8 @@ function buildHuman(look){
         if(gK){Lg.th.rotation.z+=gA*(.55+.45*sw);Lg.sh.rotation.z-=gA*(.7+.6*sw);Lg.ft.rotation.z+=gA*.2*sw}
         else{Lg.th.rotation.z+=gA*sw*.95;Lg.sh.rotation.z-=gA*Math.max(0,-Math.cos(ph))*1.5+gA*.2;Lg.ft.rotation.z+=gA*.25*sw}}
       if(!gK)for(const A of arms){const ph=gPh+(A.side>0?Math.PI:0);A.ua.rotation.z+=gA*Math.sin(ph)*.8;A.fa.rotation.z-=gA*.6}}
-    if(P.hd>.01){const A=arms[hdSide>0?1:0];A.ua.rotation.x=lerp(A.ua.rotation.x,-A.side*1.25,P.hd);A.ua.rotation.z=lerp(A.ua.rotation.z,-.2,P.hd);A.fa.rotation.z=lerp(A.fa.rotation.z,-.1,P.hd)}}
+    if(P.hd>.01){const A=arms[hdSide>0?1:0];A.ua.rotation.x=lerp(A.ua.rotation.x,-A.side*1.25,P.hd);A.ua.rotation.z=lerp(A.ua.rotation.z,-.2,P.hd);A.fa.rotation.z=lerp(A.fa.rotation.z,-.1,P.hd)}
+    if(g.ik)ikArms()}
   g.pose=p=>{const now=performance.now(),gap=now-lastT;lastT=now;const dt=Math.min(.1,gap/1000),k=gap>400?1:1-Math.exp(-(g.poseRate||11)*dt);
     for(const key of POSE_KEYS){const tv=p[key]!=null?p[key]:key==='stance'?1:0;P[key]+=(tv-P[key])*k}
     if(p.gA!=null){gA=p.gA;gPh=p.gPh||0;gK=p.gK||0}
@@ -159,7 +179,11 @@ function buildHuman(look){
     for(const k of POSE_KEYS){const av=a[k]!=null?a[k]:k==='stance'?1:0,bv=b[k]!=null?b[k]:k==='stance'?1:0;o[k]=lerp(av,bv,w)}o.handDown=w>.5?b.handDown||0:0;if(extra)Object.assign(o,extra);g.pose(o)};
   g.bones={root:g,pelvis,spine,torso,neck,head,legs:legs.map((l,i)=>{l.th.name='upperLeg'+i;l.sh.name='lowerLeg'+i;l.ft.name='foot'+i;return {upper:l.th,lower:l.sh,foot:l.ft}}),
     arms:arms.map((a,i)=>{a.cl.name='clavicle'+i;a.ua.name='upperArm'+i;a.fa.name='foreArm'+i;a.hand.name='hand'+i;return {clavicle:a.cl,upper:a.ua,fore:a.fa,hand:a.hand}})};
-  g.head=head;g.isHuman=true;g.snapPose({});return g}
+  g.head=head;g.isHuman=true;
+  /* modèle Blender skinné (18-glb.js) piloté par ce rig ; procédural si le GLB manque ou si look.proc */
+  if(!L.proc&&typeof dressHuman==='function'&&GLB.ready){const D={pelvis,spine,torso,neck,head};arms.forEach((a,i)=>{D['clavicle'+i]=a.cl;D['upperArm'+i]=a.ua;D['foreArm'+i]=a.fa;D['hand'+i]=a.hand});
+    legs.forEach((l,i)=>{D['upperLeg'+i]=l.th;D['lowerLeg'+i]=l.sh;D['foot'+i]=l.ft});try{dressHuman(g,L,D)}catch(e){GLB.err='dressHuman: '+e.message}}
+  g.snapPose({});return g}
 
 /* ---------- wingsuit (repère : avant = −z, dos = +y) ---------- */
 const FLY={sh:[[-.2,0,-.5],[.2,0,-.5]],el:[[-.55,0,-.42],[.55,0,-.42]],wr:[[-.86,0,-.32],[.86,0,-.32]],hp:[[-.11,0,.08],[.11,0,.08]],kn:[[-.24,0,.52],[.24,0,.52]],an:[[-.34,0,.96],[.34,0,.96]]};
