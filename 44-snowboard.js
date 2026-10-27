@@ -208,7 +208,7 @@ MODES.snowboard=function(cfg,look,ctx){
     return null}
   return {env,stats,name:'Snowboard',vScale:120,target:course?((cfg.len+1.5)*CH)/16:0,
     keys:[['Espace','maintenir = charger · relâcher = saut'],['← →','carver · en l\'air : rotations'],['Shift / F','grab en l\'air (ou ré-appui Espace)'],['↑ / ↓','frein / tuck · en l\'air : flips'],['C','caméra']],
-    touch:{u:'Frein',d:'Tuck',a:'Saut'},
+    touch:{u:'Frein',d:'Tuck',a:'Saut',g:'Grab'},
     inst:`<div class="ihead">Ride</div><div class="ro-grid"><div class="ro"><span>Pente</span><b id="iSl">0<small>°</small></b></div><div class="ro"><span>Air</span><b id="iAir">—</b></div>
       <div class="ro"><span>Meilleure figure</span><b id="iBest" style="font-size:15px">—</b></div><div class="ro"><span>Sauts</span><b id="iAirs">0</b></div></div>
       <div class="barline"><span>Carre</span><div class="bt"><i id="iEdge"></i></div><b id="iEdgeV">0%</b></div>`,

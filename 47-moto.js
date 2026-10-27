@@ -197,7 +197,7 @@ MODES.motocross=function(cfg,look,ctx){
     const want=Math.atan2(tx-St.pos.x,-(tz-St.pos.z)),dY=wrapA(want-St.yaw);const vT=course?(St.apCurve>.9?11:St.apCurve>.5?14:19):apI&&apI.ph===1?(apI.l.k==='fmx'?19:15):11;return {x:clamp(dY*2,-1,1),y:Math.abs(dY)>.9&&sp>9?-1:sp<vT?1:0,a:false,g:false}}
   return {env,stats,name:'Motocross',vScale:100,target:finishT,
     keys:[['↑ / ↓','gaz / frein · en l\'air : plonger / cabrer (backflip)'],['← →','braquer · en l\'air : whip'],['Shift / F','figure freestyle en l\'air (+ ← → / ↓)'],['Espace','maintenir = précharger la suspension · relâcher = saut'],['C','caméra']],
-    touch:{u:'Gaz',d:'Frein',a:'Saut'},
+    touch:{u:'Gaz',d:'Frein',a:'Saut',g:'Freestyle'},
     inst:`<div class="ihead">Moto</div><div class="ro-grid"><div class="ro"><span>Rapport</span><b id="mGear">1</b></div><div class="ro"><span>Air</span><b id="mAir">—</b></div>
       <div class="ro"><span>Meilleure figure</span><b id="mBest" style="font-size:15px">—</b></div><div class="ro"><span>Plus haut</span><b id="mH">—</b></div></div>
       <div class="barline"><span id="mLbl">Assiette</span><div class="bt"><i id="mBar"></i></div><b id="mBarV">—</b></div>`,

@@ -148,7 +148,7 @@ MODES.wakeboard=function(cfg,look,ctx){
         const T=airTrick();const lq=off<.2&&vn<5.5&&!onRidge?'perfect':off<.6&&vn<7.5?'clean':'sketchy';
         if(live){land=clamp(vn/6,.2,1);human.impact(land*.5);camShake(land*.35);sfx.splash(.5+land*.6);for(let i=0;i<(eco?8:24);i++)spray.spawn(RW.x,St.y+.05,RW.z,(Math.random()-.5)*4,.8+Math.random()*2*land,(Math.random()-.5)*4,.9,.95,.98,1);
           if(St.airT>.45){stats.airs++;if(St.wakeJ)stats.wakeAirs++;if(St.w2w)stats.w2w++;stats.maxH=Math.max(stats.maxH,St.hmax);stats.flips+=T.flips;
-            if(onRidge)feed('Réception sur le sillage');ctx.trick(T.name,T.pts,{land:lq,base:T.name.replace(' · Wake to wake','')});if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
+            if(onRidge)feed('Réception sur le sillage');ctx.trick(T.name,T.pts,{land:lq,base:T.name.replace(' · Wake to wake','')});if(lq==='perfect'&&T.flips&&ctx.slowmo)ctx.slowmo(.3,.5);if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
             if(wch&&wch[1](T.name)){ctx.bonus(wch[2],'Défi sillage : '+wch[0]);if(!sfx.trick(4))ding(990,.3);wch=WCH[Math.floor(Math.random()*WCH.length)];toast('Nouveau défi : '+wch[0],true)}
             if(spots&&St.takeK)spots.test(T.name,{mod:St.takeK,near:RW},ctx)}}}}
     St.prevA=I.a;return null}
@@ -167,7 +167,7 @@ MODES.wakeboard=function(cfg,look,ctx){
     const d=Math.abs(St.X-(-apDir*0))-xr,near=(St.X*apDir<-xr+1.6&&St.X*apDir>-xr-1)&&Math.abs(St.U)>4;return {x:apDir,y:0,a:St.X*apDir<-xr-.2&&St.X*apDir>-xr-2.8,g:false}}
   return {env,stats,name:'Wakeboard',vScale:55,target:finishT,
     keys:[['← →','carre : traverser le sillage · en l\'air : rotations'],['Espace','maintenir = charger · relâcher sur la crête = pop'],['↑ / ↓','en l\'air : Tantrum / Backroll'],['Shift / F','grab (+ ← = Melon)'],['C','caméra']],
-    touch:{u:'Tantrum',d:'Backroll',a:'Pop'},
+    touch:{u:'Tantrum',d:'Backroll',a:'Pop',g:'Grab'},
     inst:`<div class="ihead">Sillage</div><div class="ro-grid"><div class="ro"><span>Position</span><b id="wkPos">—</b></div><div class="ro"><span>Air</span><b id="wkAir">—</b></div>
       <div class="ro"><span>Meilleure figure</span><b id="wkBest" style="font-size:15px">—</b></div><div class="ro"><span>${course?'Bouées':'Défi'}</span><b id="wkCh" style="font-size:14px">—</b></div></div>
       <div class="barline"><span>Charge</span><div class="bt"><i id="wkBar"></i></div><b id="wkBarV">0%</b></div>`,

@@ -296,4 +296,11 @@ body.od #vig{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba
 .sstrip b{font-weight:600}.sstrip small{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
 .sstrip:hover,.sstrip:focus-visible{border-color:var(--c)}
 .slv{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}.slv b{color:var(--c);font-weight:600}.slv i{flex:1;height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}.slv em{display:block;height:100%;background:var(--c)}
+
+.tb.fig{width:58px;height:58px;border-color:var(--gold);color:var(--gold)}
+
+/* mobile en paysage (hauteur réduite) : panneau d'instruments compact en haut à droite, compteur réduit, rien sous les boutons */
+@media (max-height:520px){body.touch .inst{top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;right:calc(70px + env(safe-area-inset-right,0px));width:180px;padding:7px;gap:5px;font-size:11px;opacity:.9}
+  body.touch .inst .ro-grid{display:none}body.touch .spd{bottom:auto;top:calc(6px + env(safe-area-inset-top,0px));width:92px;height:92px}body.touch .spd-n b{font-size:26px}
+  body.touch .hud-tr{bottom:auto;top:calc(100px + env(safe-area-inset-top,0px))}body.touch .goal{display:none}}
 </style>

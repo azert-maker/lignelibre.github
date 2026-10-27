@@ -169,11 +169,11 @@ function ding(f,dur){if(!actx||quiet)return;dur=dur||.4;const t=actx.currentTime
 function buzz(p){try{if(S().haptics&&navigator.vibrate)navigator.vibrate(p)}catch(e){}}
 
 /* ---------- entrées : clavier, tactile, manette ---------- */
-const keys=Object.create(null);const tch={l:0,r:0,u:0,d:0,a:0};const pad={x:0,y:0,a:false,rx:0,ry:0};
+const keys=Object.create(null);const tch={l:0,r:0,u:0,d:0,a:0,g:0};const pad={x:0,y:0,a:false,rx:0,ry:0};
 const NEUTRAL={x:0,y:0,a:false};
 function inp(){const L=keys.ArrowLeft||keys.KeyA||tch.l,R=keys.ArrowRight||keys.KeyD||tch.r,U=keys.ArrowUp||keys.KeyW||tch.u,D=keys.ArrowDown||keys.KeyS||tch.d;
   let x=(R?1:0)-(L?1:0),y=(U?1:0)-(D?1:0);if(Math.abs(pad.x)>.25)x=pad.x;if(Math.abs(pad.y)>.35)y=pad.y>0?1:-1;
-  return {x:clamp(x,-1,1),y,a:!!(keys.Space||tch.a||pad.a),g:!!(keys.ShiftLeft||keys.ShiftRight||keys.KeyF||pad.g)}}
+  return {x:clamp(x,-1,1),y,a:!!(keys.Space||tch.a||pad.a),g:!!(keys.ShiftLeft||keys.ShiftRight||keys.KeyF||pad.g||tch.g)}}
 const padPrev={};
 let padOff=false;
 function pollPad(onPress){if(padOff)return;let gps=[];try{gps=navigator.getGamepads?navigator.getGamepads():[]}catch(e){padOff=true;return}const gp=gps&&[...gps].find(g=>g&&g.connected);if(!gp){pad.x=0;pad.y=0;pad.a=false;pad.rx=0;pad.ry=0;return}

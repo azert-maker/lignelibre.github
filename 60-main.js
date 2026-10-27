@@ -46,7 +46,7 @@ async function startRun(cfg,opt={}){
   cur=MODES[cfg.sport](cfg,profile.look,ctx);flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
   $('#hMode').textContent=cur.name;E.inst.innerHTML=cur.inst;E.feed.innerHTML='';E.mp.innerHTML='';
   $('#keys').innerHTML=cur.keys.slice(0,4).map(k=>'<div><kbd>'+k[0]+'</kbd>'+k[1]+'</div>').join('');
-  $('#tU span').textContent=cur.touch.u;$('#tD span').textContent=cur.touch.d;$('#tA').textContent=cur.touch.a||'';$('#tA').hidden=!cur.touch.a;
+  $('#tU span').textContent=cur.touch.u;$('#tD span').textContent=cur.touch.d;$('#tA').textContent=cur.touch.a||'';$('#tA').hidden=!cur.touch.a;$('#tG span').textContent=cur.touch.g||'Figure';$('#tG').hidden=cur.touch.g===false;
   runT=0;countT=3;state='count';$('#hud').hidden=false;E.touch.hidden=!isTouch;E.count.hidden=false;E.count.textContent='3';
   cur.update(0,NEUTRAL);hudAcc=1;setHud({kmh:0},0);run.cdS=sfx.count();if(!load('ll3_lookTip',0)){save('ll3_lookTip',1);setTimeout(()=>{if(state==='play')toast(isTouch?'Glisse sur l\'écran pour regarder autour':'Souris : regarder autour · molette : zoom · V : derrière',true)},4200)}if(run.use.boost)feed('Départ lancé');if(run.use.x15)feed('Score ×1,5');netPush(true)}
 function netPush(force){if(!run||!run.multi||!cur)return;const ns=cur.netState();
@@ -227,7 +227,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='p
 /* filet : onglet fermé sur l'écran de fin → on crédite pièces / défi / série (jamais en pleine partie : le joueur peut encore continuer) */
 function saveOnLeave(){try{if(run&&!run.finalized&&state==='over')finalizeRun(true);flushProfile()}catch(e){}}
 addEventListener('pagehide',saveOnLeave);addEventListener('beforeunload',saveOnLeave);
-$$('#touch .tb').forEach(b=>{const k=b.dataset.k;const on=e=>{e.preventDefault();tch[k]=1;b.classList.add('on');if(k==='a')press('Space');else press({l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',d:'ArrowDown'}[k])};const off=()=>{tch[k]=0;b.classList.remove('on')};
+$$('#touch .tb').forEach(b=>{const k=b.dataset.k;const on=e=>{e.preventDefault();tch[k]=1;b.classList.add('on');if(k==='a')press('Space');else if(k!=='g')press({l:'ArrowLeft',r:'ArrowRight',u:'ArrowUp',d:'ArrowDown'}[k])};const off=()=>{tch[k]=0;b.classList.remove('on')};
   b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)});
 
 /* ---------- boucle ---------- */
