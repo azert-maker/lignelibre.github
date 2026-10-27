@@ -119,6 +119,11 @@ const sfx={thud(p){p=p||1;if(!sfxPlay('crash',Math.min(1,.95*p))){burst('lowpass
   whoosh(){if(!sfxPlay(Math.random()<.5?'whoosh':'whoosh2',.55,.9+Math.random()*.2))burst('bandpass',500,1.2,.45,.5,2400)},
   splash(p){p=p||1;if(!sfxPlay(p>1?'splashL':'splashS',Math.min(1,.7*p),.9+Math.random()*.2))burst('bandpass',1300,.7,.6,.6*p,500)},
   crunch(){if(!sfxPlay('crunch',.8,.9+Math.random()*.25))burst('highpass',2500,.6,.25,.35)},
+  /* réception : impact sourd dosé + signature de qualité (clac net, cliquetis, frottement) */
+  land(q,k){k=k??.6;burst('lowpass',120+60*k,1,.18+.12*k,.25+.45*k);
+    if(q==='perfect'){burst('bandpass',2400,5,.05,.32);ding(1568,.06)}
+    else if(q==='sketchy'){burst('highpass',1400,.7,.34,.18+.22*k,500);sfxPlay('crunch',.3*k+.15,.7)}
+    else burst('bandpass',950,2,.09,.16)},
   trick(n){return sfxPlay(n>=3?'combo':'trick',.5,1+Math.min(n||1,6)*.04)},finish(){return sfxPlay('finish',.7)},click(){return sfxPlay('click',.3)},coin(){return sfxPlay('coin',.45)},count(){return sfxPlay('count',.55)},pump(good){burst('lowpass',good?240:180,.9,.2,good?.45:.25);burst('bandpass',850,.7,.28,good?.18:.1,420)},shhh(g){if(!sfxPlay('splashS',.35*(g||1),1.25))burst('highpass',1800,.5,.5,.25*(g||1))},crowd(g){return sfxPlay('crowd',g??.5,.9+Math.random()*.2)},gull(g){return sfxPlay('gull',g??.25,.9+Math.random()*.25)}};
 
 /* double appui gauche/droite (≤ 0,32 s) : déclencheur de figures (tonneau, etc.) */

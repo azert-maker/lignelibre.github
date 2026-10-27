@@ -193,7 +193,7 @@ MODES.bmx=function(cfg,look,ctx){
           if(vn>13.5)return ['Réception trop violente','Impact à '+vn.toFixed(1)+' m/s : vise la pente de réception plutôt que le plat.']}
         St.pos.y=g.h;St.vel.addScaledVector(n,-St.vel.dot(n));if(hv2>1.2)St.yaw=velYaw();St.vel.multiplyScalar(1-Math.sin(Math.min(off,1.2))*.4-(vn>9?.15:0));
         St.air=false;nSm.copy(n);St.transfer=!!(St.takeMod&&g.m&&g.m!==St.takeMod&&St.takeMod.tag==='spine'&&g.m.tag==='spine');HITm=g.m;const T=airTrick();St.pitch=0;const lq=off<.2&&fl<.2&&vn<8.5?'perfect':off<.55&&vn<10.5?'clean':'sketchy';
-        if(live){land=clamp(vn/8,.25,1);human.impact(land*.5);camShake(land*.4);sfx.thud(.25+land*.3);for(let i=0;i<(eco?5:14);i++)dust.spawn(St.pos.x,St.pos.y+.05,St.pos.z,(Math.random()-.5)*3,.4+Math.random()*1.2*land,(Math.random()-.5)*3,.8,.85,.8,.75);
+        if(live){land=clamp(vn/8,.25,1);const isT=!!(St.airT>.4||T.flips||T.deg||St.whips||St.bars);ctx.land(lq,{k:land,pos:St.pos,n,human,air:St.airT,trick:isT});for(let i=0;i<(eco?5:14);i++)dust.spawn(St.pos.x,St.pos.y+.05,St.pos.z,(Math.random()-.5)*3,.4+Math.random()*1.2*land,(Math.random()-.5)*3,.8,.85,.8,.75);
           if(St.airT>.4||T.flips||T.deg||St.whips||St.bars){stats.airs++;stats.maxH=Math.max(stats.maxH,St.hmax);stats.whips+=St.whips;stats.flips+=T.flips;
             const p=ctx.trick(T.name,T.pts,{land:lq,base:T.name.replace(/ · Transfert/,'')});if(lq==='perfect'&&T.pts>=700&&ctx.slowmo)ctx.slowmo(.3,.5);if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
             if(spots)spots.test(T.name,{mod:St.takeMod,near:St.pos,h:St.hmax},ctx)}}
@@ -234,7 +234,7 @@ MODES.bmx=function(cfg,look,ctx){
       const ped=!St.air&&!St.man&&!St.grind&&I.y>0;St.crankA+=ped?dt*clamp(sp,2,9)*2.2:0;BK.crank.rotation.x=-St.crankA;
       const rollW=sp*dt/BK.R*(St.air?0:1);BK.wR.rotation.x-=rollW;BK.wF.rotation.x-=rollW*(St.wheelie>.2?0:1);
       const ps=St.charge>0&&!St.air?{crouch:.82+St.charge*.18,lean:1.02,back:.85,spread:.12,stance:0,look:0}:St.grind?{crouch:.8,lean:.95,back:.85,spread:.15,stance:0,side:.15}:St.man?{crouch:.25,lean:-.35,back:1.05,spread:.08,stance:0}:
-        St.air?{crouch:St.whip||St.bar?.9:.8,lean:.85,back:St.bar?.3:.85,spread:St.bar?.9:.15,stance:0,look:0}:{crouch:.8+land*.2,lean:1,back:.85,spread:.12,stance:0,turn:-St.steer*.4,side:St.steer*.15};
+        St.air?{crouch:St.whip||St.bar?.9:.8,lean:.85,back:St.bar?.3:.85,spread:St.bar?.9:.15,stance:0,look:0}:{crouch:.8,lean:1,back:.85,spread:.12,stance:0,turn:-St.steer*.4,side:St.steer*.15};
       if(human.ik)human.ik.w+=((St.bar?0:1)-human.ik.w)*(live?1-Math.exp(-18*dt):1);
       human.pose(ps);human.gait(ped?.35:0,St.crankA,true);
       const gyB=groundH(St.pos.x,St.pos.z);blob.set(St.pos.x,gyB,St.pos.z,St.pos.y-gyB);
@@ -245,7 +245,7 @@ MODES.bmx=function(cfg,look,ctx){
       human.visible=ctx.cam()!==1;
       if(ctx.cam()===1){camera.position.copy(St.pos).addScaledVector(up,1.55);camera.rotation.set(-.2,-camYaw,0,'YXZ')}
       else{const ab=St.air?clamp((St.airT-.15)*2.5,0,2.2):0;airCam+=(ab-airCam)*(1-Math.exp(-3*dt));const D=(ctx.cam()===2?14:5.2)+airCam,Hh=(ctx.cam()===2?8:2.3)+airCam*.6;
-        camera.position.set(St.pos.x-Math.sin(camYaw)*D,Math.max(St.pos.y,0)+Hh-land*.3,St.pos.z+Math.cos(camYaw)*D);const gc=groundH(camera.position.x,camera.position.z);if(camera.position.y<gc+1)camera.position.y=gc+1;
+        camera.position.set(St.pos.x-Math.sin(camYaw)*D,Math.max(St.pos.y,0)+Hh,St.pos.z+Math.cos(camYaw)*D);const gc=groundH(camera.position.x,camera.position.z);if(camera.position.y<gc+1)camera.position.y=gc+1;
         look3.set(St.pos.x+Math.sin(camYaw)*4,St.pos.y+.8,St.pos.z-Math.cos(camYaw)*4);camera.lookAt(look3)}
       camera.fov=62+clamp((sp-5)*1.4,0,14)+overdrive()*4;camera.updateProjectionMatrix();shadowFollow(St.pos);speedLines(clamp((sp-9)/6,0,1)*.6,dt);
       /* son : pneus sur béton, roue libre qui cliquette, grind métallique */
