@@ -19,6 +19,10 @@ const GEAR={
     {id:'250f',name:'250 4T',desc:'La référence du motocross : puissante sans être brutale.',st:{Puissance:.72,Maniabilité:.75,Suspension:.75},phys:{power:7.4,top:27,turn:1,grip:8.6,pitch:1,susp:15.5}},
     {id:'125',name:'125 2T',desc:'Légère et joueuse : assiette plus vive en l\'air, moins de vitesse de pointe.',st:{Puissance:.55,Maniabilité:.95,Suspension:.62},phys:{power:6.7,top:24.5,turn:1.15,grip:9.2,pitch:1.18,susp:14.5},cost:1},
     {id:'450f',name:'450 4T',desc:'Couple énorme et suspension costaude. Lourde à faire tourner.',st:{Puissance:.95,Maniabilité:.55,Suspension:.95},phys:{power:8.7,top:30,turn:.88,grip:8.2,pitch:.88,susp:17.5},cost:2}],
+  wboard:[
+    {id:'flex',name:'Flex 140',desc:'Planche souple et tolérante : réceptions douces.',st:{Coupe:.7,Rotation:.75,Stabilité:.8},phys:{cut:8.6,spin:1,len:1.4}},
+    {id:'stiff',name:'Boat 144',desc:'Rigide, coupe plus fort vers le sillage : sauts plus hauts.',st:{Coupe:.92,Rotation:.68,Stabilité:.75},phys:{cut:9.5,spin:.93,len:1.44},cost:1},
+    {id:'parkw',name:'Park 136',desc:'Courte et vive : rotations plus rapides.',st:{Coupe:.65,Rotation:.95,Stabilité:.6},phys:{cut:8.2,spin:1.13,len:1.36},cost:2}],
   wheel:[
     {id:'w80',name:'Grip 80A',desc:'Gomme tendre, colle en courbe, slide plus dur.',st:{Adhérence:.9,Slide:.45,Roulement:.55},phys:{alat:.5,slide:5.0,rr:.16}},
     {id:'w83',name:'Freeride 83A',desc:'Compromis grip et slide.',st:{Adhérence:.7,Slide:.75,Roulement:.65},phys:{alat:0,slide:5.8,rr:.15}},
@@ -39,6 +43,8 @@ const SHOP=[
   {id:'flat',price:1400,kind:'Équipement',slot:'bmx',name:'BMX Flatland Light',effect:'Rotations +12 %, tailwhip +15 %. Accélération +8 %.',ads:2},
   {id:'125',price:900,kind:'Équipement',slot:'moto',name:'Moto 125 2T',effect:'Assiette en l\'air +18 %, braquage +15 %. Vitesse de pointe −9 %.',ads:1},
   {id:'450f',price:2200,kind:'Équipement',slot:'moto',name:'Moto 450 4T',effect:'Puissance +18 %, pointe +11 %, encaisse des réceptions plus dures. Plus lourde.',ads:3},
+  {id:'stiff',price:900,kind:'Équipement',slot:'wboard',name:'Wakeboard Boat 144',effect:'Coupe +10 % vers le sillage : sauts plus hauts.',ads:1},
+  {id:'parkw',price:1300,kind:'Équipement',slot:'wboard',name:'Wakeboard Park 136',effect:'Rotations +13 %.',ads:2},
   {id:'carbon',price:500,kind:'Cosmétique',slot:'helmet',name:'Casque carbone',effect:'Coque carbone brillante.',ads:1},
   {id:'neon',price:400,kind:'Cosmétique',name:'Pack couleurs néon',effect:'4 teintes fluo pour tout l\'équipement.',ads:1},
   {id:'smoke',price:400,kind:'Cosmétique',name:'Fumigènes couleur',effect:'Fumée aux couleurs de ta voilure en wingsuit.',ads:1},

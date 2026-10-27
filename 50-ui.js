@@ -19,6 +19,9 @@ const SPORTS={
   motocross:{name:'Motocross',place:'Circuit de la Combe Rouge',c:'#ff6a1f',desc:'Terre, bosses, doubles et berms. Gère l\'assiette en l\'air, whippe, pose les gros sauts.',facts:['jusqu\'à 100 km/h','big airs'],
     modes:{course:'Course sur circuit',free:'Arène freestyle'},len:{opts:[4,6,9],unit:'sections',def:1},yt:'motocross onboard',
     params:[{k:'jumps',label:'Taille des sauts',opts:['Petits','Moyens','Gros'],def:1}]},
+  wakeboard:{name:'Wakeboard',place:'Lac des Turquoises',c:'#22d3c5',desc:'Tracté par le bateau : coupe vers le sillage, pop sur la crête, wake to wake, kickers et sliders.',facts:['33 km/h','sillage 75 cm'],noSnow:true,
+    modes:{course:'Slalom de bouées',free:'Session au lac'},len:{opts:[8,12,16],unit:'bouées',def:1},yt:'wakeboarding wake to wake',
+    params:[{k:'speed',label:'Vitesse du bateau',opts:['29 km/h','33 km/h','37 km/h'],def:1},{k:'wake',label:'Taille du sillage',opts:['Petit','Moyen','Gros'],def:1}]},
 };
 const SPORT_IDS=Object.keys(SPORTS).filter(k=>MODES[k]);
 
