@@ -180,14 +180,18 @@ let resetArm=false;
 function paintSettings(){const s=S();
   $('#settingsBody').innerHTML=`
   <div class="grp"><span class="lbl">Graphismes</span>${chipRow('quality',['Éco (vieux PC)','Normal','Élevé (ombres)'],['eco','normal','high'].indexOf(s.quality))}</div>
-  <div class="grp"><span class="lbl">Volume <b>${Math.round(s.vol*100)} %</b></span><input type="range" id="setVol" min="0" max="1" step="0.05" value="${s.vol}"></div>
+  <div class="grp"><span class="lbl">Volume général <b>${Math.round(s.vol*100)} %</b></span><input type="range" id="setVol" min="0" max="1" step="0.05" value="${s.vol}"></div>
+  <div class="grp"><span class="lbl">Effets sonores <b>${Math.round((s.sfxVol??1)*100)} %</b></span><input type="range" id="setSfx" min="0" max="1" step="0.05" value="${s.sfxVol??1}"></div>
+  <div class="grp"><span class="lbl">Musique <b>${Math.round((s.musicVol??1)*100)} %</b></span><input type="range" id="setMus" min="0" max="1" step="0.05" value="${s.musicVol??1}"></div>
+  <div class="grp"><span class="lbl">Secousses de caméra</span>${chipRow('shake',['Aucune','Réduites','Normales'],[0,.5,1].indexOf(s.shake??1))}</div>
+  <div class="grp"><span class="lbl">Flashs d'écran <b>frôlements, overdrive</b></span>${chipRow('flash',['Non','Oui'],s.flash===false?0:1)}</div>
   <div class="grp"><span class="lbl">Wingsuit</span>${chipRow('invert',['↑ = plonger','↑ = cabrer (avion)'],s.invert?1:0)}</div>
   <div class="grp"><span class="lbl">Caméra par défaut</span>${chipRow('cam',['Poursuite','Casque','Drone'],s.cam)}</div>
   <div class="grp"><span class="lbl">Qualité auto <b>passe en Éco si &lt; 40 i/s</b></span>${chipRow('autoQ',['Non','Oui'],s.autoQ!==false?1:0)}</div>
   <div class="grp"><span class="lbl">Figures snowboard <b>assisté = réception recalée, plus de tolérance</b></span>${chipRow('sbAssist',['Pro','Assisté'],s.sbAssist!==false?1:0)}</div>
   <div class="grp"><span class="lbl">Vitesse de rotation en l'air</span>${chipRow('spinSens',['Lente','Normale','Rapide'],[.8,1,1.25].indexOf(s.spinSens||1))}</div>
   <div class="grp"><span class="lbl">Fantôme de ton record</span>${chipRow('ghost',['Non','Oui'],s.ghost!==false?1:0)}</div>
-  <div class="grp"><span class="lbl">Musique</span>${chipRow('music',['Non','Oui'],s.music!==false?1:0)}</div>
+  <div class="grp"><span class="lbl">Musique (menus, discrète en course)</span>${chipRow('music',['Non','Oui'],s.music!==false?1:0)}</div>
   <div class="grp"><span class="lbl">Vibrations (mobile)</span>${chipRow('haptics',['Non','Oui'],s.haptics?1:0)}</div>
   <div class="grp"><span class="lbl">Pubs de démonstration</span>${chipRow('ads',['Désactivées','Activées'],s.adsDemo?1:0)}
     <p class="note">Régie actuelle : <b>${ADS_CONFIG.provider}</b>. Pour brancher une vraie régie, change <code>ADS_CONFIG.provider</code> en haut du script publicités.</p></div>
@@ -197,9 +201,10 @@ function paintSettings(){const s=S();
   ${paintAccountBlock()}
   <div class="grp"><span class="lbl">Données</span><div class="row"><button class="btn small" id="setReset">${resetArm?'Confirmer : tout effacer':'Réinitialiser la progression'}</button></div></div>`;
   $$('#settingsBody [data-row]').forEach(row=>row.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const v=+b.dataset.v,n=row.dataset.row;
-    if(n==='quality'){s.quality=['eco','normal','high'][v];resize();if(state==='menu')previewSport(previewId,previewW,true)}else if(n==='invert')s.invert=v===1;else if(n==='cam'){s.cam=v;setCam(v)}else if(n==='haptics')s.haptics=v===1;else if(n==='music')s.music=v===1;else if(n==='ghost')s.ghost=v===1;else if(n==='sbAssist')s.sbAssist=v===1;else if(n==='spinSens')s.spinSens=[.8,1,1.25][v];else if(n==='autoQ'){s.autoQ=v===1;AQ.done=false}else if(n==='ads')s.adsDemo=v===1;
+    if(n==='quality'){s.quality=['eco','normal','high'][v];resize();if(state==='menu')previewSport(previewId,previewW,true)}else if(n==='invert')s.invert=v===1;else if(n==='cam'){s.cam=v;setCam(v)}else if(n==='haptics')s.haptics=v===1;else if(n==='music')s.music=v===1;else if(n==='ghost')s.ghost=v===1;else if(n==='sbAssist')s.sbAssist=v===1;else if(n==='spinSens')s.spinSens=[.8,1,1.25][v];else if(n==='autoQ'){s.autoQ=v===1;AQ.done=false}else if(n==='ads')s.adsDemo=v===1;else if(n==='shake')s.shake=[0,.5,1][v];else if(n==='flash')s.flash=v===1;
     saveProfile();paintSettings()});
   const vol=$('#setVol');vol.oninput=()=>{setVolume(+vol.value);vol.previousElementSibling.querySelector('b').textContent=Math.round(vol.value*100)+' %'};
+  for(const [id,k] of [['#setSfx','sfxVol'],['#setMus','musicVol']]){const r=$(id);r.oninput=()=>{s[k]=+r.value;saveProfile();r.previousElementSibling.querySelector('b').textContent=Math.round(r.value*100)+' %'}}
   bindAccountBlock(paintSettings);
   $('#setReset').onclick=()=>{if(!resetArm){resetArm=true;paintSettings();setTimeout(()=>{resetArm=false;if(screen==='settings')paintSettings()},4000);return}
     profileFrozen=true;try{localStorage.removeItem(PROFILE_KEY)}catch(e){}location.reload()}}

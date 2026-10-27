@@ -97,7 +97,7 @@ function surface(kind,level,speed){if(!actx||!AUD.ready)return;if(kind!=='air'&&
   if(kind==='snow')AUD.layers.snow.fl.frequency.setTargetAtTime(1800+(speed||0)*40,t,.2)}
 const on2=v=>v>.02?v:0;
 function burst(type,f,q,dur,gain,sweep){if(!actx||!AUD.ready||quiet)return;const t=actx.currentTime,s=actx.createBufferSource();s.buffer=AUD.buf;const fl=actx.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);if(sweep)fl.frequency.exponentialRampToValueAtTime(sweep,t+dur);fl.Q.value=q;
-  const g=actx.createGain();g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl);fl.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.05)}
+  const g=actx.createGain();g.gain.setValueAtTime(gain*(S().sfxVol??1)+1e-4,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl);fl.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.05)}
 /* ---------- échantillons (Pixabay, voir 16-sfx-data) : décodés au premier geste, repli procédural sinon ----------
    Boucles de surface road/snow/water en fondu enchaîné avec le bruit filtré ; musique de menu ; one-shots. */
 /* décodage paresseux : chaque son n'est décodé qu'au premier besoin (premier sfxPlay / première surface / musique au menu) ;
@@ -112,9 +112,9 @@ function sampleReady(k){const d=SFX_DATA[k];
   if(k==='road'||k==='snow'||k==='water'){const src=actx.createBufferSource();src.buffer=SMP[k];src.loop=true;src.loopStart=d.loop[0];src.loopEnd=d.loop[1];
     const g=actx.createGain();g.gain.value=0;src.connect(g);g.connect(master);src.start(0,d.loop[0]);SLOOP[k]={src,g}}
   if(k==='music'){musicSrc=actx.createBufferSource();musicSrc.buffer=SMP.music;musicSrc.loop=true;musicGain=actx.createGain();musicGain.gain.value=0;musicSrc.connect(musicGain);musicGain.connect(master);musicSrc.start()}}
-function sfxPlay(name,gain,rate){if(!actx||(quiet&&name!=='click'))return false;if(!SMP[name]){ensureSample(name);return false}const t=actx.currentTime,s=actx.createBufferSource(),g=actx.createGain();s.buffer=SMP[name];s.playbackRate.value=rate||1;g.gain.value=gain??1;s.connect(g);g.connect(master);s.start(t);return true}
+function sfxPlay(name,gain,rate){if(!actx||(quiet&&name!=='click'))return false;if(!SMP[name]){ensureSample(name);return false}const t=actx.currentTime,s=actx.createBufferSource(),g=actx.createGain();s.buffer=SMP[name];s.playbackRate.value=rate||1;g.gain.value=(gain??1)*(name==='click'?1:(S().sfxVol??1));s.connect(g);g.connect(master);s.start(t);return true}
 /* musique : présente dans les menus, très discrète en course ; réglage « Musique » */
-function musicTick(st){if(!musicGain){if(actx&&S().music!==false)ensureSample('music');return}const on=S().music!==false;const v=!on?0:(st==='play'||st==='count')?.07:st==='ad'?0:.3;musicGain.gain.setTargetAtTime(v,actx.currentTime,.6)}
+function musicTick(st){if(!musicGain){if(actx&&S().music!==false)ensureSample('music');return}const on=S().music!==false;const v=(!on?0:(st==='play'||st==='count')?.07:st==='ad'?0:.3)*(S().musicVol??1);musicGain.gain.setTargetAtTime(v,actx.currentTime,.6)}
 const sfx={thud(p){p=p||1;if(!sfxPlay('crash',Math.min(1,.95*p))){burst('lowpass',180,1,.5,.9*p);ding(70,.45)}},
   whoosh(){if(!sfxPlay(Math.random()<.5?'whoosh':'whoosh2',.55,.9+Math.random()*.2))burst('bandpass',500,1.2,.45,.5,2400)},
   splash(p){p=p||1;if(!sfxPlay(p>1?'splashL':'splashS',Math.min(1,.7*p),.9+Math.random()*.2))burst('bandpass',1300,.7,.6,.6*p,500)},
@@ -176,7 +176,7 @@ function wind(s01,air){if(!actx||!AUD.wind)return;const t=actx.currentTime,s=cla
   AUD.wind.gn.gain.setTargetAtTime(g,t,.08);AUD.wind.fl.frequency.setTargetAtTime(260+s*1500,t,.1)}
 
 /* flash de frôlement (wingsuit près d'un sapin / du sol, slide parfait) */
-function nearMissFx(){const el=document.getElementById('nmFlash');if(!el)return;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(typeof camShake==='function')camShake(.18)}
+function nearMissFx(){const el=document.getElementById('nmFlash');if(!el||S().flash===false){if(typeof camShake==='function')camShake(.18);return}el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(typeof camShake==='function')camShake(.18)}
 
 /* fantômes (multi, record) : un seul matériau transparent partagé par fantôme, teinté de sa couleur (moins d'appels GPU) */
 function ghostify(obj,color,op){const m=new THREE.MeshLambertMaterial({color:color||0x8fd3ff,transparent:true,opacity:op||.42,depthWrite:false});obj.traverse(n=>{if(n.isMesh||n.isInstancedMesh){if(!n.isSprite)n.material=m}n.castShadow=false});obj.userData.ghostMat=m;return obj}
