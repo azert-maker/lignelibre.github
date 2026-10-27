@@ -22,7 +22,9 @@ function setHud(d,dt){if(d&&d.kmh!=null)hudKmh=d.kmh;if(cur&&d&&d.kmh!=null)vigT
   E.score.textContent=fmt(cur.stats.score*(run&&run.use.x15?1.5:1));E.mult.textContent=d.mult||'';E.speed.textContent=Math.round(d.kmh);
   E.vmax.textContent='max '+Math.round(cur.stats.vmax);E.arc.style.strokeDasharray=(66.7*clamp(d.kmh/cur.vScale,0,1)).toFixed(2)+' 100';
   E.time.textContent=fmtT(runT+(run?run.pen:0));const pg=cur.prog?cur.prog():'';E.prog.hidden=!pg;if(pg)E.prog.innerHTML=pg;
-  if(cur.hudUpdate)cur.hudUpdate(d);goalProgress();if(run&&run.multi)paintMp()}
+  if(cur.hudUpdate)cur.hudUpdate(d);goalProgress();if(run&&run.multi)paintMp();
+  /* record personnel battu en direct (monde libre) : annonce une seule fois, sans interrompre */
+  if(run&&!run.recAnn&&curCfg.mode==='free'&&state==='play'){const rec=profile.records[curCfg.sport+'|free']||0,sc=cur.stats.score*(run.use.x15?1.5:1);if(rec>0&&sc>rec){run.recAnn=true;toast('NOUVEAU RECORD · '+fmt(sc),true);feed('Record battu ('+fmt(rec)+')');sfxPlay('finish',.35,1.15);nearMissFx()}}}
 function standings(){const me={me:true,n:profile.look.name,c:profile.look.accent,sc:cur?cur.stats.score:0,cp:run?run.cp:0,ft:run&&run.finished?run.final:0,dnf:run&&run.dnf&&!run.finished};
   const list=[me];for(const p of roomPeers){if(p.me)continue;const s=p.st||{};if(s.st==='lobby'||!s.sp||s.sp!==curCfg.sport)continue;
     list.push({me:false,n:String(s.n||'Rider').slice(0,16),c:((s.k||{}).a>>>0)&0xffffff,sc:+s.sc||0,cp:+s.cp||0,ft:+s.ft||0,dnf:!!s.dnf})}

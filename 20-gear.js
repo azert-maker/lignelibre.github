@@ -93,7 +93,7 @@ function buildHuman(look){
   const g=new THREE.Group();const L=look;const lo=S().quality==='eco';const seg=lo?6:10;
   const mS=new THREE.MeshLambertMaterial({color:L.suit,map:TEX.fabric}),mT=new THREE.MeshLambertMaterial({color:L.accent,map:TEX.fabric}),
     mV=new THREE.MeshPhongMaterial({color:0x0b0e11,shininess:110,specular:0x8899aa}),mK=new THREE.MeshLambertMaterial({color:L.skin}),
-    mSole=new THREE.MeshLambertMaterial({color:0xe9e6dc}),mG=new THREE.MeshLambertMaterial({color:0x1b2026}),mPad=new THREE.MeshLambertMaterial({color:new THREE.Color(L.suit).multiplyScalar(.55)});
+    mSole=new THREE.MeshLambertMaterial({color:0xe9e6dc}),mG=new THREE.MeshLambertMaterial({color:0x1b2026}),mShoe=new THREE.MeshLambertMaterial({color:{trail:0x2a3038,grip:0xff6a1f,light:0x39e07a}[(L.gear&&L.gear.shoe)||'trail']||0x2a3038}),mPad=new THREE.MeshLambertMaterial({color:new THREE.Color(L.suit).multiplyScalar(.55)});
   const hid=(L.gear&&L.gear.helmet)||'full';const mH=hid==='carbon'?new THREE.MeshPhongMaterial({color:0xffffff,map:TEX.carbon,shininess:90,specular:0x8899aa}):new THREE.MeshPhongMaterial({color:L.helmet,shininess:50,specular:0x444444});
   const cyl=(r1,r2,h,m,s)=>{const ge=new THREE.CylinderGeometry(r1,r2,h,s||seg);ge.translate(0,-h/2,0);return new THREE.Mesh(ge,m)};
   const ball=(r,m)=>new THREE.Mesh(new THREE.SphereGeometry(r,seg,Math.max(4,seg-3)),m);
@@ -128,7 +128,7 @@ function buildHuman(look){
   const legs=[];
   for(const side of [-1,1]){const th=grp(pelvis,0,-.05,side*.1,'upperLeg');th.add(cyl(.105,.074,.44,mS));const pad=ball(.07,mPad);pad.position.set(.025,-.44,0);pad.scale.set(.9,1,1);th.add(pad);
     const sh=grp(th,0,-.44,0,'lowerLeg');sh.add(cyl(.074,.056,.42,mS));const bootTop=cyl(.068,.072,.12,mG);bootTop.position.y=-.3;sh.add(bootTop);
-    const ft=grp(sh,0,-.43,0,'foot');const shoe=new THREE.Mesh(new THREE.BoxGeometry(.28,.08,.12),mG);shoe.position.set(.05,0,0);ft.add(shoe);
+    const ft=grp(sh,0,-.43,0,'foot');const shoe=new THREE.Mesh(new THREE.BoxGeometry(.28,.08,.12),mShoe);shoe.position.set(.05,0,0);ft.add(shoe);
     const sole=new THREE.Mesh(new THREE.BoxGeometry(.29,.025,.125),mSole);sole.position.set(.05,-.045,0);ft.add(sole);const strap=new THREE.Mesh(new THREE.BoxGeometry(.05,.085,.13),mT);strap.position.set(.02,.005,0);ft.add(strap);
     legs.push({th,sh,ft,side})}
   const P={};for(const k of POSE_KEYS)P[k]=0;P.hd=0;P.stance=1;let hdSide=1,lastT=-1e9,imp=0,gA=0,gPh=0,gK=0;/* gA/gPh : cycle de jambes (course, pédalage) ; gK = 0 course, 1 pédalage */
@@ -201,8 +201,8 @@ function buildLongboard(look){
   const human=buildHuman(L);human.position.y=deck.position.y+.02;g.add(human);g.human=human;g.len=len;return g}
 
 /* look compact pour le réseau (≤ 300 octets) */
-function packLook(L){return {n:String(L.name||'Rider').slice(0,16),s:L.skin,u:L.suit,a:L.accent,h:L.helmet,w1:L.wing1,w2:L.wing2,pt:L.pattern,d:L.deck,wh:L.wheel,f:L.fcol,b:L.boardCol,g:L.gear}}
+function packLook(L){return {n:String(L.name||'Rider').slice(0,16),s:L.skin,u:L.suit,a:L.accent,h:L.helmet,w1:L.wing1,w2:L.wing2,pt:L.pattern,d:L.deck,wh:L.wheel,b:L.boardCol,bx:L.bmxCol,mc:L.motoCol,g:L.gear}}
 function unpackLook(k){k=k||{};const num=(v,d)=>Number.isFinite(v)?v>>>0&0xffffff:d;const D=PROFILE_DEFAULT.look;const gr=k.g&&typeof k.g==='object'?k.g:{};
   const gear={};for(const s of Object.keys(GEAR))gear[s]=GEAR[s].some(x=>x.id===gr[s])?gr[s]:D.gear[s];
   return {name:String(k.n||'Rider').slice(0,16),skin:num(k.s,D.skin),suit:num(k.u,D.suit),accent:num(k.a,D.accent),helmet:num(k.h,D.helmet),wing1:num(k.w1,D.wing1),wing2:num(k.w2,D.wing2),
-    pattern:clamp(k.pt|0,0,3),deck:num(k.d,D.deck),wheel:num(k.wh,D.wheel),fcol:num(k.f,D.fcol),boardCol:num(k.b,D.boardCol),gear}}
+    pattern:clamp(k.pt|0,0,3),deck:num(k.d,D.deck),wheel:num(k.wh,D.wheel),boardCol:num(k.b,D.boardCol),bmxCol:num(k.bx,D.bmxCol),motoCol:num(k.mc,D.motoCol),gear}}

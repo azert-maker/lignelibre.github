@@ -20,7 +20,15 @@ const DAILY_POOL=[
   {id:'lb_slide',sport:'longboard',mode:'free',label:'Downhill libre : 12 s de slide cumulées',check:st=>(st.slideTime||0)>=12,reward:120},
   {id:'lb_score',sport:'longboard',mode:'free',label:'Downhill libre : fais 4 000 points',check:(st,r,m,sc)=>sc>=4000,reward:100},
   {id:'any_medal',sport:'*',mode:'course',label:'N\'importe quel parcours : décroche une médaille',check:(st,r,m)=>m!=='n',reward:150},
-  {id:'sb_airs',sport:'snowboard',mode:'free',label:'Snowboard freeride : enchaîne 5 sauts',check:st=>(st.airs||0)>=5,reward:110}
+  {id:'sb_airs',sport:'snowboard',mode:'free',label:'Snowboard freeride : enchaîne 5 sauts',check:st=>(st.airs||0)>=5,reward:110},
+  {id:'bx_tricks',sport:'bmx',mode:'free',label:'BMX jam : réussis 8 figures',check:st=>(st.tricks||0)>=8,reward:120},
+  {id:'bx_line',sport:'bmx',mode:'course',label:'BMX : termine une ligne chrono',check:(st,r)=>!!r.finished,reward:110},
+  {id:'mx_big',sport:'motocross',mode:'free',label:'Motocross : pose 2 big airs',check:st=>(st.bigAir||0)>=2,reward:130},
+  {id:'mx_race',sport:'motocross',mode:'course',label:'Motocross : termine une course',check:(st,r)=>!!r.finished,reward:110},
+  {id:'wk_w2w',sport:'wakeboard',mode:'free',label:'Wakeboard : 5 wake to wake',check:st=>(st.w2w||0)>=5,reward:120},
+  {id:'wk_slalom',sport:'wakeboard',mode:'course',label:'Wakeboard : slalom sans bouée manquée',check:(st,r)=>!!r.finished&&!st.pen,reward:140},
+  {id:'pk_flow',sport:'parkour',mode:'free',label:'Parkour : 12 s de flow continu',check:st=>(st.flowMax||0)>=12,reward:120},
+  {id:'pk_race',sport:'parkour',mode:'course',label:'Parkour : termine la course des toits',check:(st,r)=>!!r.finished,reward:110}
 ].filter(c=>c.sport==='*'||MODES[c.sport]);
 function dailyChallenge(){const c=DAILY_POOL[strSeed('daily-'+dayKey())%DAILY_POOL.length];return Object.assign({},c,{done:profile.dailyDone===dayKey()})}
 const dailyMatches=(c,cfg)=>(c.sport==='*'||c.sport===cfg.sport)&&c.mode===cfg.mode;
@@ -32,12 +40,16 @@ function pickSessionGoal(cfg){
   if(course){const n=Math.min(3,Math.max(1,(cfg.len|0)-1));return {label:'Passe '+n+' point'+(n>1?'s':'')+' de passage',key:'cp',target:n,done:false}}
   const G={wingsuit:alt?{label:'Passe 5 anneaux',key:'rings',target:5}:{label:'Fais 2 000 points',key:'score',target:2000},
     longboard:alt?{label:'Cumule 6 s de slide',key:'slideTime',target:6}:{label:'Fais 2 000 points',key:'score',target:2000},
-    snowboard:[{label:'Réussis 3 sauts',key:'airs',target:3},{label:'Fais 1 500 points',key:'score',target:1500},{label:'Réussis 3 figures avec grab',key:'grabs',target:3}][profile.runs%3]}[cfg.sport]||{label:'Survis 45 s',key:'time',target:45};
+    snowboard:[{label:'Réussis 3 sauts',key:'airs',target:3},{label:'Fais 1 500 points',key:'score',target:1500},{label:'Réussis 3 figures avec grab',key:'grabs',target:3}][profile.runs%3],
+    bmx:[{label:'Réussis 5 figures',key:'tricks',target:5},{label:'Fais 3 000 points',key:'score',target:3000},{label:'Tiens un manual de 4 s',key:'maxManual',target:4}][profile.runs%3],
+    motocross:[{label:'Fais 4 sauts',key:'airs',target:4},{label:'Pose un big air',key:'bigAir',target:1},{label:'Fais 2 500 points',key:'score',target:2500}][profile.runs%3],
+    wakeboard:[{label:'Fais 3 wake to wake',key:'w2w',target:3},{label:'Fais 4 sauts de sillage',key:'wakeAirs',target:4},{label:'Fais 3 000 points',key:'score',target:3000}][profile.runs%3],
+    parkour:[{label:'Fais 3 sauts de toit',key:'gaps',target:3},{label:'Fais 3 vaults',key:'vaults',target:3},{label:'Tiens 8 s de flow',key:'flowMax',target:8}][profile.runs%3]}[cfg.sport]||{label:'Survis 45 s',key:'time',target:45};
   return Object.assign({done:false},G)}
 function goalValue(g){if(!g||!cur)return 0;if(g.key==='cp')return run?run.cp:0;return +cur.stats[g.key]||0}
 function goalProgress(){const el=$('#hGoal');if(!el)return;const g=run&&run.goal;if(!g){el.hidden=true;return}el.hidden=false;
   const v=goalValue(g);if(!g.done&&v>=g.target&&state==='play'){g.done=true;cur.stats.score+=25;feed('Objectif atteint · +25');ding(880,.3);(run.engageBits=run.engageBits||[]).push('Objectif de session : '+g.label)}
-  const shown=g.key==='time'||g.key==='slideTime'||g.key==='flight'?Math.floor(Math.min(v,g.target))+' / '+g.target+' s':fmt(Math.min(v,g.target))+' / '+fmt(g.target);
+  const shown=['time','slideTime','flight','maxManual','flowMax'].includes(g.key)?Math.floor(Math.min(v,g.target))+' / '+g.target+' s':fmt(Math.min(v,g.target))+' / '+fmt(g.target);
   el.classList.toggle('done',g.done);el.innerHTML=(g.done?'✓ ':'Objectif · ')+esc(g.label)+(g.done?'':' <b>'+shown+'</b>')}
 
 /* ---------- bonus de fin de partie (appelé par finalizeRun) ---------- */
@@ -66,7 +78,18 @@ function paintHomeEngage(){const el=$('#homeEngage');if(!el)return;const dc=dail
   const f=$('#heFirst');if(f)f.onclick=()=>{setup=loadSetup('longboard');setup.mode='free';setup.params.slope=0;go('setup')}}
 
 /* ---------- tutoriel léger (3 conseils max sur la vie du profil) ---------- */
-function maybeTutorial(){if((profile.tutorialStep|0)>=3)return;const i=profile.tutorialStep|0;
+/* tutoriel pratique par sport : 3 conseils pendant les 2 premières parties de chaque sport, non bloquants
+   (désactivables dans Réglages ; les commandes restent affichées en bas à gauche et dans la Pause) */
+const SPORT_TIPS={
+  wingsuit:['↓ pour plonger et prendre de la vitesse, ↑ pour remonter','Passe dans les anneaux : le centre rapporte plus','Double appui ← ou → : tonneau'],
+  longboard:['Lis les notes de virage : la vitesse conseillée est affichée','Espace en virage = slide : garde-le jusqu\'à la sortie','↓ = tuck : plus aéro, plus vite'],
+  bmx:['↑ pédale. Maintiens Espace, relâche sur la lèvre = gros saut','En l\'air : ← → rotations, ↑ ↓ flips, Shift = tailwhip, Espace = barspin','Au sol : Shift maintenu = manual, équilibre avec ↑ ↓'],
+  motocross:['↑ gaz. Le panneau jaune donne la vitesse pour franchir le saut','En l\'air : relâche les gaz puis ↓ cabre, ↑ plonge. Atterris parallèle à la pente','← → en l\'air = whip ; Shift + direction = figure freestyle'],
+  wakeboard:['← → : mets la carre pour traverser le sillage','Maintiens Espace, relâche en montant sur la crête = pop','En l\'air : ← → rotations, ↑ Tantrum, ↓ Backroll, Shift grab'],
+  parkour:['↑ cours, Espace saute au bord du toit','Fonce sur un obstacle jaune : vault automatique (Espace juste avant = kong)','Panneaux cyan : arrive en biais pour un wallrun, Espace pour walljump. ↓ = glissade / roulade']};
+function maybeTutorial(){const sp=curCfg&&curCfg.sport,stips=SPORT_TIPS[sp];profile.tips=profile.tips&&typeof profile.tips==='object'?profile.tips:{};const n=profile.tips[sp]|0;
+  if(stips&&n<2&&S().tips!==false){profile.tips[sp]=n+1;saveProfile();stips.forEach((t,i)=>setTimeout(()=>{if(state==='play'&&curCfg.sport===sp){E.toast.classList.add('tip');toast(t,true);setTimeout(()=>E.toast.classList.remove('tip'),1800)}},1400+i*5200));return}
+  if((profile.tutorialStep|0)>=3)return;const i=profile.tutorialStep|0;
   const tips=isTouch?['Dirige avec les boutons ◀ ▶','Le gros bouton rond = action du sport','II en haut à gauche = pause']:['Oriente avec ← → (ou A / D)','Espace = action du sport (slide, pomper, frein…)','C change de caméra · Échap met en pause'];
   setTimeout(()=>{if(state!=='play')return;const t=E.toast;t.classList.add('tip');toast(tips[i],true);setTimeout(()=>t.classList.remove('tip'),1200)},1300);
   profile.tutorialStep=i+1;saveProfile()}

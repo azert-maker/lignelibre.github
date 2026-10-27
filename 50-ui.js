@@ -42,8 +42,11 @@ $$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 function hideMenus(){SCREENS.forEach(s=>$('#'+s).hidden=true)}
 
 /* ---------- accueil ---------- */
-function paintHome(){paintHomeEngage();const L=profile.look;$('#profileChip').innerHTML=`<span class="av" style="background:${hexCss(L.accent)}"></span><span><b>${esc(L.name)}</b><small>${fmt(profile.coins)} pièces · ${medalCount()} médailles</small></span>`;
+function paintHome(){paintHomeEngage();paintSportStrip();const L=profile.look;$('#profileChip').innerHTML=`<span class="av" style="background:${hexCss(L.accent)}"></span><span><b>${esc(L.name)}</b><small>${fmt(profile.coins)} pièces · ${medalCount()} médailles</small></span>`;
   Net.onReady(k=>{$('#netState').textContent=k==='claude'?'salons en direct disponibles':k==='ws'?'serveur connecté':'nécessite Claude ou un serveur'})}
+/* bandeau des 7 sports sur l'accueil : accès direct aux réglages de partie */
+function paintSportStrip(){const el=$('#sportStrip');if(!el)return;el.innerHTML=SPORT_IDS.map(id=>{const s=SPORTS[id],lv=lvlOf((profile.xp||{})[id]||0).l;return `<button class="sstrip" data-s="${id}" style="--c:${s.c}"><i></i><b>${s.name}</b><small>niv. ${lv}</small></button>`}).join('');
+  $$('#sportStrip .sstrip').forEach(b=>b.onclick=()=>{setup=loadSetup(b.dataset.s);go('setup')})}
 function medalCount(){let n=0;for(const s in profile.medals){const m=profile.medals[s];n+=(m.g||0)+(m.s||0)+(m.b||0)}return n}
 
 /* ---------- choix du sport ---------- */
@@ -51,12 +54,14 @@ let hostMode=false;
 let playSel=null,playHover=null;
 function paintPlay(){hostMode=false;playSel=playSel||profile.last.sport||'wingsuit';
   $('#playBody').innerHTML=`<p class="note">Choisis un sport : l'aperçu en direct joue derrière (pilote automatique, vrai moteur du jeu).</p><div class="sport-cards">${SPORT_IDS.map(id=>{const s=SPORTS[id],b=profile.records[id+'|free'],sel=id===playSel;
+  const lv=lvlOf((profile.xp||{})[id]||0),pct=Math.round(lv.x/lv.need*100);
   return `<div class="scard" role="button" tabindex="0" data-sport="${id}" style="--c:${s.c};${sel?'border-color:var(--c)':''}" aria-pressed="${sel}"><span class="place">${s.place}</span><h3>${s.name}</h3><p>${s.desc}</p><span class="best">${s.facts.join(' · ')}${b?' · record '+fmt(b):''}</span>
-    ${sel?`<span class="row" style="margin-top:6px"><button class="btn small primary" data-pick="${id}">Choisir</button><a class="btn small" href="https://www.youtube.com/results?search_query=${encodeURIComponent(s.yt)}" target="_blank" rel="noopener">Vraie vidéo ↗</a></span>`:''}</div>`}).join('')}</div>
+    <span class="slv"><b>Niv. ${lv.l}</b><i><em style="width:${pct}%"></em></i></span>
+    ${sel?`<span class="row" style="margin-top:6px"><button class="btn small primary" data-pick="${id}" data-mode="course">${s.modes.course}</button><button class="btn small primary" data-pick="${id}" data-mode="free">${s.modes.free}</button><a class="btn small" href="https://www.youtube.com/results?search_query=${encodeURIComponent(s.yt)}" target="_blank" rel="noopener">Vraie vidéo ↗</a></span>`:''}</div>`}).join('')}</div>
   <p class="note">Astuce : le « parcours du jour » est le même pour tout le monde. Compare tes temps avec tes amis.</p>`;
   previewSport(playSel);showDemoTag();
   $$('#playBody .scard').forEach(c=>{const id=c.dataset.sport;
-    c.onclick=e=>{if(e.target.closest('a'))return;if(e.target.closest('[data-pick]')){setup=loadSetup(id);go('setup');return}if(playSel===id&&isTouch){return}playSel=id;paintPlay()};
+    c.onclick=e=>{if(e.target.closest('a'))return;const pk=e.target.closest('[data-pick]');if(pk){setup=loadSetup(id);if(pk.dataset.mode)setup.mode=pk.dataset.mode;go('setup');return}if(playSel===id&&isTouch){return}playSel=id;paintPlay()};
     c.onkeydown=e=>{if(e.key==='Enter'){setup=loadSetup(id);go('setup')}};
     c.onmouseenter=()=>{if(isTouch)return;clearTimeout(playHover);playHover=setTimeout(()=>{if(screen==='play'&&playSel!==id){playSel=id;paintPlay()}},260)}})}
 function showDemoTag(){const t=$('#demoTag');const id=previewId;t.hidden=!(screen==='play'&&id);if(id)t.innerHTML='<i></i>Aperçu en direct · '+SPORTS[id].name}
@@ -115,6 +120,10 @@ function garageObj(){if(gObj){gScene.remove(gObj);disposeTree(gObj)}const L=prof
   if(gTab==='corps'){o=buildHuman(L);hu=o;ps={crouch:.15,spread:.25,twist:.2,look:.2};ty=.95;d=4.4}
   else if(gTab==='equip'){o=new THREE.Group();const f=buildFlyer(L);f.rotation.x=1.05;f.position.y=1.1;f.scale.setScalar(1.25);o.add(f);o.userData.fly=f;ty=1.1;d=4.8}
   else if(gTab==='board'||gTab==='teintes'){o=buildLongboard(L);hu=o.human;ps={crouch:.55,lean:.6,twist:.8,back:.4};ty=.8;d=4.6}
+  else if(gTab==='velo'){o=buildBmx(L);hu=o.human;ps={crouch:.35,lean:.55,back:.85,spread:.12,stance:0};ty=.75;d=4.2}
+  else if(gTab==='moto'){o=buildMoto(L);hu=o.human;ps={crouch:.45,lean:.6,back:.9,spread:.18,stance:0};ty=.95;d=5.6}
+  else if(gTab==='wake'){o=buildWake(L);hu=o.human;ps={crouch:.4,lean:-.15,twist:1.15,back:.85,spread:.15,side:.35};ty=.85;d=4.4}
+  else if(gTab==='pk'){o=buildHuman(L);hu=o;ps={crouch:.25,lean:.35,spread:.15,stance:0};ty=.95;d=4.2}
   if(hu){hu.snapPose?hu.snapPose(ps):hu.pose(ps)}o.userData.hu=hu;o.userData.ps=ps;
   gObj=o;gScene.add(o);gScene.userData.ring.material.color.set(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#8fd3ff');
   gCam.userData={ty,d}}
@@ -124,7 +133,7 @@ function garageFrame(dt){if(!gObj)return;if(gAuto&&!gDrag)gRot+=dt*.35;gObj.rota
   const w=innerWidth,h=innerHeight;gCam.aspect=w/h;if(w>700){gCam.setViewOffset(w,h,-Math.min(580,w)/2,0,w,h)}else{gCam.setViewOffset(w,h,0,h*.29,w,h)}gCam.updateProjectionMatrix()}
 renderer.domElement.addEventListener('pointerdown',e=>{if(state!=='garage')return;gDrag={x:e.clientX,r:gRot};gAuto=false});
 addEventListener('pointermove',e=>{if(gDrag)gRot=gDrag.r+(e.clientX-gDrag.x)*.01});addEventListener('pointerup',()=>{gDrag=null});
-const GTABS=[['corps','Corps'],['equip','Équipement'],['board','Board / Ski'],['teintes','Teintes']];
+const GTABS=[['corps','Corps'],['equip','Wingsuit'],['board','Downhill'],['velo','BMX'],['moto','Moto'],['wake','Wake'],['pk','Parkour'],['teintes','Teintes']];
 function statBars(st){return st?`<div class="stbars">${Object.entries(st).map(([k,v])=>`<div class="stb"><span>${k}</span><i style="--v:${Math.round(v*100)}%"></i></div>`).join('')}</div>`:''}
 function itemList(slot){const cur=profile.look.gear[slot];return `<div class="items">${GEAR[slot].map(g=>{const un=gearUnlocked(slot,g.id),it=SHOP.find(s=>s.id===g.id);
   return `<button class="item" data-slot="${slot}" data-id="${g.id}" aria-pressed="${cur===g.id}"><h4>${g.name}</h4><span class="tagr ${un?'':'lock'}">${un?(cur===g.id?'équipé':'disponible'):('🔒 '+it.ads+' pub'+(it.ads>1?'s':'')+' ou '+fmt(it.price)+' pièces'+(LVL_UNLOCK[g.id]?' ou '+lvlLabel(g.id):''))}</span><p>${g.desc}</p>${statBars(g.st)}</button>`}).join('')}</div>`}
@@ -138,10 +147,15 @@ function paintGarage(){$('#garageTabs').innerHTML=GTABS.map(([k,l])=>`<button cl
     <div class="grp"><span class="lbl">Casque</span>${itemList('helmet')}</div>`;
   else if(gTab==='equip')h=`<div class="grp"><span class="lbl">Voilure wingsuit</span>${itemList('wing')}</div><div class="grp"><span class="lbl">Motif</span>${chipRow('pattern',['Uni','Bras / jambes','Dégradé','Rayures'],L.pattern)}</div>`;
   else if(gTab==='board')h=`<div class="grp"><span class="lbl">Planche <b>downhill</b></span>${itemList('board')}</div><div class="grp"><span class="lbl">Roues</span>${itemList('wheel')}</div>`;
+  else if(gTab==='velo')h=`<div class="grp"><span class="lbl">Cadre BMX <b>change la physique</b></span>${itemList('bmx')}</div><div class="grp"><span class="lbl">Couleur du cadre <b>cosmétique</b></span>${swatches('bmxCol',PALETTE)}</div><div class="grp"><span class="lbl">Jantes</span>${swatches('wheel',PALETTE)}</div>`;
+  else if(gTab==='moto')h=`<div class="grp"><span class="lbl">Moto <b>change la physique</b></span>${itemList('moto')}</div><div class="grp"><span class="lbl">Plastiques <b>cosmétique</b></span>${swatches('motoCol',PALETTE)}</div>`;
+  else if(gTab==='wake')h=`<div class="grp"><span class="lbl">Wakeboard <b>change la physique</b></span>${itemList('wboard')}</div><div class="grp"><span class="lbl">Couleur de la planche <b>cosmétique</b></span>${swatches('boardCol',PALETTE)}</div>`;
+  else if(gTab==='pk')h=`<div class="grp"><span class="lbl">Chaussures <b>vitesse et détente</b></span>${itemList('shoe')}</div><p class="note">La couleur des chaussures suit le modèle choisi. Tenue et casque : onglets Corps et Teintes.</p>`;
   else h=`<div class="grp"><span class="lbl">Combinaison</span>${swatches('suit',PALETTE)}</div><div class="grp"><span class="lbl">Haut / accent</span>${swatches('accent',PALETTE)}</div>
     <div class="grp"><span class="lbl">Casque</span>${swatches('helmet',PALETTE)}</div>
     <div class="grp"><span class="lbl">Wingsuit principale</span>${swatches('wing1',PALETTE)}</div><div class="grp"><span class="lbl">Wingsuit secondaire</span>${swatches('wing2',PALETTE)}</div>
-    <div class="grp"><span class="lbl">Deck <b>aussi le snowboard</b></span>${swatches('deck',PALETTE)}</div><div class="grp"><span class="lbl">Roues</span>${swatches('wheel',PALETTE)}</div>`;
+    <div class="grp"><span class="lbl">Deck <b>aussi le snowboard</b></span>${swatches('deck',PALETTE)}</div><div class="grp"><span class="lbl">Roues <b>aussi les jantes BMX</b></span>${swatches('wheel',PALETTE)}</div>
+    <div class="grp"><span class="lbl">Cadre BMX</span>${swatches('bmxCol',PALETTE)}</div><div class="grp"><span class="lbl">Plastiques moto</span>${swatches('motoCol',PALETTE)}</div><div class="grp"><span class="lbl">Wakeboard</span>${swatches('boardCol',PALETTE)}</div>`;
   $('#garageBody').innerHTML=h;
   const n=$('#gName');if(n)n.oninput=()=>{L.name=n.value.replace(/[\u0000-\u001f]/g,'').slice(0,16)||'Rider';saveProfile()};
   $$('#garageBody .swatches').forEach(w=>w.onclick=e=>{const b=e.target.closest('.sw');if(!b)return;if(b.dataset.lock){offerUnlock('neon');return}L[w.dataset.key]=+b.dataset.c;saveProfile();paintGarage()});
@@ -200,20 +214,22 @@ function paintSettings(){const s=S();
   <div class="grp"><span class="lbl">Wingsuit</span>${chipRow('invert',['↑ = plonger','↑ = cabrer (avion)'],s.invert?1:0)}</div>
   <div class="grp"><span class="lbl">Caméra par défaut</span>${chipRow('cam',['Poursuite','Casque','Drone'],s.cam)}</div>
   <div class="grp"><span class="lbl">Qualité auto <b>passe en Éco si &lt; 40 i/s</b></span>${chipRow('autoQ',['Non','Oui'],s.autoQ!==false?1:0)}</div>
-  <div class="grp"><span class="lbl">Figures snowboard <b>assisté = réception recalée, plus de tolérance</b></span>${chipRow('sbAssist',['Pro','Assisté'],s.sbAssist!==false?1:0)}</div>
+  <div class="grp"><span class="lbl">Figures (tous les sports) <b>assisté = fin de rotation et réception aidées</b></span>${chipRow('sbAssist',['Pro','Assisté'],s.sbAssist!==false?1:0)}</div>
   <div class="grp"><span class="lbl">Vitesse de rotation en l'air</span>${chipRow('spinSens',['Lente','Normale','Rapide'],[.8,1,1.25].indexOf(s.spinSens||1))}</div>
+  <div class="grp"><span class="lbl">Astuces en jeu <b>2 premières parties de chaque sport</b></span>${chipRow('tips',['Non','Oui'],s.tips===false?0:1)}</div>
+  <div class="grp"><span class="lbl">Ralentis sur les moments forts</span>${chipRow('slowmo',['Non','Oui'],s.slowmo===false?0:1)}</div>
   <div class="grp"><span class="lbl">Fantôme de ton record</span>${chipRow('ghost',['Non','Oui'],s.ghost!==false?1:0)}</div>
   <div class="grp"><span class="lbl">Musique (menus, discrète en course)</span>${chipRow('music',['Non','Oui'],s.music!==false?1:0)}</div>
   <div class="grp"><span class="lbl">Vibrations (mobile)</span>${chipRow('haptics',['Non','Oui'],s.haptics?1:0)}</div>
   <div class="grp"><span class="lbl">Pubs de démonstration</span>${chipRow('ads',['Désactivées','Activées'],s.adsDemo?1:0)}
     <p class="note">Régie actuelle : <b>${ADS_CONFIG.provider}</b>. Pour brancher une vraie régie, change <code>ADS_CONFIG.provider</code> en haut du script publicités.</p></div>
   <div class="grp"><span class="lbl">Commandes</span><div class="ctl-list">
-    <kbd>← → ↑ ↓</kbd><span>diriger (ou WASD / ZQSD)</span><kbd>Espace</kbd><span>action (slide, pomper)</span><kbd>C</kbd><span>changer de caméra</span><kbd>R</kbd><span>rejouer</span><kbd>Échap</kbd><span>pause / retour</span>
-    <kbd>Manette</kbd><span>stick gauche, A = action, Y = caméra, Start = pause</span></div></div>
+    <kbd>← → ↑ ↓</kbd><span>diriger (ou WASD / ZQSD)</span><kbd>Espace</kbd><span>action du sport : saut, pop, slide…</span><kbd>Shift / F</kbd><span>figure ou grab (selon le sport)</span><kbd>C</kbd><span>changer de caméra</span><kbd>Q / E · V</kbd><span>regarder autour · derrière</span><kbd>R</kbd><span>rejouer</span><kbd>Échap</kbd><span>pause / retour</span><kbd>M</kbd><span>couper le son</span>
+    <kbd>Manette</kbd><span>stick gauche, A = action, LT/RT = figure, stick droit = regarder, Y = caméra, X = rejouer, Start = pause</span></div><p class="note">Les commandes de chaque sport sont affichées en jeu (en bas à gauche) et dans le menu Pause.</p></div>
   ${paintAccountBlock()}
   <div class="grp"><span class="lbl">Données</span><div class="row"><button class="btn small" id="setReset">${resetArm?'Confirmer : tout effacer':'Réinitialiser la progression'}</button></div></div>`;
   $$('#settingsBody [data-row]').forEach(row=>row.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const v=+b.dataset.v,n=row.dataset.row;
-    if(n==='quality'){s.quality=['eco','normal','high'][v];resize();if(state==='menu')previewSport(previewId,previewW,true)}else if(n==='invert')s.invert=v===1;else if(n==='cam'){s.cam=v;setCam(v)}else if(n==='haptics')s.haptics=v===1;else if(n==='music')s.music=v===1;else if(n==='ghost')s.ghost=v===1;else if(n==='sbAssist')s.sbAssist=v===1;else if(n==='spinSens')s.spinSens=[.8,1,1.25][v];else if(n==='autoQ'){s.autoQ=v===1;AQ.done=false}else if(n==='ads')s.adsDemo=v===1;else if(n==='shake')s.shake=[0,.5,1][v];else if(n==='flash')s.flash=v===1;
+    if(n==='quality'){s.quality=['eco','normal','high'][v];resize();if(state==='menu')previewSport(previewId,previewW,true)}else if(n==='invert')s.invert=v===1;else if(n==='cam'){s.cam=v;setCam(v)}else if(n==='haptics')s.haptics=v===1;else if(n==='music')s.music=v===1;else if(n==='ghost')s.ghost=v===1;else if(n==='sbAssist')s.sbAssist=v===1;else if(n==='spinSens')s.spinSens=[.8,1,1.25][v];else if(n==='autoQ'){s.autoQ=v===1;AQ.done=false}else if(n==='ads')s.adsDemo=v===1;else if(n==='shake')s.shake=[0,.5,1][v];else if(n==='tips')s.tips=v===1;else if(n==='slowmo')s.slowmo=v===1;else if(n==='flash')s.flash=v===1;
     saveProfile();paintSettings()});
   const vol=$('#setVol');vol.oninput=()=>{setVolume(+vol.value);vol.previousElementSibling.querySelector('b').textContent=Math.round(vol.value*100)+' %'};
   for(const [id,k] of [['#setSfx','sfxVol'],['#setMus','musicVol']]){const r=$(id);r.oninput=()=>{s[k]=+r.value;saveProfile();r.previousElementSibling.querySelector('b').textContent=Math.round(r.value*100)+' %'}}
