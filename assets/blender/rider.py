@@ -139,18 +139,45 @@ hr = sphere('hair', 0.11, (-0.016, 0, 1.872), M['hair'], *((16, 10) if LO else (
 parts['hair'] = boolean(hr, box('hcut', (0.2, 0.3, 0.16), (0.16, 0, 1.79), M['hair']))
 parts['hair'] = boolean(parts['hair'], box('hcut2', (0.4, 0.4, 0.2), (0, 0, 1.69), M['hair']))
 
-# ---------------- casque intégral (BMX/MX) : coque creuse, mentonnière, ouverture, visière, masque ----------------
-shell = sphere('helmet_full', 0.156, (0.006, 0, 1.842), M['helmet'], *((20, 14) if LO else (30, 20)), scale=(1.12, 0.98, 1.12))
-shell = boolean(shell, sphere('inner', 0.136, (0.006, 0, 1.842), M['helmet'], *((14, 10) if LO else (20, 14)), scale=(1.08, 0.94, 1.12)))
-shell = boolean(shell, box('low', (0.6, 0.6, 0.3), (0, 0, 1.55), M['helmet']))
-shell = boolean(shell, box('port', (0.2, 0.15, 0.092), (0.15, 0, 1.832), M['helmet'], bevel=0.025, segs=3))
+# ---------------- casque intégral v2 (BMX/MX) ----------------
+# Coque lissée par anneaux (profil MX : dôme, nuque, mentonnière qui avance), épaisseur réelle (solidify),
+# ouverture du masque arrondie, bandes de couleur peintes sur la coque, visière cintrée, masque à écran bombé.
+HR_ = [  # z, avance du centre, demi-profondeur, demi-largeur
+    (1.688, 0.050, 0.140, 0.108), (1.715, 0.042, 0.156, 0.120), (1.755, 0.026, 0.160, 0.128), (1.80, 0.014, 0.158, 0.133),
+    (1.85, 0.008, 0.155, 0.135), (1.90, 0.004, 0.147, 0.131), (1.945, 0.0, 0.128, 0.116), (1.975, -0.004, 0.096, 0.088), (1.993, -0.006, 0.052, 0.048),
+]
+shell = loft('helmet_full', [{'c': (cx, 0, z), 'a': a, 'b': b} for z, cx, a, b in HR_], M['helmet'],
+             n=16 if LO else 22, caps=(False, True), cap_round=0.4)
+sol = shell.modifiers.new('sol', 'SOLIDIFY')
+sol.thickness = 0.014
+sol.offset = -1
+shell = bake_to_mesh(shell, 'helmet_full')
+port = box('port', (0.2, 0.172, 0.082), (0.2, 0, 1.836), M['helmet'], bevel=0.03, segs=3)
+shell = boolean(shell, port)
 parts['helmet_full'] = shell
-parts['helmet_full_peak'] = box('helmet_full_peak', (0.15, 0.2, 0.012), (0.18, 0, 1.96), M['accent'], bevel=0.005, rot=(0, math.radians(-14), 0))
-parts['helmet_full_stripe'] = box('helmet_full_stripe', (0.3, 0.035, 0.03), (-0.02, 0, 2.0), M['accent'], bevel=0.012)
-parts['helmet_full_chin'] = box('helmet_full_chin', (0.09, 0.15, 0.075), (0.145, 0, 1.728), M['helmet'], bevel=0.034, segs=4, rot=(0, math.radians(-18), 0))
-parts['helmet_full_vent'] = box('helmet_full_vent', (0.02, 0.07, 0.03), (0.19, 0, 1.722), M['detail'], bevel=0.008, rot=(0, math.radians(-18), 0))
-parts['goggle'] = box('goggle', (0.03, 0.19, 0.06), (0.145, 0, 1.835), M['visor'], bevel=0.014, segs=3)
-parts['goggle_strap'] = torus('goggle_strap', 0.152, 0.008, (0.0, 0, 1.84), M['accent2'], scale=(1.1, 0.99, 1))
+# décors projetés sur la coque (bords nets) : bande centrale, mentonnière peinte, grille d'aération
+def from_out(cz, th, y):
+    d = Vector((math.cos(th), 0, math.sin(th)))
+    return (Vector((0, y, cz)) + d * 0.45, -d)
+NS = 18 if LO else 34
+parts['helmet_full_stripe'] = surface_patch('helmet_full_stripe', shell, M['accent'],
+    [math.radians(24 + 185 * k / NS) for k in range(NS + 1)], [-0.021, 0, 0.021], lambda u, v: from_out(1.84, u, v))
+parts['helmet_full_chin'] = surface_patch('helmet_full_chin', shell, M['accent'],
+    [math.radians(-48 + 38 * k / 10) for k in range(11)], [-0.075 + 0.15 * k / 8 for k in range(9)], lambda u, v: from_out(1.80, u, v), offset=0.0035, max_dist=0.33)
+parts['helmet_full_vent'] = surface_patch('helmet_full_vent', shell, M['detail'],
+    [math.radians(-36 + 14 * k / 4) for k in range(5)], [-0.03 + 0.06 * k / 4 for k in range(5)], lambda u, v: from_out(1.80, u, v), offset=0.006, max_dist=0.33)
+# visière : plaque cintrée ancrée dans la coque au-dessus du masque
+peak = []
+for k in range(7):
+    t = k / 6
+    peak.append({'c': (0.085 + 0.15 * t, 0, 1.942 + 0.022 * t), 'a': 0.005, 'b': 0.084 + 0.016 * t})
+parts['helmet_full_peak'] = loft('helmet_full_peak', peak, M['accent'], n=10, fwd=(0, 0, 1), subsurf=0 if LO else 1)
+for s in (-1, 1):
+    parts[f'helmet_full_screw{s}'] = cylinder(f'helmet_full_screw{s}', 0.009, 0.008, (0.092, s * 0.092, 1.952), M['metal'], 10, rot=(math.pi / 2, 0, 0))
+# masque : cadre arrondi + écran bombé teinté + sangle
+parts['goggle_frame'] = box('goggle_frame', (0.04, 0.2, 0.072), (0.163, 0, 1.836), M['detail'], bevel=0.02, segs=3)
+parts['goggle'] = sphere('goggle', 1.0, (0.178, 0, 1.836), M['visor'], *((16, 10) if LO else (28, 16)), scale=(0.02, 0.086, 0.03))
+parts['goggle_strap'] = torus('goggle_strap', 0.152, 0.01, (0.004, 0, 1.842), M['accent2'], scale=(1.03, 0.9, 1), seg=24 if LO else 36, mseg=6)
 # casque bol (skate / downhill)
 op = sphere('helmet_open', 0.14, (0.0, 0, 1.862), M['helmet'], *((18, 10) if LO else (28, 16)), scale=(1.08, 0.98, 0.95))
 parts['helmet_open'] = boolean(op, box('lo2', (0.5, 0.5, 0.3), (0, 0, 1.70), M['helmet']))
@@ -259,7 +286,7 @@ groups = {
     'body': [k for k in parts if not k.startswith(('helmet', 'goggle', 'head', 'hair', 'mouth', 'nose', 'ear', 'eye', 'iris', 'pupil', 'brow'))],
     'face': ['head', 'mouth', 'nose'] + [k for k in parts if k.startswith(('ear', 'eye', 'iris', 'pupil', 'brow'))],
     'hair': ['hair'],
-    'helmet_full': [k for k in parts if k.startswith('helmet_full')] + ['goggle', 'goggle_strap'],
+    'helmet_full': [k for k in parts if k.startswith('helmet_full')] + ['goggle', 'goggle_frame', 'goggle_strap'],
     'helmet_open': [k for k in parts if k.startswith('helmet_open')],
 }
 
@@ -385,6 +412,8 @@ if '--render' in sys.argv and not LO:
     final['helmet_open'].hide_render = True
     render_setup((640, 800), 24)
     render(os.path.join(ASSETS, 'renders', 'rider_34.png'), (2.6, -1.9, 1.55), (0, 0, 1.0), 45)
+    render(os.path.join(ASSETS, 'renders', 'helmet_front.png'), (0.95, 0.0, 1.84), (0, 0, 1.83), 50)
+    render(os.path.join(ASSETS, 'renders', 'helmet_34.png'), (0.7, -0.6, 1.95), (0, 0, 1.83), 50)
     final['helmet_full'].hide_render = True
     render(os.path.join(ASSETS, 'renders', 'rider_face.png'), (0.75, -0.35, 1.84), (0, 0, 1.82), 50)
     final['helmet_full'].hide_render = False

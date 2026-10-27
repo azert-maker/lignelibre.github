@@ -1,6 +1,8 @@
 # État du projet · Ligne Libre
 
-Mis à jour : 27 octobre 2026 (version 0.17.0, vertical slice BMX, étape 1).
+Mis à jour : 27 octobre 2026 (version 0.18.0 : réceptions, chutes, casque intégral v2).
+
+Note d'audit : le « Skatepark BMX v2 » mentionné dans le dernier brief n'existe pas dans le dépôt (aucun commit, aucun code de béton à joints ni de lampadaires). L'environnement du skatepark reste à faire.
 
 Légende des statuts (utilisée dans tous les documents) :
 
@@ -42,6 +44,7 @@ Choisi parce que le rider est entièrement visible (pas de combinaison ni de vue
 | Un sport jouable de bout en bout | ✅ | course libre + parcours, combo, overdrive, fin de course, replay, fantôme |
 | Personnage 3D de qualité (Blender) | ✅ v1 | `assets/glb/rider.glb`, rendus `assets/renders/rider_*.jpg` ; rig 19 os, pondéré, 3 clips |
 | Équipement complet (Blender) | ✅ v1 | `assets/glb/bmx.glb` : cadre, fourche, cintre 2 pièces, 36 rayons par roue, plateau ajouré, chaîne, pegs, pédales à picots |
+| Réceptions qualifiées et chutes physiques | ✅ | `tests/land.js` 12/12 ; compression 6 à 11 cm selon la qualité, rider éjecté à 3-4 m puis au sol, vélo couché, reprise propre |
 | Animations fonctionnelles | ✅ | les os du modèle suivent le rig du jeu (écart mesuré 0,0 cm) ; mains sur les poignées par IK (écart 0,0 cm) ; tailwhip, barspin, pédalage, roues animés sur les pièces Blender |
 | Environnement soigné | 🔵 | skatepark fonctionnel mais visuellement brut (sol uni, immeubles en blocs) : prochaine tâche |
 | Bonnes commandes | 🟡 | clavier et tactile testés automatiquement (manette non testée) ; ressenti à valider par un joueur |

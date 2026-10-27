@@ -16,15 +16,15 @@ Conventions : mètres ; dans Blender Z en haut, le personnage regarde +X, son c�
 
 | Asset | Fichier | Triangles | Matériaux | Taille GLB | Rig | Animations | Statut |
 |---|---|---|---|---|---|---|---|
-| Rider (complet) | `assets/glb/rider.glb` | 21 484 au total ; ≈ 20 100 visibles avec casque intégral (corps 13 508, visage 3 532, casque 3 082) | 17 : skin, accent, accent2, suit, helmet, visor, shoe, sole, glove, hair, eye_white, iris, pupil, lip, brow, detail, metal | 689 Ko | 19 os (pelvis, spine, torso, neck, head, clavicle/upperArm/foreArm/hand ×2, upperLeg/lowerLeg/foot ×2), pondération douce aux articulations, 4 influences max | idle, celebrate, run (30 i/s) ; en jeu les os suivent le rig procédural | ✅ v1, testé en jeu |
-| Rider (léger, LOD) | `assets/glb/rider_lo.glb` | 10 131 au total ; ≈ 9 300 visibles | idem | 361 Ko | idem | idem | ✅ v1, qualité éco + personnages secondaires |
+| Rider (complet) | `assets/glb/rider.glb` | 23 974 au total ; ≈ 22 600 visibles avec casque intégral (corps 13 508, visage 3 532, casque v2 5 572) | 17 : skin, accent, accent2, suit, helmet, visor, shoe, sole, glove, hair, eye_white, iris, pupil, lip, brow, detail, metal | 765 Ko | 19 os (pelvis, spine, torso, neck, head, clavicle/upperArm/foreArm/hand ×2, upperLeg/lowerLeg/foot ×2), pondération douce aux articulations, 4 influences max | idle, celebrate, run (30 i/s) ; en jeu les os suivent le rig procédural | ✅ v1, testé en jeu |
+| Rider (léger, LOD) | `assets/glb/rider_lo.glb` | 9 543 au total ; ≈ 8 700 visibles | idem | 350 Ko | idem | idem | ✅ v1, qualité éco + personnages secondaires |
 | BMX freestyle | `assets/glb/bmx.glb` | 7 678 (cadre 2 230, avant 1 148, roues 1 868 ×2, pédalier 564) | 7 : frame, chrome, dark, tire, rim, grip, seat | 144 Ko | pièces rigides sur les pivots du jeu (tailwhip, barspin, axes, boîtier) | animées par le jeu : roues, pédalier, tailwhip, barspin, braquage | ✅ v1, testé en jeu |
 
 Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé pour « Carbone » avec une teinte sombre brillante) et `helmet_open` (bol, cheveux visibles).
 
 ## Rendus de contrôle
 
-`assets/renders/` : `rider_34.jpg` (trois-quarts), `rider_face.jpg` (visage sans casque), `rider_celebrate.jpg` (clip), `bmx_side.jpg`, `bmx_34.jpg`.
+`assets/renders/` : `helmet_front.jpg` et `helmet_34.jpg` (casque intégral v2), `rider_34.jpg` (trois-quarts), `rider_face.jpg` (visage sans casque), `rider_celebrate.jpg` (clip), `bmx_side.jpg`, `bmx_34.jpg`.
 
 ## Licences
 
