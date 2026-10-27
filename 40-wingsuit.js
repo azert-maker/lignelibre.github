@@ -56,7 +56,7 @@ MODES.wingsuit=function(cfg,look,ctx){
     target:course?totalDist/36:0,
     keys:[['← →','incliner / virer'],[S().invert?'↓':'↑','plonger (prendre de la vitesse)'],[S().invert?'↑':'↓','cabrer (attention au décrochage)'],['←← / →→','tonneau (double appui)'],['C','caméra']],
     press(code){const d=tap(code);if(d&&!roll.on){roll.on=true;roll.t=0;roll.dir=d}},
-    touch:{u:S().invert?'Cabrer':'Plonger',d:S().invert?'Plonger':'Cabrer',a:null},
+    touch:{u:S().invert?'Cabrer':'Plonger',d:S().invert?'Plonger':'Cabrer',a:null,g:false},
     inst:`<div class="ihead">Instruments de vol</div>
       <div class="ro-grid"><div class="ro"><span>Sol</span><b id="iAgl">0<small>m</small></b></div><div class="ro"><span>Vario</span><b id="iVar">0<small>m/s</small></b></div>
       <div class="ro"><span>Finesse</span><b id="iGr">0</b></div><div class="ro"><span>Charge</span><b id="iG">1.0<small>g</small></b></div></div>
@@ -98,7 +98,7 @@ MODES.wingsuit=function(cfg,look,ctx){
           if(Math.hypot(Math.hypot(lx,ly)-RING_R,lzz)<RING_T+HIT_R&&live)return crash('Anneau percuté','Tu as touché le cadre de l\'anneau. Vise le centre.')}}
         if((lzP>0&&lz<=0)||(lzP<0&&lz>=0)){const t=lzP/(lzP-lz),px=lerp(prev.x,St.pos.x,t),py=lerp(prev.y,St.pos.y,t),pz=lerp(prev.z,St.pos.z,t);
           const lx=(px-r.x)*r.cos+(pz-r.z)*r.sin,ly=py-r.y;r.done=true;
-          if(Math.hypot(lx,ly)<RING_R-RING_T){r.hit=true;r.mat.color.setHex(0xffffff);chain++;stats.rings++;St.vel.multiplyScalar(1.05);
+          if(Math.hypot(lx,ly)<RING_R-RING_T){r.hit=true;r.mat.color.setHex(0xffffff);chain++;stats.rings++;St.vel.multiplyScalar(1.05);if(live&&Math.hypot(lx,ly)<RING_R*.3){stats.perfectRings=(stats.perfectRings||0)+1;nearMissFx();ctx.trick('Anneau parfait',220,{land:'perfect',base:'Anneau parfait'})}/* plein centre : flash de précision */
             if(live){if(course){nextGate=r.k+1;ctx.bonus(300,'Porte '+r.k);ctx.checkpoint(r.k,cfg.len)}else ctx.bonus(500*chain,chain>1?'Anneaux ×'+chain:'Anneau');toast(course?'Porte '+r.k:chain>1?'Série ×'+chain:'Anneau',true);ding(660+Math.min(chain,6)*110);sfx.whoosh()}}
           else{r.mat.opacity=.25;if(live){if(course){stats.pen+=3;stats.missed++;nextGate=r.k+1;feed('Porte '+r.k+' manquée · +3 s');toast('+3 s',true)}else if(chain>1)feed('Série perdue')}chain=0}}}
       if(course&&finishZ!==null&&prev.z>finishZ&&St.pos.z<=finishZ&&live){ding(990,.5);return ctx.finish(stats.time+stats.pen)}

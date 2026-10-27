@@ -112,7 +112,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
   const crash=(t,x)=>{ding(90,.7);buzz([40,30,60]);ctx.crash(t,x)};
   return {env,stats,name:luge?'Street luge':'Downhill',vScale:luge?160:140,target:course?LEN/24:0,
     keys:luge?[['← →','se pencher pour tourner'],['↓','tête baissée : plus aéro (6 s = figure)'],['↑','se redresser (frein à air)'],['Espace','freiner avec les pieds'],['C','caméra']]:[['← →','carver (frôle la glissière = figure)'],['↓','tuck : position aéro'],['Espace + ← →','slide : Coleman, Pendulum (change de côté)'],['↑ + Espace','stand-up slide'],['C','caméra']],
-    touch:luge?{u:'Redresser',d:'Aéro',a:'Frein'}:{u:'Debout',d:'Tuck',a:'Slide'},
+    touch:{u:'Debout',d:'Tuck',a:'Slide',g:false},
     inst:`<div class="ihead">Notes de virage</div>
       <div class="pace" id="iPace"><svg id="iArrow" viewBox="0 0 40 40"></svg><div><div class="pn" id="iPn">Ligne droite</div><div class="pd" id="iPd"></div></div></div>
       <div class="ro-grid"><div class="ro"><span>Pente</span><b id="iSl">0<small>%</small></b></div><div class="ro"><span>Dernier km</span><b id="iKm">—</b></div></div>

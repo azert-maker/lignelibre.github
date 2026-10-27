@@ -31,6 +31,7 @@ const ACH=[
  {id:'ws_double',s:'wingsuit',l:'Double tonneau (combo)',t:(n,c)=>/^Tonneau/.test(n)&&c>=2,xp:300,c:90},
  {id:'ws_ress',s:'wingsuit',l:'Ressource',t:(n)=>n==='Ressource',xp:220,c:60},
  {id:'ws_rase',s:'wingsuit',l:'3 rase-mottes',t:(n)=>n==='Rase-mottes',n:3,xp:300,c:90},
+ {id:'ws_perfect',s:'wingsuit',l:'Anneau parfait (plein centre)',t:(n)=>n==='Anneau parfait',xp:220,c:60},
  {id:'ws_paroi',s:'wingsuit',l:'Vol de paroi',t:(n)=>n==='Vol de paroi',xp:220,c:60},
  {id:'bx_360',s:'bmx',l:'Rotation 360',t:(n)=>/\b(360|540|720)\b/.test(n),xp:200,c:60},
  {id:'bx_whip',s:'bmx',l:'Tailwhip',t:(n)=>/Tailwhip/.test(n),xp:220,c:60},

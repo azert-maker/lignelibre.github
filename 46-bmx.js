@@ -191,7 +191,7 @@ MODES.bmx=function(cfg,look,ctx){
         St.air=false;nSm.copy(n);St.transfer=!!(St.takeMod&&g.m&&g.m!==St.takeMod&&St.takeMod.tag==='spine'&&g.m.tag==='spine');HITm=g.m;const T=airTrick();St.pitch=0;const lq=off<.2&&fl<.2&&vn<8.5?'perfect':off<.55&&vn<10.5?'clean':'sketchy';
         if(live){land=clamp(vn/8,.25,1);human.impact(land*.5);camShake(land*.4);sfx.thud(.25+land*.3);for(let i=0;i<(eco?5:14);i++)dust.spawn(St.pos.x,St.pos.y+.05,St.pos.z,(Math.random()-.5)*3,.4+Math.random()*1.2*land,(Math.random()-.5)*3,.8,.85,.8,.75);
           if(St.airT>.4||T.flips||T.deg||St.whips||St.bars){stats.airs++;stats.maxH=Math.max(stats.maxH,St.hmax);stats.whips+=St.whips;stats.flips+=T.flips;
-            const p=ctx.trick(T.name,T.pts,{land:lq,base:T.name.replace(/ · Transfert/,'')});if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
+            const p=ctx.trick(T.name,T.pts,{land:lq,base:T.name.replace(/ · Transfert/,'')});if(lq==='perfect'&&T.pts>=700&&ctx.slowmo)ctx.slowmo(.3,.5);if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
             if(spots)spots.test(T.name,{mod:St.takeMod,near:St.pos,h:St.hmax},ctx)}}
         St.vert=null;St.whips=0;St.bars=0}}
     St.prevA=I.a;if(!St.air&&!St.grind)St.prevG=I.g;orient(h);return null}
@@ -209,7 +209,7 @@ MODES.bmx=function(cfg,look,ctx){
     return {x:clamp(dY*2.2,-1,1),y:Math.abs(dY)>1.1&&sp>4?-1:sp<8.5?1:0,a:apPhase===1&&toLip<2.5&&toLip>-2,g:false}}
   return {env,stats,name:'BMX',vScale:45,target:course?finishT:0,
     keys:[['↑ / ↓','pédaler / freiner · en l\'air : flips'],['← →','tourner · en l\'air : rotations'],['Espace','maintenir = charger · relâcher = bunny hop · en l\'air : barspin'],['Shift / F','manual au sol · tailwhip en l\'air'],['C','caméra']],
-    touch:{u:'Pédaler',d:'Freiner',a:'Saut'},
+    touch:{u:'Pédaler',d:'Freiner',a:'Saut',g:'Whip/Manual'},
     inst:`<div class="ihead">Ligne</div><div class="ro-grid"><div class="ro"><span>Air</span><b id="bAir">—</b></div><div class="ro"><span>Hauteur</span><b id="bH">—</b></div>
       <div class="ro"><span>Meilleure figure</span><b id="bBest" style="font-size:15px">—</b></div><div class="ro"><span>Grinds</span><b id="bGr">0</b></div></div>
       <div class="barline"><span id="bLbl">Saut</span><div class="bt"><i id="bBar"></i></div><b id="bBarV">0%</b></div>`,

@@ -157,7 +157,7 @@ MODES.parkour=function(cfg,look,ctx){
     return {x:clamp(dY*2,-1,1),y:bar?-1:1,a:edge,g:false}}
   return {env,stats,name:'Parkour',vScale:32,target:finishT,
     keys:[['↑','courir · ← → tourner'],['Espace','sauter (bord du toit) · walljump en wallrun · kong vault'],['↓','glissade en course · roulade à la réception'],['Panneaux cyan','wallrun : arrive en biais, saute pour enchaîner'],['C','caméra']],
-    touch:{u:'Courir',d:'Glisser',a:'Saut'},
+    touch:{u:'Courir',d:'Glisser',a:'Saut',g:false},
     inst:`<div class="ihead">Flow</div><div class="ro-grid"><div class="ro"><span>Mouvement</span><b id="pkMode" style="font-size:15px">—</b></div><div class="ro"><span>Hauteur</span><b id="pkH">—</b></div>
       <div class="ro"><span>Meilleur</span><b id="pkBest" style="font-size:15px">—</b></div><div class="ro"><span>Sauts de toit</span><b id="pkG">0</b></div></div>
       <div class="barline"><span>Élan</span><div class="bt"><i id="pkBar"></i></div><b id="pkBarV">0%</b></div>`,
