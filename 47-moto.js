@@ -180,7 +180,7 @@ MODES.motocross=function(cfg,look,ctx){
           for(let i=0;i<(eco?2:6);i++)dust.spawn(St.pos.x,St.pos.y+.3,St.pos.z,(Math.random()-.5)*3,.5+Math.random(),(Math.random()-.5)*3,2.4,.85,.78,.66);
           if(St.airT>.55){stats.airs++;stats.maxAir=Math.max(stats.maxAir,St.airT);stats.maxH=Math.max(stats.maxH,St.hmax);stats.maxDist=Math.max(stats.maxDist,T.dist);stats.flips+=T.flips;if(St.whipMax>.75)stats.whips++;
             if(T.big){stats.bigAir++;if(ctx.slowmo)ctx.slowmo(.35,.45);toast('BIG AIR · '+St.hmax.toFixed(1)+' m',true);nearMissFx()}
-            ctx.trick(T.name,T.pts,{land:lq,base:T.name});if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
+            ctx.trick(T.name,T.pts,{land:lq,base:T.name,big:T.big});if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
             if(spots)spots.test(T.name,{mod:St.takeMod,near:St.dist0,h:St.hmax,whip:St.whipMax},ctx)}}
         St.whip=0;St.fmx=null;St.fmxName='';St.flipT=0}}
     orient(h);return null}

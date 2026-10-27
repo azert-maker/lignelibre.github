@@ -288,4 +288,12 @@ body.touch .hud-tr{bottom:calc(270px + env(safe-area-inset-bottom,0px))}
 body.od .hud-tr .score{color:#ffd23a;text-shadow:0 0 18px rgba(255,160,40,.55)}
 body.od #vig{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(120,40,140,.45) 100%)}
 @media (prefers-reduced-motion:reduce){.combo.bump b,.combo.pop::after{animation:none}}
+
+/* bandeau des sports (accueil) et niveau sur les cartes */
+.sport-strip{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;max-width:640px}
+.sstrip{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--glass);border:1px solid var(--line);font-size:13px}
+.sstrip i{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
+.sstrip b{font-weight:600}.sstrip small{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.sstrip:hover,.sstrip:focus-visible{border-color:var(--c)}
+.slv{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}.slv b{color:var(--c);font-weight:600}.slv i{flex:1;height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}.slv em{display:block;height:100%;background:var(--c)}
 </style>

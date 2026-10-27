@@ -34,7 +34,7 @@ MODES.parkour=function(cfg,look,ctx){
   /* mobilier des toits : climatiseurs (vault), murets, barres de glissade, plots de précision, rampes/escaliers vers un toit plus haut */
   const props=[];
   for(const b of roofs){const y=b.y1,cx=(b.x0+b.x1)/2,cz=(b.z0+b.z1)/2;const n=1+Math.floor(R()*2.2);
-    for(let i=0;i<n;i++){const k=R();const px=b.x0+2+R()*(BW-4),pz=b.z0+2.5+R()*(b.z1-b.z0-5);
+    for(let i=0;i<n;i++){const k=R();const px=b.x0+2+R()*(BW-4),pz=b.z0+2.5+R()*(b.z1-b.z0-5);if(b.r===0&&Math.abs(px-(b.x0+b.x1)/2)<3.5&&pz>b.z1-7)continue;/* zone de départ dégagée */
       if(k<.35){const w=1.4,d=1.1,hh=.9+R()*.3;props.push(addBox(px-w/2,px+w/2,y,y+hh,pz-d/2,pz+d/2,'vault'))}
       else if(k<.55){const w=4,hh=.75;props.push(addBox(px-w/2,px+w/2,y,y+hh,pz-.2,pz+.2,'vault'))}
       else if(k<.72){props.push(addBox(px-2.2,px+2.2,y+1.15,y+1.45,pz-.15,pz+.15,'bar'));for(const s of [-1,1])props.push(addBox(px+s*2.2-.1,px+s*2.2+.1,y,y+1.15,pz-.1,pz+.1,'post'))}
@@ -148,7 +148,7 @@ MODES.parkour=function(cfg,look,ctx){
   function boxUnder(){let best=null,by=-1;for(const b of near(St.pos.x,St.pos.z,.3,_N)){if(b.t==='bar')continue;if(St.pos.x>=b.x0-.12&&St.pos.x<=b.x1+.12&&St.pos.z>=b.z0-.12&&St.pos.z<=b.z1+.12&&Math.abs(b.y1-St.pos.y)<.05&&b.y1>by){by=b.y1;best=b}}return best}
   const V3t=V3();
   /* ---------- pilote automatique (aperçu) : court vers la porte / vers le nord, saute aux bords, glisse sous les barres ---------- */
-  function auto(){let tx,tz;const g=gates&&gates.next();if(g){tx=g.x;tz=g.z-6}else{tx=Math.sin(tN*.13)*20;tz=St.pos.z-40}
+  function auto(){if(St.mode==='run'&&St.sp<.8){St.apStuck=(St.apStuck||0)+1/60;if(St.apStuck>.7){St.apStuck=0;St.h+=(Math.random()<.5?-1:1)*1.2}}else St.apStuck=0;let tx,tz;const g=gates&&gates.next();if(g){tx=g.x;tz=g.z-6}else{tx=Math.sin(tN*.13)*20;tz=St.pos.z-40}
     const want=Math.atan2(tx-St.pos.x,-(tz-St.pos.z));const dY=wrapA(want-St.h);const ahead=V3t.set(St.pos.x+Math.sin(St.h)*1.4,0,St.pos.z-Math.cos(St.h)*1.4);
     const gA=groundTop(ahead.x,ahead.z,St.pos.y+.3);const edge=St.mode==='run'&&gA<St.pos.y-.6&&St.sp>4;let bar=false;for(const b of near(ahead.x,ahead.z,.6,_N)){if(b.t==='bar'&&Math.abs(b.y0-St.pos.y-1.15)<.3&&ahead.x>b.x0-.5&&ahead.x<b.x1+.5&&ahead.z>b.z0-.8&&ahead.z<b.z1+.8)bar=true}
     return {x:clamp(dY*2,-1,1),y:bar?-1:1,a:edge,g:false}}
