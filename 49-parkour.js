@@ -95,11 +95,11 @@ MODES.parkour=function(cfg,look,ctx){
     fw.set(Math.sin(St.h),0,-Math.cos(St.h));St.stun-=h;
     if(St.mode==='vault'||St.mode==='climb'){const v=St.vault||St.climb;v.t+=h;const k=clamp(v.t/v.dur,0,1),e=k*k*(3-2*k);St.pos.x=lerp(v.a.x,v.b.x,e);St.pos.z=lerp(v.a.z,v.b.z,e);St.pos.y=lerp(v.a.y,v.b.y,Math.min(1,e*1.6))+Math.sin(Math.PI*k)*v.arc;
       if(k>=1){St.mode='run';St.onG=true;St.sp=Math.max(St.sp,v.out);St.vault=St.climb=null;if(live&&v.trick)name(v.trick,v.pts,v.opt||{})}return null}
-    if(St.mode==='wallrun'){const w=St.wr;w.t+=h;St.vel.y+=(-1.2-St.vel.y)*(1-Math.exp(-(w.t>.5?1.8:.6)*h));St.pos.addScaledVector(V3t.set(w.tx,0,w.tz),St.sp*h);St.pos.y+=St.vel.y*h;
+    if(St.mode==='wallrun'){const w=St.wr;w.t+=h;St.vel.y+=(-1.8-St.vel.y)*(1-Math.exp(-(w.t>.4?2.6:1.1)*h));St.pos.addScaledVector(V3t.set(w.tx,0,w.tz),St.sp*h);St.pos.y+=St.vel.y*h;
       /* toujours contre le panneau ? */const b=w.b,inside=St.pos.z>b.z0-.2&&St.pos.z<b.z1+.2&&St.pos.y<b.y1-.3&&St.pos.y>b.y0;
       if(aE||!inside||w.t>1.35){const d=w.t*St.sp;St.mode='air';St.wrUsed=b;if(live)name('Wallrun '+Math.round(d)+' m',90+d*30,{hold:true,base:'Wallrun'});
         if(aE&&inside){St.vel.set(w.tx*St.sp*.75+w.nx*4.6,6,w.tz*St.sp*.75+w.nz*4.6);St.h=Math.atan2(St.vel.x,-St.vel.z);St.sp=Math.hypot(St.vel.x,St.vel.z);St.peak=St.pos.y;St.airT=0;if(live){sfx.whoosh();name('Wall jump',200,{risk:.4});camShake(.15)}}
-        else{St.vel.set(w.tx*St.sp,St.vel.y,w.tz*St.sp)}}return null}
+        else{St.vel.set(w.tx*St.sp+w.nx*1.6,St.vel.y,w.tz*St.sp+w.nz*1.6);St.h=Math.atan2(St.vel.x,-St.vel.z)}}return null}
     if(St.mode==='run'||St.mode==='slide'||St.mode==='roll'){
       const feet=St.pos.y;/* vitesse et virages */const vm=vmax();let acc=0;
       if(St.mode==='slide'){St.slide-=h;St.sp=Math.max(2.5,St.sp-2.6*h);if(St.slide<=0||(I.y>=0&&St.slide<.45)){St.mode='run';St.height=1.8}}
@@ -124,7 +124,7 @@ MODES.parkour=function(cfg,look,ctx){
     const hit=pushOut(feet,feet+1.8);
     if(hit){const b=hit.b,top=b.y1-feet,face=-(fw.x*hit.nx+fw.z*hit.nz);
       /* panneau cyan : wallrun si on arrive en biais (pas de face) avec de la vitesse */
-      if(b.wr&&hit.nx!==0&&St.wrUsed!==b&&hs>3.5&&face<.82&&St.pos.y<b.y1-1.2){const tz=Math.sign(fw.z)||-1;St.mode='wallrun';St.wr={b,t:0,tx:0,tz,nx:hit.nx,nz:0};St.vel.y=Math.max(St.vel.y,2.4);St.sp=Math.max(hs,6.2);stats.wallruns++;if(live){sfx.crunch();camShake(.1)}return null}
+      if(b.wr&&hit.nx!==0&&St.wrUsed!==b&&hs>3.5&&face<.82&&St.pos.y<b.y1-1.2){const tz=Math.sign(fw.z)||-1;St.mode='wallrun';St.wr={b,t:0,tx:0,tz,nx:hit.nx,nz:0};St.pos.x=hit.nx>0?b.x1+RAD+.02:b.x0-RAD-.02;St.h=Math.atan2(0,-tz);St.from=null;/* la traversée en wallrun n'est pas comptée en plus comme « saut de toit » */St.vel.y=clamp(St.vel.y+.8,1,1.8);St.sp=Math.max(hs,6.2);stats.wallruns++;if(live){sfx.crunch();camShake(.1)}return null}
       /* rebord à portée des mains : escalade */
       if(top>0&&top<=2.35&&face>.35&&b.t!=='bar'){const tgt=St.pos.clone().addScaledVector(V3t.set(-hit.nx,0,-hit.nz),RAD*2+.4);const fast=hs>5;St.mode='climb';St.climb={t:0,dur:fast?.36:.55,a:St.pos.clone(),b:V3(tgt.x,b.y1,tgt.z),arc:.15,out:fast?hs*.7:2.2,trick:fast?'Wall pop':'Montée',pts:fast?160:80};St.sp=0;return null}
       /* sinon : on glisse le long du mur, choc si on le prend de face */
