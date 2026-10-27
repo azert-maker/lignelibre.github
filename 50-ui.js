@@ -22,6 +22,9 @@ const SPORTS={
   wakeboard:{name:'Wakeboard',place:'Lac des Turquoises',c:'#22d3c5',desc:'Tracté par le bateau : coupe vers le sillage, pop sur la crête, wake to wake, kickers et sliders.',facts:['33 km/h','sillage 75 cm'],noSnow:true,
     modes:{course:'Slalom de bouées',free:'Session au lac'},len:{opts:[8,12,16],unit:'bouées',def:1},yt:'wakeboarding wake to wake',
     params:[{k:'speed',label:'Vitesse du bateau',opts:['29 km/h','33 km/h','37 km/h'],def:1},{k:'wake',label:'Taille du sillage',opts:['Petit','Moyen','Gros'],def:1}]},
+  parkour:{name:'Parkour',place:'Toits de Néo-Belleville',c:'#ff3fbf',desc:'Cours sur les toits : sauts entre immeubles, vaults, wallruns sur les panneaux cyan, glissades, roulades.',facts:['30 km/h','flow continu'],
+    modes:{course:'Course des toits',free:'Quartier libre'},len:{opts:[3,4,6],unit:'portes',def:1},yt:'parkour rooftop run pov',
+    params:[{k:'gaps',label:'Écarts entre toits',opts:['Courts','Moyens','Longs'],def:1},{k:'height',label:'Dénivelé',opts:['Doux','Moyen','Fort'],def:1}]},
 };
 const SPORT_IDS=Object.keys(SPORTS).filter(k=>MODES[k]);
 
