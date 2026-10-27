@@ -20,13 +20,17 @@ const L=require('./lib');const shots=process.argv.includes('--shots');
   const sb=await p.evaluate(()=>{__ll.startRun({sport:'snowboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'L1'},{});__ll.forcePlay();const c=__ll.cur;const seen=[];const o=sfx.land;sfx.land=(q,k)=>{seen.push(q);o(q,k)};
       for(let i=0;i<60*25;i++){const I=c.auto?c.auto():{x:0,y:0,a:false,g:false};c.update(1/60,I);if(__ll.state!=='play')__ll.forcePlay()}sfx.land=o;return seen});
   chk(sb.length>0,'snowboard : réceptions qualifiées ('+sb.length+' : '+[...new Set(sb)].join(', ')+')');
+  /* 3b. motocross et parkour : réceptions qualifiées par le système commun (pilote automatique du jeu) */
+  for(const sp_ of ['motocross','parkour']){const r=await p.evaluate(sp_=>{__ll.startRun({sport:sp_,mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'L1'},{});__ll.forcePlay();const c=__ll.cur;const seen=[];const o=sfx.land;sfx.land=(q,k)=>{seen.push(q);o(q,k)};
+      for(let i=0;i<60*40;i++){const I=c.auto?c.auto():{x:0,y:1,a:(i%90)<10,g:false};c.update(1/60,I);if(__ll.state!=='play')__ll.forcePlay()}sfx.land=o;return seen},sp_);
+    chk(r.length>0,sp_+' : réceptions qualifiées ('+r.length+' : '+[...new Set(r)].join(', ')+')')}
   /* 4. chute physique BMX : rider éjecté, au sol, vélo couché, puis reprise propre */
   await p.evaluate(()=>{__ll.startRun({sport:'bmx',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'L2'},{});__ll.forcePlay()});
   await p.keyboard.down('ArrowUp');await p.waitForTimeout(2600);
   const before=await p.evaluate(()=>{let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});return {hp:h.position.toArray(),v:RIGV.length()}});
   await p.evaluate(()=>__ll.crashNow());await p.keyboard.up('ArrowUp');
   if(shots)for(let i=0;i<6;i++){await p.waitForTimeout(220);await p.screenshot({path:`test-results/crash_${i}.png`})}
-  await p.waitForTimeout(shots?1200:2400);
+  await p.waitForFunction(()=>!crashFx||crashFx.simDone,null,{timeout:8000}).catch(()=>{});
   const after=await p.evaluate(()=>{const r=__ll.cur._rig;let h;r.traverse(n=>{if(n.isHuman)h=n});h.updateMatrixWorld(true);const c=h.bones.pelvis.getWorldPosition(new THREE.Vector3()),bk=r.getWorldPosition(new THREE.Vector3());
     const g=__ll.cur._h(c.x,c.z);const up=new THREE.Vector3(0,1,0).applyQuaternion(r.getWorldQuaternion(new THREE.Quaternion()));
     return {sep:Math.hypot(c.x-bk.x,c.z-bk.z),hAbove:c.y-g,bikeUp:up.y,nan:[c.x,c.y,c.z].some(v=>!isFinite(v)),state:__ll.state}});
@@ -39,7 +43,7 @@ const L=require('./lib');const shots=process.argv.includes('--shots');
   chk(back.hp.every((v,i)=>Math.abs(v-before.hp[i])<1e-6)&&back.ik===1,'reprise : rider remis sur le vélo, mains sur le guidon');
   /* 5. chute parkour (rider sans véhicule) */
   await p.evaluate(()=>{__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'L2'},{});__ll.forcePlay()});
-  await p.keyboard.down('ArrowUp');await p.waitForTimeout(1500);await p.evaluate(()=>__ll.crashNow());await p.keyboard.up('ArrowUp');await p.waitForTimeout(2200);
+  await p.keyboard.down('ArrowUp');await p.waitForTimeout(1500);await p.evaluate(()=>__ll.crashNow());await p.keyboard.up('ArrowUp');await p.waitForFunction(()=>!crashFx||crashFx.simDone,null,{timeout:8000}).catch(()=>{});
   const pk=await p.evaluate(()=>{const h=__ll.cur._rig;h.updateMatrixWorld(true);const c=h.bones.pelvis.getWorldPosition(new THREE.Vector3());return {h:c.y-__ll.cur._h(c.x,c.z),ok:isFinite(c.y)}});
   chk(pk.ok&&pk.h<.7,`parkour : chute au sol (bassin à ${pk.h.toFixed(2)} m)`);
   chk(errs.length===0,'aucune erreur JS '+errs.slice(0,3).join(' | '));
