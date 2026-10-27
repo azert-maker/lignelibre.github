@@ -34,7 +34,7 @@ if(ACC.active&&!ACC.list[ACC.active])ACC.active='';
 const PROFILE_KEY=ACC.active?'ll3_profile_'+ACC.active:'ll3_profile';
 const PROFILE_DEFAULT={
   look:{name:'Rider',skin:0xd9a77f,suit:0x1d2731,accent:0xff5a36,helmet:0xf2f2ee,wing1:0xff5a36,wing2:0xffb000,pattern:1,deck:0x2a1f17,wheel:0xf0b84a,fcol:0x3fe0c5,boardCol:0xf3f1ea,
-    gear:{helmet:'full',wing:'proxy',board:'top98',wheel:'w83',bmx:'street',moto:'250f'},bmxCol:0x8a5cff,motoCol:0xff6a1f},
+    gear:{helmet:'full',wing:'proxy',board:'top98',wheel:'w83',bmx:'street',moto:'250f',wboard:'flex'},bmxCol:0x8a5cff,motoCol:0xff6a1f},
   coins:0,xp:{},ach:{},achP:{},owned:{},adp:{},cons:{revive:0,boost:0,x15:0},
   records:{},medals:{},history:[],runs:0,
   settings:{quality:'normal',vol:.8,sfxVol:1,musicVol:1,shake:1,flash:true,music:true,ghost:true,autoQ:true,sbAssist:true,spinSens:1,invert:false,cam:0,adsDemo:true,haptics:true,assist:true},
