@@ -25,8 +25,12 @@ function buildBmx(look){const g=new THREE.Group();const bp=gearOf('bmx',look.gea
   fr(HB,FA,.032,ch,front);fr(HT,HB,.05,fm,front);const stem=V(0,.9,-.4);fr(HT,stem,.04,dk,front);
   const bar=new THREE.Mesh(new THREE.BoxGeometry(.7,.03,.03),dk);bar.position.set(0,.95,-.4-PIV);front.add(bar);for(const s of [-1,1]){const up=new THREE.Mesh(new THREE.BoxGeometry(.03,.14,.03),dk);up.position.set(s*.22,.89,-.4-PIV);front.add(up);const grip=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.1,6),new THREE.MeshLambertMaterial({color:look.accent}));grip.rotation.z=Math.PI/2;grip.position.set(s*.32,.95,-.4-PIV);front.add(grip)}
   for(const s of [-1,1]){const peg=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.11,8),ch);peg.rotation.z=Math.PI/2;peg.position.set(s*.11,FA.y,FA.z-PIV);front.add(peg)}
-  const human=buildHuman(look);human.rotation.y=Math.PI/2;human.position.set(0,.33,.04);g.add(human);g.human=human;
-  g.bike={frame,front,wR,wF,crank,R:.26};g.phys=bp.phys;return g}
+  const human=buildHuman(look);human.rotation.y=Math.PI/2;human.position.set(0,.33,0);g.add(human);g.human=human;
+  /* mains sur les poignées : ancres dans le groupe avant (suivent le guidon, le barspin, le braquage) */
+  const grips=human.bones.arms.map((_,i)=>{const o=new THREE.Object3D();o.position.set((i?1:-1)*.3,.985,-.41-PIV);front.add(o);return o});human.ik={anchors:grips,w:1};human.snapPose({});
+  g.bike={frame,front,wR,wF,crank,R:.26};g.phys=bp.phys;
+  if(!look.proc&&typeof dressBmx==='function'&&GLB.ready){try{dressBmx(g,look)}catch(e){GLB.err='dressBmx: '+e.message}}
+  return g}
 
 MODES.bmx=function(cfg,look,ctx){
   const P_=cfg.params||{},course=cfg.mode==='course',eco=S().quality==='eco',seedI=strSeed(cfg.seed);const R=rngAt(seedI,3,7);
@@ -229,8 +233,9 @@ MODES.bmx=function(cfg,look,ctx){
       /* rider : pédalage, compression, tuck en l'air, manual penché en arrière */
       const ped=!St.air&&!St.man&&!St.grind&&I.y>0;St.crankA+=ped?dt*clamp(sp,2,9)*2.2:0;BK.crank.rotation.x=-St.crankA;
       const rollW=sp*dt/BK.R*(St.air?0:1);BK.wR.rotation.x-=rollW;BK.wF.rotation.x-=rollW*(St.wheelie>.2?0:1);
-      const ps=St.charge>0&&!St.air?{crouch:.55+St.charge*.45,lean:.6,back:.85,spread:.12,stance:0,look:0}:St.grind?{crouch:.55,lean:.45,back:.85,spread:.15,stance:0,side:.15}:St.man?{crouch:.25,lean:-.35,back:1.05,spread:.08,stance:0}:
-        St.air?{crouch:St.whip||St.bar?.85:.65,lean:.4,back:St.bar?.3:.85,spread:St.bar?.9:.15,stance:0,look:0}:{crouch:.35+land*.4,lean:.55,back:.85,spread:.12,stance:0,turn:-St.steer*.4,side:St.steer*.15};
+      const ps=St.charge>0&&!St.air?{crouch:.82+St.charge*.18,lean:1.02,back:.85,spread:.12,stance:0,look:0}:St.grind?{crouch:.8,lean:.95,back:.85,spread:.15,stance:0,side:.15}:St.man?{crouch:.25,lean:-.35,back:1.05,spread:.08,stance:0}:
+        St.air?{crouch:St.whip||St.bar?.9:.8,lean:.85,back:St.bar?.3:.85,spread:St.bar?.9:.15,stance:0,look:0}:{crouch:.8+land*.2,lean:1,back:.85,spread:.12,stance:0,turn:-St.steer*.4,side:St.steer*.15};
+      if(human.ik)human.ik.w+=((St.bar?0:1)-human.ik.w)*(live?1-Math.exp(-18*dt):1);
       human.pose(ps);human.gait(ped?.35:0,St.crankA,true);
       const gyB=groundH(St.pos.x,St.pos.z);blob.set(St.pos.x,gyB,St.pos.z,St.pos.y-gyB);
       if(live)trail.push(St.pos.x,gyB,St.pos.z,Math.cos(St.yaw),Math.sin(St.yaw),!St.air&&!St.grind);trail.update(dt);dust.update(dt,3,dustFade);spark.update(dt,9,sparkFade);
@@ -252,7 +257,7 @@ MODES.bmx=function(cfg,look,ctx){
     snapshot(){return {p:St.pos.clone(),yaw:St.yaw}},
     restore(s){trail.clear();St.grind=null;St.man=null;St.air=false;St.pitch=0;St.whip=null;St.bar=null;St.vert=null;St.pos.copy(s.p);St.pos.y=groundH(s.p.x,s.p.z);St.yaw=s.yaw;St.vel.set(Math.sin(s.yaw)*3,0,-Math.cos(s.yaw)*3)},
     netState(){return {p:[+St.pos.x.toFixed(2),+St.pos.y.toFixed(2),+St.pos.z.toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
-    ghost(lk){const o=buildBmx(lk);o.human.pose({crouch:.35,lean:.55,back:.85,spread:.12,stance:0});const tag=textSprite(lk.name,lk.accent,3);tag.position.y=2.4;o.add(tag);root.add(o);return o},
+    ghost(lk){const o=buildBmx(lk);o.human.pose({crouch:.8,lean:1,back:.85,spread:.12,stance:0});const tag=textSprite(lk.name,lk.accent,3);tag.position.y=2.4;o.add(tag);root.add(o);return o},
     overStats(){return [['Figures',stats.tricks||0],['Meilleure figure',stats.best||'—'],['Plus haut',stats.maxH.toFixed(1)+' m'],['Grinds / manual max',stats.grinds+' / '+stats.maxManual.toFixed(1)+' s'],['Combo max','×'+String(stats.comboMax||1).replace('.',',')]]},
     _h:groundH,_root:root,_rig:rig,_st:()=>St,_park:()=>park,_lines:()=>lines,_world(){},
     dispose(){scene.remove(root);disposeTree(root)}}};

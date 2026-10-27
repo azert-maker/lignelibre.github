@@ -21,7 +21,7 @@ function buildBoat(look){const g=new THREE.Group();const hull=new THREE.MeshPhon
   const ws=new THREE.Mesh(new THREE.BoxGeometry(2.1,.5,.06),gl);ws.position.set(0,1.05,-1.2);ws.rotation.x=-.35;g.add(ws);
   for(const s of [-1,1]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,1.8,6),dk);leg.position.set(s*1.0,1.6,.6);leg.rotation.z=-s*.25;g.add(leg)}
   const bar=new THREE.Mesh(new THREE.BoxGeometry(1.6,.12,.3),dk);bar.position.set(0,2.45,.6);g.add(bar);
-  const driver=buildHuman(Object.assign({},look,{accent:0x2b6cff,suit:0x333a44}));driver.rotation.y=Math.PI/2;driver.position.set(-.5,.4,-.6);driver.snapPose({crouch:.9,lean:-.2,back:.8,stance:0});g.add(driver);
+  const driver=buildHuman(Object.assign({},look,{accent:0x2b6cff,suit:0x333a44,lod:'lo'}));driver.rotation.y=Math.PI/2;driver.position.set(-.5,.4,-.6);driver.snapPose({crouch:.9,lean:-.2,back:.8,stance:0});g.add(driver);
   g.tow=new THREE.Vector3(0,2.45,.6);return g}
 
 MODES.wakeboard=function(cfg,look,ctx){

@@ -1,0 +1,20 @@
+# sorties de build (régénérées par build.sh)
+dist/
+17-assets.js
+# dépendances et caches
+node_modules
+__pycache__/
+*.pyc
+test-results/
+*.log
+# sauvegardes automatiques de Blender
+*.blend1
+*.blend2
+# secrets : ne jamais versionner de jetons, mots de passe ou identifiants
+.env
+.env.*
+*.pem
+*.key
+secrets/
+# captures écrites par les tests à la racine
+/*.png

@@ -1,0 +1,19 @@
+{
+  "name": "ligne-libre",
+  "version": "0.17.0",
+  "private": true,
+  "description": "Jeu de sports extrêmes arcade 3D (Three.js), un seul fichier HTML.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "LL_COPY_PARENT=0 sh build.sh && node --check dist/bundle.js",
+    "test": "node tests/all.js && node tests/glb.js",
+    "test:bmx": "node tests/bmx3.js",
+    "test:input": "node tests/kb.js && node tests/touch.js",
+    "test:perf": "node tests/perf.js && node tests/leak.js",
+    "assets": "python3 assets/blender/rider.py --render && python3 assets/blender/rider.py --lo && python3 assets/blender/bmx.py --render",
+    "lan": "node server/server.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

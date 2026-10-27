@@ -179,4 +179,4 @@ function wind(s01,air){if(!actx||!AUD.wind)return;const t=actx.currentTime,s=cla
 function nearMissFx(){const el=document.getElementById('nmFlash');if(!el||S().flash===false){if(typeof camShake==='function')camShake(.18);return}el.classList.remove('on');void el.offsetWidth;el.classList.add('on');if(typeof camShake==='function')camShake(.18)}
 
 /* fantômes (multi, record) : un seul matériau transparent partagé par fantôme, teinté de sa couleur (moins d'appels GPU) */
-function ghostify(obj,color,op){const m=new THREE.MeshLambertMaterial({color:color||0x8fd3ff,transparent:true,opacity:op||.42,depthWrite:false});obj.traverse(n=>{if(n.isMesh||n.isInstancedMesh){if(!n.isSprite)n.material=m}n.castShadow=false});obj.userData.ghostMat=m;return obj}
+function ghostify(obj,color,op){const m=new THREE.MeshLambertMaterial({color:color||0x8fd3ff,transparent:true,opacity:op||.42,depthWrite:false});let ms=null;obj.traverse(n=>{if(n.isMesh||n.isInstancedMesh){if(!n.isSprite)n.material=n.isSkinnedMesh?(ms||(ms=Object.assign(m.clone(),{skinning:true}))):m}n.castShadow=false});obj.userData.ghostMat=m;return obj}

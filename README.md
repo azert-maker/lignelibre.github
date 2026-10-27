@@ -17,13 +17,16 @@ Sept disciplines : Wingsuit, Downhill longboard, Snowboard freestyle, BMX freest
 
 ## Reconstruire le fichier
 
-Le code source est découpé en modules dans `v3/` et assemblé par `v3/build.sh` :
-
 ```
-cd v3 && sh build.sh
+cd v3
+npm install          # Playwright (tests)
+npm run build        # dist/ligne-libre.html (artifact), dist/ligne-libre-standalone.html, dist/test.html, dist/bundle.js
+npm test             # 61 vérifications de régression + 15 contrôles des modèles Blender
+npm run assets       # régénère les modèles Blender (Blender 5.x ou module Python bpy)
 ```
 
-Sorties : `ligne-libre.html` (fragment pour l'artifact Claude), `ligne-libre-standalone.html` (document HTML complet), `test3.html` (copie pour les tests), `g3.js` (JS seul pour `node --check`).
+Les modèles 3D (`assets/glb/*.glb`) sont embarqués en base64 dans le fichier HTML : le jeu reste un fichier unique. Voir `docs/ASSETS.md`.
+Documents de suivi : `docs/PROJECT_STATUS.md`, `docs/ROADMAP.md`, `docs/KNOWN_ISSUES.md`, `CHANGELOG.md`, `docs/DISCORD_SETUP.md`.
 
 Ordre des modules :
 
@@ -32,6 +35,7 @@ Ordre des modules :
 | 01-head.html, 02-body.html | styles, écrans, HUD |
 | 10-core.js | utilitaires, rendu, météo, particules, audio de base, entrées, profil et migration |
 | 15-fx.js, 16-sfx-data.js | effets (eau, neige profonde, traînées), couches audio, sons Pixabay intégrés |
+| 17-assets.js (généré), 18-glb.js | modèles Blender embarqués, décodage, habillage du rig (personnage, BMX) |
 | 20-gear.js | équipement, boutique, rider articulé (`buildHuman`), modèles partagés |
 | 30-ads-net.js | pubs de démonstration, réseau (Claude ou WebSocket) |
 | 35-valley.js | terrain de montagne (wingsuit, snowboard) |
@@ -50,16 +54,15 @@ Ordre des modules :
 
 ## Tests automatisés
 
-Prérequis : Node 18+ et Playwright avec Chromium (`npm i playwright`).
-Depuis le dossier qui contient `test3.html` :
+Prérequis : Node 18+ et Playwright avec Chromium (`npm install`, puis `npx playwright install chromium`). Les tests ouvrent `dist/test.html`.
 
 ```
-node tests/all.js        # suite de régression 7 sports (61 vérifications)
+node tests/all.js        # régression 7 sports (61 vérifications)
+node tests/glb.js        # modèles Blender dans le moteur (15 contrôles)
 node tests/bmx3.js       # figures BMX scénarisées
 node tests/pk2.js        # wallrun / walljump parkour
 node tests/kb.js         # vraies touches clavier sur 4 sports
 node tests/touch.js      # écran tactile (mobile paysage)
 node tests/perf.js       # appels de dessin, triangles, i/s (rendu logiciel)
+node tests/leak.js       # géométries et textures stables entre les courses
 ```
-
-Les anciens tests (`smoke.js`, `t15.js`, `t16.js`, `t17.js`, `t19.js`, `rp1.js`) sont à la racine du dossier de travail.

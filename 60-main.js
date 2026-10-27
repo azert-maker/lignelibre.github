@@ -255,4 +255,6 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
 
 /* ---------- démarrage ---------- */
 resize();setCam(S().cam|0);previewSport(profile.last.sport||'wingsuit');go('home',false);requestAnimationFrame(frame);
-window.__ll={SPORT_IDS,SPORTS,MODES,crashNow(){onCrash('Test','Chute de test')},forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
+/* modèles Blender prêts : on reconstruit la scène de démo et le garage pour les afficher (le jeu démarre sans les attendre) */
+GLB_P.then(()=>{if(!GLB.models.rider&&!GLB.models.rider_lo)return;if(!run&&previewId&&(state==='demo'||state==='menu'||state==='garage'))previewSport(previewId,previewW,true);if(state==='garage'&&typeof garageObj==='function')garageObj()});
+window.__ll={GLB,SPORT_IDS,SPORTS,MODES,crashNow(){onCrash('Test','Chute de test')},forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
