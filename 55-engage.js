@@ -13,19 +13,14 @@ function touchStreakOnLaunch(){const today=dayKey();if(profile.lastPlayDay===tod
 
 /* ---------- défi du jour ----------
    check(st, run, medal, score) · stats réellement suivies par les modes :
-   wingsuit: rings · longboard: slideTime · snowboard: airs · parapente: climbed · surf: rides · tous: score, time · run.finished */
+   wingsuit: rings · longboard: slideTime · snowboard: airs, grabs · bmx: tricks, manualT · motocross: bigAir · wakeboard: wakeAirs · parkour: flowMax · tous: score, time · run.finished */
 const DAILY_POOL=[
   {id:'ws_rings',sport:'wingsuit',mode:'free',label:'Wingsuit libre : passe 8 anneaux',check:st=>(st.rings||0)>=8,reward:120},
   {id:'ws_score',sport:'wingsuit',mode:'free',label:'Wingsuit libre : fais 3 000 points',check:(st,r,m,sc)=>sc>=3000,reward:100},
   {id:'lb_slide',sport:'longboard',mode:'free',label:'Downhill libre : 12 s de slide cumulées',check:st=>(st.slideTime||0)>=12,reward:120},
   {id:'lb_score',sport:'longboard',mode:'free',label:'Downhill libre : fais 4 000 points',check:(st,r,m,sc)=>sc>=4000,reward:100},
-  {id:'fo_finish',sport:'foil',mode:'course',label:'Foil : termine un slalom de bouées',check:(st,r)=>!!r.finished,reward:120},
-  {id:'fo_score',sport:'foil',mode:'free',label:'Foil libre : fais 2 500 points',check:(st,r,m,sc)=>sc>=2500,reward:100},
-  {id:'su_score',sport:'surf',mode:'free',label:'Surf foil libre : fais 2 000 points',check:(st,r,m,sc)=>sc>=2000,reward:100},
   {id:'any_medal',sport:'*',mode:'course',label:'N\'importe quel parcours : décroche une médaille',check:(st,r,m)=>m!=='n',reward:150},
-  {id:'sb_airs',sport:'snowboard',mode:'free',label:'Snowboard freeride : enchaîne 5 sauts',check:st=>(st.airs||0)>=5,reward:110},
-  {id:'pg_climb',sport:'paraglide',mode:'free',label:'Parapente : gagne 150 m en thermique',check:st=>(st.climbed||0)>=150,reward:120},
-  {id:'lu_score',sport:'luge',mode:'free',label:'Street luge libre : fais 3 000 points',check:(st,r,m,sc)=>sc>=3000,reward:100}
+  {id:'sb_airs',sport:'snowboard',mode:'free',label:'Snowboard freeride : enchaîne 5 sauts',check:st=>(st.airs||0)>=5,reward:110}
 ].filter(c=>c.sport==='*'||MODES[c.sport]);
 function dailyChallenge(){const c=DAILY_POOL[strSeed('daily-'+dayKey())%DAILY_POOL.length];return Object.assign({},c,{done:profile.dailyDone===dayKey()})}
 const dailyMatches=(c,cfg)=>(c.sport==='*'||c.sport===cfg.sport)&&c.mode===cfg.mode;
@@ -37,11 +32,7 @@ function pickSessionGoal(cfg){
   if(course){const n=Math.min(3,Math.max(1,(cfg.len|0)-1));return {label:'Passe '+n+' point'+(n>1?'s':'')+' de passage',key:'cp',target:n,done:false}}
   const G={wingsuit:alt?{label:'Passe 5 anneaux',key:'rings',target:5}:{label:'Fais 2 000 points',key:'score',target:2000},
     longboard:alt?{label:'Cumule 6 s de slide',key:'slideTime',target:6}:{label:'Fais 2 000 points',key:'score',target:2000},
-    luge:{label:'Fais 2 000 points',key:'score',target:2000},
-    snowboard:[{label:'Réussis 3 sauts',key:'airs',target:3},{label:'Fais 1 500 points',key:'score',target:1500},{label:'Réussis 3 figures avec grab',key:'grabs',target:3}][profile.runs%3],
-    paraglide:{label:'Gagne 100 m en thermique',key:'climbed',target:100},
-    foil:{label:'Fais 2 000 points',key:'score',target:2000},
-    surf:[{label:'Surfe 3 vagues',key:'rides',target:3},{label:'Fais 3 aerials',key:'aerials',target:3},{label:'Reste 45 s sur le foil sans toucher',key:'flight',target:45}][profile.runs%3]}[cfg.sport]||{label:'Survis 45 s',key:'time',target:45};
+    snowboard:[{label:'Réussis 3 sauts',key:'airs',target:3},{label:'Fais 1 500 points',key:'score',target:1500},{label:'Réussis 3 figures avec grab',key:'grabs',target:3}][profile.runs%3]}[cfg.sport]||{label:'Survis 45 s',key:'time',target:45};
   return Object.assign({done:false},G)}
 function goalValue(g){if(!g||!cur)return 0;if(g.key==='cp')return run?run.cp:0;return +cur.stats[g.key]||0}
 function goalProgress(){const el=$('#hGoal');if(!el)return;const g=run&&run.goal;if(!g){el.hidden=true;return}el.hidden=false;

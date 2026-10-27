@@ -10,23 +10,11 @@ const SPORTS={
   longboard:{name:'Downhill',place:'Col des Sept Lacets',c:'#ff9a3c',desc:'Route de col, épingles, notes de virage façon rallye.',facts:['jusqu\'à 130 km/h','slide −0,55 g'],
     modes:{course:'Course chrono',free:'Descente infinie'},len:{opts:[2,3,5],unit:'km',def:1},yt:'downhill skateboarding race',
     params:[{k:'slope',label:'Pente',opts:['Douce','Normale','Raide'],def:1},{k:'turns',label:'Virages',opts:['Fluides','Techniques','Épingles'],def:1},{k:'width',label:'Largeur de route',opts:['Étroite','Normale','Large'],def:1}]},
-  luge:{name:'Street luge',place:'Col des Sept Lacets',c:'#ff5a7a',desc:'Allongé à 5 cm du bitume, les pieds devant. La plus rapide.',facts:['jusqu\'à 150 km/h','freins aux pieds'],
-    modes:{course:'Course chrono',free:'Descente infinie'},len:{opts:[2,3,5],unit:'km',def:1},yt:'street luge race onboard',
-    params:[{k:'slope',label:'Pente',opts:['Douce','Normale','Raide'],def:1},{k:'turns',label:'Virages',opts:['Fluides','Techniques','Épingles'],def:1},{k:'width',label:'Largeur de route',opts:['Étroite','Normale','Large'],def:1}]},
   snowboard:{name:'Snowboard',place:'Combe des Arêtes',c:'#7fd6ff',desc:'Freeride en poudreuse : carve, saute les bosses, plaque des rotations.',facts:['carving 0,9 g','sauts et 360'],
     modes:{course:'Slalom géant',free:'Freeride'},len:{opts:[8,12,20],unit:'portes',def:1},yt:'snowboard freeride powder pov',
     params:[{k:'slope',label:'Pente',opts:['Douce','Normale','Raide'],def:1},{k:'trees',label:'Sapins',opts:['Peu','Normal','Forêt'],def:1},{k:'bumps',label:'Bosses et sauts',opts:['Aucune','Quelques','Beaucoup'],def:1},{k:'relief',label:'Relief',opts:['Doux','Alpin','Extrême'],def:1}]},
-  paraglide:{name:'Parapente',place:'Vallée des Aiguilles',c:'#c6a6ff',desc:'Vol lent et contemplatif : enroule les thermiques pour monter, file vers la balise suivante.',facts:['38 km/h','finesse 9','thermiques'],
-    modes:{course:'Course de balises',free:'Vol de distance'},len:{opts:[4,6,10],unit:'balises',def:1},yt:'paragliding thermal alps',
-    params:[{k:'thermals',label:'Thermiques',opts:['Faibles','Normales','Fortes'],def:1},{k:'width',label:'Largeur de la vallée',opts:['Étroite','Normale','Large'],def:1},{k:'relief',label:'Relief',opts:['Doux','Alpin','Extrême'],def:1}]},
-  foil:{name:'Foil downwind',place:'Lagon de Tavake',c:'#3fe0c5',desc:'Houle de 28 m et monde ouvert semé d\'îles.',facts:['18-25 km/h','monde ouvert'],
-    modes:{course:'Slalom de bouées',free:'Monde ouvert'},len:{opts:[8,12,16],unit:'bouées',def:1},yt:'downwind foil',
-    params:[{k:'assist',label:'Assistance',opts:['Débutant (pompage et hauteur auto)','Confirmé','Expert'],def:0},{k:'swell',label:'Houle',opts:['Petite','Moyenne','Grosse'],def:1}]},
-  surf:{name:'Surf foil',place:'Récif de Teava',c:'#ffb000',desc:'Des vagues qui déferlent par séries. Attrape, carve, relie.',facts:['vagues 0,9 à 2 m','séries de 7'],
-    modes:{course:'Défi vagues',free:'Session libre'},len:{opts:[3,5,8],unit:'vagues',def:1},yt:'surf foil wave pumping',
-    params:[{k:'assist',label:'Assistance',opts:['Débutant (pompage et hauteur auto)','Confirmé','Expert'],def:0},{k:'power',label:'Puissance des vagues',opts:['Douce · 0,9 m','Moyenne · 1,4 m','Puissante · 2 m'],def:1}]}
 };
-const SPORT_IDS=Object.keys(SPORTS);
+const SPORT_IDS=Object.keys(SPORTS).filter(k=>MODES[k]);
 
 /* ---------- navigation ---------- */
 const SCREENS=['home','play','setup','garage','shop','ranking','settings','multi','lobby','prog'];
@@ -69,13 +57,13 @@ function cfgFromSetup(st){const sp=SPORTS[st.sport];const params={};sp.params.fo
   const seed=st.seedMode==='daily'?dailySeed()+st.sport:st.seedMode==='custom'&&st.seedTxt.trim()?st.seedTxt.trim().slice(0,24):'R'+randCode(6);
   return {sport:st.sport,mode:st.mode,len:sp.len.opts[st.lenIdx],weather:st.weather,wind:st.wind,params,seed,smoke:st.smoke}}
 function chipRow(name,opts,cur,dis){return `<div class="chips" data-row="${name}">${opts.map((o,i)=>`<button class="chip" data-v="${i}" aria-pressed="${i===cur}" ${dis&&dis(i)?'disabled':''}>${o}</button>`).join('')}</div>`}
-function paintSetup(){const st=setup,sp=SPORTS[st.sport];if(st.weather==='neige'&&(st.sport==='foil'||st.sport==='surf'))st.weather='soleil';previewSport(st.sport,st.weather);
+function paintSetup(){const st=setup,sp=SPORTS[st.sport];if(st.weather==='neige'&&sp.noSnow)st.weather='soleil';previewSport(st.sport,st.weather);
   $('#setupTitle').textContent=(hostMode?'Salon · ':'')+sp.name;
   const wk=Object.keys(WEATHER);
   const h=[];
   h.push(`<div class="grp"><span class="lbl">Mode</span>${chipRow('mode',[sp.modes.course,sp.modes.free],st.mode==='course'?0:1)}</div>`);
   if(st.mode==='course')h.push(`<div class="grp"><span class="lbl">Longueur <b>${sp.len.opts[st.lenIdx]} ${sp.len.unit}</b></span>${chipRow('len',sp.len.opts.map(v=>v+' '+sp.len.unit),st.lenIdx)}</div>`);
-  h.push(`<div class="grp"><span class="lbl">Météo <b>jamais de pluie</b></span>${chipRow('weather',wk.map(k=>WEATHER[k].label),wk.indexOf(st.weather),i=>wk[i]==='neige'&&(st.sport==='foil'||st.sport==='surf'))}</div>`);
+  h.push(`<div class="grp"><span class="lbl">Météo <b>jamais de pluie</b></span>${chipRow('weather',wk.map(k=>WEATHER[k].label),wk.indexOf(st.weather),i=>wk[i]==='neige'&&!!sp.noSnow)}</div>`);
   h.push(`<div class="grp"><span class="lbl">Vent <b>${WIND[st.wind].v} m/s</b></span>${chipRow('wind',WIND.map(w=>w.label),st.wind)}</div>`);
   sp.params.forEach(p=>{if(p.free&&st.mode==='course')return;h.push(`<div class="grp"><span class="lbl">${p.label}</span>${chipRow('p_'+p.k,p.opts,st.params[p.k])}</div>`)});
   if(st.sport==='wingsuit')h.push(`<div class="grp"><span class="lbl">Fumigènes couleur ${owns('smoke')?'':'<b>à débloquer en boutique</b>'}</span>${chipRow('smoke',['Blancs','Couleur de ta voile'],st.smoke&&owns('smoke')?1:0,i=>i===1&&!owns('smoke'))}</div>`);
@@ -115,7 +103,6 @@ function garageObj(){if(gObj){gScene.remove(gObj);disposeTree(gObj)}const L=prof
   if(gTab==='corps'){o=buildHuman(L);hu=o;ps={crouch:.15,spread:.25,twist:.2,look:.2};ty=.95;d=4.4}
   else if(gTab==='equip'){o=new THREE.Group();const f=buildFlyer(L);f.rotation.x=1.05;f.position.y=1.1;f.scale.setScalar(1.25);o.add(f);o.userData.fly=f;ty=1.1;d=4.8}
   else if(gTab==='board'||gTab==='teintes'){o=buildLongboard(L);hu=o.human;ps={crouch:.55,lean:.6,twist:.8,back:.4};ty=.8;d=4.6}
-  else{o=new THREE.Group();const f=buildFoil(L);f.position.y=f.mast+.05;hu=f.human;ps={crouch:.4,lean:.25,twist:.7,spread:.6};o.add(f);ty=1.45;d=6.6}
   if(hu){hu.snapPose?hu.snapPose(ps):hu.pose(ps)}o.userData.hu=hu;o.userData.ps=ps;
   gObj=o;gScene.add(o);gScene.userData.ring.material.color.set(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#8fd3ff');
   gCam.userData={ty,d}}
@@ -125,7 +112,7 @@ function garageFrame(dt){if(!gObj)return;if(gAuto&&!gDrag)gRot+=dt*.35;gObj.rota
   const w=innerWidth,h=innerHeight;gCam.aspect=w/h;if(w>700){gCam.setViewOffset(w,h,-Math.min(580,w)/2,0,w,h)}else{gCam.setViewOffset(w,h,0,h*.29,w,h)}gCam.updateProjectionMatrix()}
 renderer.domElement.addEventListener('pointerdown',e=>{if(state!=='garage')return;gDrag={x:e.clientX,r:gRot};gAuto=false});
 addEventListener('pointermove',e=>{if(gDrag)gRot=gDrag.r+(e.clientX-gDrag.x)*.01});addEventListener('pointerup',()=>{gDrag=null});
-const GTABS=[['corps','Corps'],['equip','Équipement'],['board','Board / Ski'],['foil','Foil'],['teintes','Teintes']];
+const GTABS=[['corps','Corps'],['equip','Équipement'],['board','Board / Ski'],['teintes','Teintes']];
 function statBars(st){return st?`<div class="stbars">${Object.entries(st).map(([k,v])=>`<div class="stb"><span>${k}</span><i style="--v:${Math.round(v*100)}%"></i></div>`).join('')}</div>`:''}
 function itemList(slot){const cur=profile.look.gear[slot];return `<div class="items">${GEAR[slot].map(g=>{const un=gearUnlocked(slot,g.id),it=SHOP.find(s=>s.id===g.id);
   return `<button class="item" data-slot="${slot}" data-id="${g.id}" aria-pressed="${cur===g.id}"><h4>${g.name}</h4><span class="tagr ${un?'':'lock'}">${un?(cur===g.id?'équipé':'disponible'):('🔒 '+it.ads+' pub'+(it.ads>1?'s':'')+' ou '+fmt(it.price)+' pièces'+(LVL_UNLOCK[g.id]?' ou '+lvlLabel(g.id):''))}</span><p>${g.desc}</p>${statBars(g.st)}</button>`}).join('')}</div>`}
@@ -139,12 +126,10 @@ function paintGarage(){$('#garageTabs').innerHTML=GTABS.map(([k,l])=>`<button cl
     <div class="grp"><span class="lbl">Casque</span>${itemList('helmet')}</div>`;
   else if(gTab==='equip')h=`<div class="grp"><span class="lbl">Voilure wingsuit</span>${itemList('wing')}</div><div class="grp"><span class="lbl">Motif</span>${chipRow('pattern',['Uni','Bras / jambes','Dégradé','Rayures'],L.pattern)}</div>`;
   else if(gTab==='board')h=`<div class="grp"><span class="lbl">Planche <b>downhill</b></span>${itemList('board')}</div><div class="grp"><span class="lbl">Roues</span>${itemList('wheel')}</div>`;
-  else if(gTab==='foil')h=`<div class="grp"><span class="lbl">Aile</span>${itemList('fwing')}</div><div class="grp"><span class="lbl">Planche</span>${itemList('fboard')}</div><div class="grp"><span class="lbl">Mât</span>${itemList('mast')}</div>`;
   else h=`<div class="grp"><span class="lbl">Combinaison</span>${swatches('suit',PALETTE)}</div><div class="grp"><span class="lbl">Haut / accent</span>${swatches('accent',PALETTE)}</div>
     <div class="grp"><span class="lbl">Casque</span>${swatches('helmet',PALETTE)}</div>
-    <div class="grp"><span class="lbl">Wingsuit principale <b>aussi la voile de parapente</b></span>${swatches('wing1',PALETTE)}</div><div class="grp"><span class="lbl">Wingsuit secondaire</span>${swatches('wing2',PALETTE)}</div>
-    <div class="grp"><span class="lbl">Deck <b>aussi snowboard et luge</b></span>${swatches('deck',PALETTE)}</div><div class="grp"><span class="lbl">Roues</span>${swatches('wheel',PALETTE)}</div>
-    <div class="grp"><span class="lbl">Planche de foil</span>${swatches('boardCol',PALETTE)}</div><div class="grp"><span class="lbl">Aile de foil</span>${swatches('fcol',PALETTE)}</div>`;
+    <div class="grp"><span class="lbl">Wingsuit principale</span>${swatches('wing1',PALETTE)}</div><div class="grp"><span class="lbl">Wingsuit secondaire</span>${swatches('wing2',PALETTE)}</div>
+    <div class="grp"><span class="lbl">Deck <b>aussi le snowboard</b></span>${swatches('deck',PALETTE)}</div><div class="grp"><span class="lbl">Roues</span>${swatches('wheel',PALETTE)}</div>`;
   $('#garageBody').innerHTML=h;
   const n=$('#gName');if(n)n.oninput=()=>{L.name=n.value.replace(/[\u0000-\u001f]/g,'').slice(0,16)||'Rider';saveProfile()};
   $$('#garageBody .swatches').forEach(w=>w.onclick=e=>{const b=e.target.closest('.sw');if(!b)return;if(b.dataset.lock){offerUnlock('neon');return}L[w.dataset.key]=+b.dataset.c;saveProfile();paintGarage()});
@@ -251,7 +236,7 @@ function onRoomPeers(){const h=hostPeer();
   if(!isHost&&h&&h.st.cfg){roomCfg=sanitizeCfg(h.st.cfg);if(!hostSeen){hostSeen=true;lastGo=h.st.go||0}else if(h.st.go&&h.st.go!==lastGo){lastGo=h.st.go;if(state==='menu'||state==='demo'||state==='over'||state==='garage')startRun(roomCfg,{multi:true});}}
   if(screen==='lobby')paintLobby();if(state==='play'||state==='count'||state==='over')syncGhosts()}
 function sanitizeCfg(c){const sp=SPORTS[c.sport]?c.sport:'longboard';const S_=SPORTS[sp];const params={};S_.params.forEach(p=>{const v=c.params&&c.params[p.k];params[p.k]=p.bool?v!==false:clamp(v|0,0,p.opts.length-1)});
-  return {sport:sp,mode:c.mode==='free'?'free':'course',len:S_.len.opts.includes(c.len)?c.len:S_.len.opts[1],weather:WEATHER[c.weather]&&!(c.weather==='neige'&&(sp==='foil'||sp==='surf'))?c.weather:'soleil',wind:clamp(c.wind|0,0,3),params,seed:String(c.seed||'salon').slice(0,24),smoke:false}}
+  return {sport:sp,mode:c.mode==='free'?'free':'course',len:S_.len.opts.includes(c.len)?c.len:S_.len.opts[1],weather:WEATHER[c.weather]&&!(c.weather==='neige'&&S_.noSnow)?c.weather:'soleil',wind:clamp(c.wind|0,0,3),params,seed:String(c.seed||'salon').slice(0,24),smoke:false}}
 function paintLobby(){const code=Net.code||'—',cfg=roomCfg;const sp=cfg&&SPORTS[cfg.sport];
   $('#lobbyBody').innerHTML=`<div class="grp"><span class="lbl">Code du salon</span><div class="code">${esc(code)}</div><p class="note">Donne ce code à tes amis : ils le saisissent dans Multijoueur.</p></div>
   <div class="grp"><span class="lbl">Partie</span>${cfg?`<div class="stat-line"><span>Sport</span><b>${sp.name}</b></div><div class="stat-line"><span>Mode</span><b>${sp.modes[cfg.mode]}${cfg.mode==='course'?' · '+cfg.len+' '+sp.len.unit:''}</b></div>
