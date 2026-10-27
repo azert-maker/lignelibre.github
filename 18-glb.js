@@ -90,3 +90,29 @@ function dressBmx(g,L){
     o.traverse(m=>{if(m.isMesh){if(!cache.has(m.material))cache.set(m.material,mk(m.material));m.material=cache.get(m.material)}});grp.add(o);n++};
   put('bmx_frame',b.frame);put('bmx_front',b.front);put('bmx_wheelR',b.wR);put('bmx_wheelF',b.wF);put('bmx_crank',b.crank);
   g.glbBike=n===5;return g.glbBike}
+
+/* Moto de motocross (modèle fourni, nettoyé par assets/blender/moto.py) : pièces sur les groupes body / front / roues
+   de buildMoto. Le pivot de direction et la position des roues viennent des « extras » du GLB ; la plaque numéro reçoit
+   le numéro du joueur ; les mains sont ancrées aux poignées (IK). */
+function dressMoto(g,L,numTex){
+  const gl=GLB.models.moto,m=g.moto;if(!gl||!m)return false;const N=n=>gl.scene.getObjectByName(n);
+  if(!['moto_body','moto_front','moto_wheelF','moto_wheelR'].every(N))return false;
+  let plate=null;if(numTex){plate=numTex.clone();plate.flipY=false;plate.needsUpdate=true}
+  const mk=src=>{const nm=src.name||'',col=src.color?src.color.getHex():0xffffff;
+    if(nm==='Body')return new THREE.MeshPhongMaterial({color:L.motoCol??L.accent,shininess:70,specular:0x666666});
+    if(nm==='Metal')return new THREE.MeshPhongMaterial({color:0xb4bac2,shininess:100,specular:0xbbbbbb});
+    if(nm==='Black Metal')return new THREE.MeshPhongMaterial({color:0x1a1c20,shininess:60,specular:0x444444});
+    if(nm==='Decale')return new THREE.MeshLambertMaterial({color:0xffffff,map:plate||null});
+    if(nm==='Rubber')return new THREE.MeshLambertMaterial({color:0x111214});
+    return new THREE.MeshLambertMaterial({color:col})};
+  const cache=new Map();
+  const hide=grp=>{for(const c of grp.children)if(c.isMesh)c.visible=false};
+  const put=(name,grp)=>{const o=N(name).clone(true);o.position.set(0,0,0);o.quaternion.identity();o.scale.set(1,1,1);
+    o.traverse(n=>{if(n.isMesh){if(!cache.has(n.material))cache.set(n.material,mk(n.material));n.material=cache.get(n.material)}});grp.add(o)};
+  hide(m.body);hide(m.swing);hide(m.front);hide(m.wF);hide(m.wR);
+  put('moto_body',m.body);put('moto_front',m.front);put('moto_wheelF',m.wF);put('moto_wheelR',m.wR);
+  const pv=n=>{const p=N(n).userData.pivot;return new THREE.Vector3(p[0],p[1],p[2])};
+  const pF=pv('moto_front');m.front.position.copy(pF);m.frontY0=pF.y;m.wF.position.copy(pv('moto_wheelF').sub(pF));m.wR.position.copy(pv('moto_wheelR'));
+  const ud=N('moto_front').userData;/* les extras donnent le pivot des leviers ; la main se pose ~9 cm plus à l'extérieur, sur la poignée */
+  m.grips=[ud.gripL,ud.gripR].map(a=>a?new THREE.Vector3(a[0]+Math.sign(a[0])*.09,a[1]-.015,a[2]).sub(pF):null);
+  g.glbMoto=true;return true}

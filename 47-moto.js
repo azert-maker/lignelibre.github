@@ -25,8 +25,15 @@ function buildMoto(look){const g=new THREE.Group();const gp=gearOf('moto',look.g
   function wheel(r){const w=new THREE.Group();const t=new THREE.Mesh(new THREE.TorusGeometry(r-.06,.07,8,22),tyre);t.rotation.y=Math.PI/2;w.add(t);for(let i=0;i<10;i++){const k=new THREE.Mesh(new THREE.BoxGeometry(.15,.035,.035),tyre);const a=i/10*Math.PI*2;k.position.set(0,Math.cos(a)*(r-.01),Math.sin(a)*(r-.01));k.rotation.x=a;w.add(k)}
     const rim=new THREE.Mesh(new THREE.TorusGeometry(r-.13,.015,4,22),metal);rim.rotation.y=Math.PI/2;w.add(rim);const hub=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.16,8),metal);hub.rotation.z=Math.PI/2;w.add(hub);return w}
   const wF=wheel(.42),wR=wheel(.4);wF.position.set(0,-.72,-.32);front.add(wF);wR.position.set(0,.4,.73);body.add(wR);
-  const human=buildHuman(look);human.rotation.y=Math.PI/2;human.position.set(0,.58,.18);g.add(human);g.human=human;
-  g.moto={body,front,wF,wR,swing};g.phys=gp.phys;return g}
+  const human=buildHuman(look);human.rotation.y=Math.PI/2;human.position.set(0,.48,.18);g.add(human);g.human=human;
+  g.moto={body,front,wF,wR,swing,frontY0:1.12};g.phys=gp.phys;
+  if(!look.proc&&typeof dressMoto==='function'&&GLB.ready){try{dressMoto(g,look,numTex)}catch(e){GLB.err='dressMoto: '+e.message}}
+  /* mains sur les poignées (IK) : ancres dans le groupe avant, elles suivent la direction et la fourche */
+  {const gp_=g.moto.grips||[new THREE.Vector3(-.36,.12,.04),new THREE.Vector3(.36,.12,.04)];const sides=human.bones.arms.map((_,i)=>i?1:-1);
+   /* côté 0 du rider (z −) = gauche de la moto (x −) car le rider est tourné de +90° */
+   const anchors=sides.map(s=>{const p=gp_.find(v=>v&&Math.sign(v.x)===s)||new THREE.Vector3(s*.36,.12,.04);const o=new THREE.Object3D();o.position.copy(p);front.add(o);return o});
+   human.ik={anchors,w:1};human.snapPose({})}
+  return g}
 
 MODES.motocross=function(cfg,look,ctx){
   const P_=cfg.params||{},course=cfg.mode==='course',eco=S().quality==='eco',seedI=strSeed(cfg.seed);const R=rngAt(seedI,5,11);
@@ -117,7 +124,7 @@ MODES.motocross=function(cfg,look,ctx){
     fw.set(Math.sin(St.yaw),0,-Math.cos(St.yaw));fw.addScaledVector(up,-fw.dot(up)).normalize();rgt.crossVectors(fw,up).normalize();tmp.copy(fw).negate();m4.makeBasis(rgt,up,tmp);rig.quaternion.setFromRotationMatrix(m4);
     if(St.air&&St.pitch){q1.setFromAxisAngle(AXX,St.pitch);rig.quaternion.multiply(q1)}
     MK.body.rotation.set(0,St.whip*.75,St.whip*.55);/* whip : la moto pivote et se couche sous le pilote */
-    rig.position.copy(St.pos);MK.front.position.y=1.12+St.comp*.18;MK.front.rotation.y=St.steer*.35;MK.body.position.y=-St.comp*.12}
+    rig.position.copy(St.pos);MK.front.position.y=MK.frontY0+St.comp*.18;MK.front.rotation.y=St.steer*.35;MK.body.position.y=-St.comp*.12}
   function takeoff(){St.air=true;St.pArm=false;St.airT=0;St.flipT=0;St.whip=0;St.whipMax=0;St.fmx=null;St.fmxT=0;St.fmxBack=0;St.hmax=0;St.takeY=St.pos.y;St.dist0.copy(St.pos);St.takeMod=HITm;
     /* assiette de départ = pente de la lèvre ; scrub = moto couchée en tournant juste avant la lèvre */
     St.pitch=Math.atan2(St.vel.y,Math.max(1,hsp()));St.scrub=0;/* assiette > 0 = nez en haut */
@@ -218,7 +225,7 @@ MODES.motocross=function(cfg,look,ctx){
       const rollW=sp*dt/.41;if(!St.air){MK.wF.rotation.x-=rollW;MK.wR.rotation.x-=rollW}else if(St.thr>0)MK.wR.rotation.x-=dt*40;
       /* pilote : debout sur les cale-pieds, buste en avant ; en freestyle, poses dédiées */
       const ps=St.fmx==='Superman'?{crouch:0,lean:1.2,back:1.1,spread:.2,stance:0,legSpread:.4}:St.fmx==='Nac-nac'?{crouch:.3,lean:.4,back:.9,spread:.3,stance:0,side:.5,legSpread:1}:St.fmx==='Heel clicker'?{crouch:.1,lean:-.2,back:1,spread:.1,stance:0,legSpread:.8}:
-        St.air?{crouch:.45,lean:.55+(I.y>0?.3:I.y<0?-.3:0),back:.9,spread:.15,stance:0}:{crouch:.45+land*.15+(St.preload||0)*.3,lean:.6,back:.9,spread:.18,stance:0,turn:-St.steer*.4,side:St.steer*.25};
+        St.air?{crouch:.6,lean:.75+(I.y>0?.25:I.y<0?-.25:0),back:.9,spread:.15,stance:0}:{crouch:.65+land*.15+(St.preload||0)*.25,lean:.85,back:.9,spread:.18,stance:0,turn:-St.steer*.4,side:St.steer*.25};
       human.pose(ps);
       const gyB=groundH(St.pos.x,St.pos.z);blob.set(St.pos.x,gyB,St.pos.z,St.pos.y-gyB);
       if(live)trail.push(St.pos.x,gyB,St.pos.z,Math.cos(St.yaw),Math.sin(St.yaw),!St.air);trail.update(dt);roost.update(dt,9,roostFade);dust.update(dt,-.2,dustFade);
@@ -241,7 +248,7 @@ MODES.motocross=function(cfg,look,ctx){
     snapshot(){return {p:St.pos.clone(),yaw:St.yaw}},
     restore(s){trail.clear();St.air=false;St.pitch=0;St.whip=0;St.fmx=null;St.flipT=0;St.pos.copy(s.p);St.pos.y=groundH(s.p.x,s.p.z);St.yaw=s.yaw;St.vel.set(Math.sin(s.yaw)*5,0,-Math.cos(s.yaw)*5)},
     netState(){return {p:[+St.pos.x.toFixed(2),+St.pos.y.toFixed(2),+St.pos.z.toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
-    ghost(lk){const o=buildMoto(lk);o.human.pose({crouch:.45,lean:.6,back:.9,spread:.18,stance:0});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.8;o.add(tag);root.add(o);return o},
+    ghost(lk){const o=buildMoto(lk);o.human.pose({crouch:.65,lean:.85,back:.9,spread:.18,stance:0});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.8;o.add(tag);root.add(o);return o},
     overStats(){return [['Figures',stats.tricks||0],['Meilleure figure',stats.best||'—'],['Plus haut / plus loin',stats.maxH.toFixed(1)+' m / '+Math.round(stats.maxDist)+' m'],['Big airs',stats.bigAir],['Vitesse max',Math.round(stats.vmax)+' km/h']]},
     _h:groundH,_root:root,_rig:rig,_st:()=>St,_park:()=>park,_lines:()=>lines,_C:()=>C,_world(){},
     dispose(){if(ENG){try{ENG.g.gain.value=0;ENG.o1.stop();ENG.o2.stop();ENG.g.disconnect()}catch(e){}}scene.remove(root);disposeTree(root)}}};

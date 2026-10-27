@@ -25,6 +25,15 @@ const L=require('./lib');
       /* la paume est ~6 cm sous le poignet, le long de l'avant-bras */
       h.bones.arms[i].fore.getWorldPosition(d);const dir=w.clone().sub(d).normalize();out.push(w.addScaledVector(dir,.06).distanceTo(t))}return out});
   chk(ik.every(d=>d<.05),'bmx : mains sur les poignées (écarts '+ik.map(d=>(d*100).toFixed(1)+' cm').join(', ')+')');
+  /* motocross : moto du modèle fourni, plaque numéro, mains sur les poignées */
+  const mo=await p.evaluate(()=>{__ll.startRun({sport:'motocross',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<60;i++)c.update(1/60,c.auto?c.auto():{x:0,y:1,a:false,g:false});
+    const r=c._rig;let h;r.traverse(n=>{if(n.isHuman)h=n});h.updateMatrixWorld(true);const d=[];
+    for(let i=0;i<2;i++){const t=new THREE.Vector3(),w=new THREE.Vector3(),e=new THREE.Vector3();h.ik.anchors[i].getWorldPosition(t);h.bones.arms[i].hand.getWorldPosition(w);h.bones.arms[i].fore.getWorldPosition(e);d.push(w.addScaledVector(w.clone().sub(e).normalize(),.06).distanceTo(t))}
+    let plate=false;r.traverse(n=>{if(n.isMesh&&n.visible&&n.material&&n.material.map&&n.material.map.isCanvasTexture!==undefined)plate=true;if(n.isMesh&&n.visible&&n.material&&n.material.map)plate=true});
+    return {glb:!!r.glbMoto,d,plate}});
+  chk(mo.glb,'motocross : moto Blender intégrée (carrosserie, avant, roues)');
+  chk(mo.plate,'motocross : plaque numéro texturée');
+  chk(mo.d.every(x=>x<.06),'motocross : mains sur les poignées ('+mo.d.map(x=>(x*100).toFixed(1)+' cm').join(', ')+')');
   /* éco : variante légère */
   const lo=await p.evaluate(()=>{__ll.profile.settings.quality='eco';__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
     let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});let t=0;h.glb.traverse(n=>{if(n.isMesh&&n.visible&&n.parent.visible){const g=n.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3}});__ll.profile.settings.quality='normal';return t});
