@@ -40,7 +40,7 @@ async function startRun(cfg,opt={}){
   ghostStop();if(cur)cur.dispose();ghostsClear();previewId=null;demo=null;quiet=false;$('#demoTag').hidden=true;
   curCfg=cfg;run={cfg,use:opt.use||{},multi:!!opt.multi,pen:0,continues:0,snaps:[],snapT:0,finished:false,dnf:false,cp:0,final:0,finalized:false,coins:0,netT:0,doubled:false,engageBits:[]};run.goal=pickSessionGoal(cfg);
   const ctx={boost:!!run.use.boost,crash:onCrash,finish:onFinish,cam:()=>camMode,hud:setHud,
-    bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,comboBreak};combo.n=0;combo.t=-9;FLOW.v=0;FLOW.t=0;
+    bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,comboBreak};combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
   cur=MODES[cfg.sport](cfg,profile.look,ctx);flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
   $('#hMode').textContent=cur.name;E.inst.innerHTML=cur.inst;E.feed.innerHTML='';E.mp.innerHTML='';
   $('#keys').innerHTML=cur.keys.slice(0,4).map(k=>'<div><kbd>'+k[0]+'</kbd>'+k[1]+'</div>').join('');
@@ -60,17 +60,53 @@ function startCrashFx(){camShake(.7);const r=cur&&cur._rig;const water=curCfg.sp
 function crashFrame(dt){const c=crashFx;if(!c)return;c.t+=dt;const k=Math.exp(-2.6*c.t);
   if(c.r&&c.t<1.6){c.r.rotation.x+=c.w.x*k*dt;c.r.rotation.y+=c.w.y*k*dt;c.r.rotation.z+=c.w.z*k*dt;const h=c.r.human||c.r;if(h.setPose)h.setPose('crash',1,{side:Math.sin(c.t*6)*.3*k})}
   const a=.35*Math.exp(-5*c.t);if(a>.003)camBase.p.set(c.cam.x+(Math.random()-.5)*a,c.cam.y+(Math.random()-.5)*a,c.cam.z+(Math.random()-.5)*a);else{camBase.p.copy(c.cam);if(c.t>1.6)crashFx=null}}
-/* FIGURES : point d'entrée commun à tous les sports. Enchaîner des figures à moins de 2,8 s
-   fait monter le combo (×1,5, ×2… jusqu'à ×4). Une chute casse le combo. */
-const combo={n:0,t:-9};
-/* FLOW : chaque figure remplit la jauge ; pleine = 8 s de « Flow » (figures ×1,5). Elle redescend doucement, et de moitié si le combo casse. */
-const FLOW={v:0,t:0};
-function comboBreak(){if(combo.n>1)feed('Combo cassé');combo.n=0;FLOW.v*=.5}
-function flowTick(dt){if(FLOW.t>0){FLOW.t-=dt;if(FLOW.t<=0)FLOW.v=0}else FLOW.v=Math.max(0,FLOW.v-.05*dt);const el=E.flow;if(el){el.style.width=(FLOW.t>0?FLOW.t/8:FLOW.v)*100+'%';el.parentNode.classList.toggle('on',FLOW.t>0)}}
-function trickFn(name,pts){if(!run||!cur||state!=='play')return;const now=runT;combo.n=now-combo.t<2.8?combo.n+1:1;combo.t=now;
-  const m=Math.min(4,1+(combo.n-1)*.5)*(FLOW.t>0?1.5:1),p=Math.round(pts*m);
-  if(FLOW.t<=0){FLOW.v=Math.min(1,FLOW.v+pts/1600);if(FLOW.v>=1){FLOW.t=8;toast('FLOW ! figures ×1,5',true);nearMissFx();sfxPlay('combo',.6,.85)}}cur.stats.score+=p;cur.stats.tricks=(cur.stats.tricks||0)+1;run.tricks=(run.tricks||0)+1;
-  const ms=String(m).replace('.',',');feed('+'+fmt(p)+' '+name+(m>1?' · combo ×'+ms:''));toast(m>1?name+' · ×'+ms:name,true);if(!sfx.trick(combo.n))ding(620+Math.min(combo.n,6)*90,.12);progTrick(curCfg.sport,name,combo.n)}
+/* =====================================================================
+   SCORE · COMBO · OVERDRIVE : barème central et configurable, commun aux 7 sports.
+   - ctx.trick(nom, points, opt) est l'unique entrée des figures. opt (facultatif) :
+       base   : famille de la figure pour la variété (ex. '360', 'Tailwhip') ; défaut = nom sans les mètres
+       land   : 'perfect' | 'clean' | 'sketchy' (qualité de réception mesurée par le sport)
+       risk   : 0..1 (frôlement, gap, trajectoire risquée) → bonus de risque
+       hold   : true pour les actions tenues (grind, manual, slide) : prolongent le combo sans compter de répétition
+   - Combo : chaque figure dans la fenêtre (SCORE.window s) monte le multiplicateur de SCORE.step, plafonné à ×4.
+   - Variété : refaire la même famille parmi les SCORE.memory dernières figures rapporte de moins en moins ;
+     une famille encore jamais faite dans le combo en cours rapporte un bonus.
+   - Overdrive : la jauge se remplit avec les points ; pleine = SCORE.od.dur s d'Overdrive : le combo monte
+     deux fois plus vite (toujours plafonné à ×4), effets visuels et sonores renforcés. Rien dans la physique ne change.
+   - Une chute ou ctx.comboBreak() (touché d'eau, bonk, freinage) remet le combo à ×1 et vide la moitié de la jauge.
+===================================================================== */
+const SCORE={window:2.8,step:.5,max:4,memory:6,repeat:[1,.6,.35,.2],fresh:.15,
+  land:{perfect:{pts:120,label:'Réception parfaite'},clean:{pts:40,label:''},sketchy:{pts:0,label:'Réception limite'}},
+  risk:150,od:{fill:1/1800,dur:8,stepK:2}};
+const combo={n:0,t:-9,m:1,seen:new Set(),best:0};
+const recent=[];/* familles des dernières figures (variété) */
+const FLOW={v:0,t:0};/* jauge + Overdrive (nom historique conservé) */
+const overdrive=()=>FLOW.t>0?clamp(FLOW.t/SCORE.od.dur*3,0,1):0;/* 0..1, lisible par les sports pour doser leurs effets */
+function comboBreak(){if(combo.n>1)feed('Combo cassé');combo.n=0;combo.m=1;combo.seen.clear();FLOW.v*=.5;paintCombo()}
+function comboAlive(){return run&&runT-combo.t<SCORE.window}
+function paintCombo(){const el=E.combo;if(!el)return;const alive=combo.n>0&&comboAlive();el.classList.toggle('on',alive&&combo.m>1);
+  const x=E.comboX;if(x)x.textContent='×'+String(Math.round(combo.m*10)/10).replace('.',',');const b=E.comboT;if(b)b.style.width=(alive?clamp(1-(runT-combo.t)/SCORE.window,0,1)*100:0)+'%'}
+function flowTick(dt){if(FLOW.t>0){FLOW.t-=dt;if(FLOW.t<=0){FLOW.v=0;document.body.classList.remove('od')}}else FLOW.v=Math.max(0,FLOW.v-.04*dt);
+  if(combo.n>0&&!comboAlive()){combo.n=0;combo.m=1;combo.seen.clear()}
+  const el=E.flow;if(el){el.style.width=(FLOW.t>0?FLOW.t/SCORE.od.dur:FLOW.v)*100+'%';el.parentNode.classList.toggle('on',FLOW.t>0)}paintCombo()}
+function trickFn(name,pts,opt){if(!run||!cur||state!=='play')return 0;opt=opt||{};const now=runT;
+  const base=opt.base||String(name).replace(/\s\d+\s?m$/,'').replace(/^(Slide parfait · )/,'');
+  const alive=now-combo.t<SCORE.window;combo.n=alive?combo.n+1:1;if(!alive){combo.seen.clear();combo.m=1}combo.t=now;
+  const od=FLOW.t>0;if(combo.n>1)combo.m=Math.min(SCORE.max,combo.m+SCORE.step*(od?SCORE.od.stepK:1));
+  /* variété */
+  let rep=0;if(!opt.hold)for(const r of recent)if(r===base)rep++;const vk=SCORE.repeat[Math.min(rep,SCORE.repeat.length-1)];
+  const fresh=!opt.hold&&!combo.seen.has(base)&&combo.n>1;combo.seen.add(base);if(!opt.hold){recent.push(base);if(recent.length>SCORE.memory)recent.shift()}
+  /* bonus */
+  const lq=opt.land&&SCORE.land[opt.land];const risk=Math.round(clamp(opt.risk||0,0,1)*SCORE.risk);
+  const raw=pts*vk*(fresh?1+SCORE.fresh:1)+(lq?lq.pts:0)+risk;const p=Math.round(raw*combo.m);
+  if(FLOW.t<=0){FLOW.v=Math.min(1,FLOW.v+raw*SCORE.od.fill);if(FLOW.v>=1){FLOW.t=SCORE.od.dur;document.body.classList.add('od');toast('OVERDRIVE · le combo monte deux fois plus vite',true);nearMissFx();sfxPlay('combo',.6,.85)}}
+  cur.stats.score+=p;cur.stats.tricks=(cur.stats.tricks||0)+1;run.tricks=(run.tricks||0)+1;combo.best=Math.max(combo.best,combo.m);cur.stats.comboMax=Math.max(cur.stats.comboMax||1,combo.m);
+  const ms=String(Math.round(combo.m*10)/10).replace('.',',');
+  const tags=[];if(lq&&lq.label)tags.push(lq.label);if(risk)tags.push('risque');if(fresh)tags.push('variété');if(vk<1)tags.push('déjà vu');
+  feed('+'+fmt(p)+' '+name+(combo.m>1?' · ×'+ms:'')+(tags.length?' · '+tags.join(', '):''));
+  const big=pts>=250||combo.m>=3||opt.land==='perfect';if(big||combo.n===1)toast(combo.m>1?name+' · ×'+ms:name,true);
+  if(opt.land==='perfect'){ding(1320,.18);if(E.combo){E.combo.classList.remove('pop');void E.combo.offsetWidth;E.combo.classList.add('pop')}}
+  if(!sfx.trick(combo.n))ding(620+Math.min(combo.n,6)*90,.12);if(combo.n>1&&E.combo){E.combo.classList.remove('bump');void E.combo.offsetWidth;E.combo.classList.add('bump')}
+  progTrick(curCfg.sport,name,combo.n,opt);paintCombo();return p}
 /* ---------- CAMÉRA LIBRE ----------
    Glisser (souris ou doigt) pour regarder autour, molette = zoom, Q / E = regarder sur les côtés,
    V = regarder derrière, stick droit de la manette. La caméra tourne autour du rider (rotation rigide :
@@ -78,7 +114,7 @@ function trickFn(name,pts){if(!run||!cur||state!=='play')return;const now=runT;c
    travelling d'intro autour du rider. Au « Go » : coup de zoom, souffle, vibration. */
 const LOOK={yaw:0,pitch:0,zoom:1,drag:null,lastIn:-9,go:0,shake:0};
 /* secousse amortie (réceptions, frottements, chutes, frôlements) : camShake(0..1) */
-function camShake(a){LOOK.shake=Math.min(1,Math.max(LOOK.shake,a||.3))}const camBase={p:V3(),q:new THREE.Quaternion(),ok:false};let vigT=0;
+function camShake(a){const k=S().shake??1;if(k<=0)return;LOOK.shake=Math.min(1,Math.max(LOOK.shake,(a||.3)*k))}const camBase={p:V3(),q:new THREE.Quaternion(),ok:false};let vigT=0;
 const _LT=V3(),_LO=V3(),_LA=V3(),_LY=new THREE.Vector3(0,1,0),_Lq1=new THREE.Quaternion(),_Lq2=new THREE.Quaternion();
 const lookOn=()=>state==='play'||state==='count'||state==='over'||state==='pause';
 renderer.domElement.addEventListener('pointerdown',e=>{if(lookOn())LOOK.drag={x:e.clientX,y:e.clientY,id:e.pointerId}});
@@ -103,7 +139,7 @@ function applyLook(dt){if(!cur||!camBase.ok||state==='replay')return;const t=per
       if(cur._h){const gy=cur._h(camera.position.x,camera.position.z);if(isFinite(gy)&&camera.position.y<gy+.7)camera.position.y=gy+.7}}}
   if(state==='play'&&LOOK.go>0){camera.fov+=18*LOOK.go*LOOK.go;camera.updateProjectionMatrix();LOOK.go=Math.max(0,LOOK.go-dt*1.6)}
   if(LOOK.shake>.003&&(state==='play'||state==='over')){const a=LOOK.shake*.3;camera.position.x+=(Math.random()-.5)*a;camera.position.y+=(Math.random()-.5)*a;camera.position.z+=(Math.random()-.5)*a;camera.rotateZ((Math.random()-.5)*a*.12);LOOK.shake*=Math.exp(-6*dt)}}
-function onCrash(title,text){window.__llLastCrash={title,text};combo.n=0;FLOW.v=0;FLOW.t=0;if(state!=='play')return;state='over';startCrashFx();run.dnf=true;speedLines(0,0);showOver('crash',title,text);netPush(true)}
+function onCrash(title,text){window.__llLastCrash={title,text};combo.n=0;combo.m=1;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');if(state!=='play')return;state='over';startCrashFx();run.dnf=true;speedLines(0,0);showOver('crash',title,text);netPush(true)}
 function onFinish(time){if(state!=='play')return;state='over';sfx.finish();run.finished=true;run.final=time+run.pen;finalizeRun();speedLines(0,0);
   const medal=medalOf(run.final,cur.target);const mtxt={g:'Médaille d\'or',s:'Médaille d\'argent',b:'Médaille de bronze',n:'Arrivée'}[medal];
   showOver('finish',mtxt,'Temps '+fmtT2(run.final)+(run.pen?' dont '+run.pen+' s de pénalités':'')+' · objectif or '+fmtT(cur.target)+'.',medal);netPush(true)}

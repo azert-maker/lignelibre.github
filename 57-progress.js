@@ -42,10 +42,10 @@ function addXp(sport,g){profile.xp=profile.xp||{};const before=sportLvl(sport);p
 function achComplete(a){profile.ach=profile.ach||{};profile.ach[a.id]=Date.now();profile.coins+=a.c;addXp(a.s,a.xp);toast('Défi réussi : '+a.l,true);feed('Défi « '+a.l+' » · +'+a.xp+' XP · +'+a.c+' pièces');
   if(run){run.achs=run.achs||[];run.achs.push(a.l)}saveProfile()}
 /* appelée par trickFn à chaque figure */
-function progTrick(sport,name,comboN){profile.achP=profile.achP||{};
+function progTrick(sport,name,comboN,opt){profile.achP=profile.achP||{};opt=opt||{};
   for(const a of ACH){if(a.s!==sport||achDone(a.id))continue;
-    if(a.m){const mm=/(\d+) m$/.exec(name);if(mm&&/50-50|Boardslide/.test(name)){profile.achP[a.id]=(profile.achP[a.id]||0)+(+mm[1]);if(profile.achP[a.id]>=a.m)achComplete(a)}continue}
-    if(!a.t(name,comboN))continue;if(a.n){profile.achP[a.id]=(profile.achP[a.id]||0)+1;if(profile.achP[a.id]>=a.n)achComplete(a)}else achComplete(a)}}
+    if(a.m){const mm=/(\d+) m$/.exec(name);if(mm&&(a.mre||/50-50|Boardslide/).test(name)){profile.achP[a.id]=(profile.achP[a.id]||0)+(+mm[1]);if(profile.achP[a.id]>=a.m)achComplete(a)}continue}
+    if(!a.t(name,comboN,opt))continue;if(a.n){profile.achP[a.id]=(profile.achP[a.id]||0)+1;if(profile.achP[a.id]>=a.n)achComplete(a)}else achComplete(a)}}
 function xpFor(st,r){return clamp(Math.round((st.score||0)/12+(st.tricks||0)*8+(r.finished?60:0)+(st.time||0)*1.2),5,3000)}
 function progOverHtml(){if(!run||!cur)return '';const sp=curCfg.sport,g=run.xpGain!=null?run.xpGain:xpFor(cur.stats,run),L=lvlOf((profile.xp||{})[sp]||0);
   const pct=Math.round(L.x/L.need*100);return `<div class="xpline"><span>+${g} XP${run.xpGain==null?' (à la fin)':''}</span><div class="bt"><i style="width:${pct}%"></i></div><b>Niv. ${L.l} ${SPORT_SHORT[sp]}</b></div>`+

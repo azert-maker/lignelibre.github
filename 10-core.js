@@ -37,7 +37,7 @@ const PROFILE_DEFAULT={
     gear:{helmet:'full',wing:'proxy',board:'top98',wheel:'w83'}},
   coins:0,xp:{},ach:{},achP:{},owned:{},adp:{},cons:{revive:0,boost:0,x15:0},
   records:{},medals:{},history:[],runs:0,
-  settings:{quality:'normal',vol:.8,music:true,ghost:true,autoQ:true,sbAssist:true,spinSens:1,invert:false,cam:0,adsDemo:true,haptics:true,assist:true},
+  settings:{quality:'normal',vol:.8,sfxVol:1,musicVol:1,shake:1,flash:true,music:true,ghost:true,autoQ:true,sbAssist:true,spinSens:1,invert:false,cam:0,adsDemo:true,haptics:true,assist:true},
   last:{},
   streak:0,bestStreak:0,lastPlayDay:'',dailyDone:'',tutorialStep:0,
   account:{pseudo:'',pinHash:'',syncedAt:0,recoveryCode:''},classCode:''
@@ -165,7 +165,7 @@ function muteAll(m){audioMuted=m;if(master)master.gain.setTargetAtTime(m?0:S().v
 function sound(g,f,q){if(!actx)return;const t=actx.currentTime;nGain.gain.setTargetAtTime((quiet?g*.12:g)*.6,t,.12);nFilt.frequency.setTargetAtTime(f,t,.12);nFilt.Q.setTargetAtTime(q,t,.2)}
 let quiet=false;
 function ding(f,dur){if(!actx||quiet)return;dur=dur||.4;const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();o.type=f<200?'sine':'triangle';o.frequency.value=f;
-  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(f<200?.4:.16,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05)}
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime((f<200?.4:.16)*(S().sfxVol??1)+1e-4,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05)}
 function buzz(p){try{if(S().haptics&&navigator.vibrate)navigator.vibrate(p)}catch(e){}}
 
 /* ---------- entrées : clavier, tactile, manette ---------- */
@@ -185,7 +185,7 @@ function pollPad(onPress){if(padOff)return;let gps=[];try{gps=navigator.getGamep
 const isTouch=matchMedia('(pointer:coarse)').matches;if(isTouch)document.body.classList.add('touch');
 
 /* ---------- HUD ---------- */
-const E={score:$('#hScore'),mult:$('#hMult'),speed:$('#hSpeed'),vmax:$('#hVmax'),arc:$('#spdArc'),time:$('#hTime'),toast:$('#toast'),touch:$('#touch'),feed:$('#feed'),inst:$('#inst'),count:$('#count'),prog:$('#hProg'),mp:$('#hMp'),vig:$('#vig'),flow:$('#hFlow')};
+const E={score:$('#hScore'),mult:$('#hMult'),speed:$('#hSpeed'),vmax:$('#hVmax'),arc:$('#spdArc'),time:$('#hTime'),toast:$('#toast'),touch:$('#touch'),feed:$('#feed'),inst:$('#inst'),count:$('#count'),prog:$('#hProg'),mp:$('#hMp'),vig:$('#vig'),flow:$('#hFlow'),combo:$('#hCombo'),comboX:$('#hComboX'),comboT:$('#hComboT')};
 let toastT=0,lastToast='';
 function toast(msg,force){if(!force&&msg===lastToast&&toastT>0){toastT=1.1;return}
   E.toast.textContent=msg;E.toast.classList.remove('show');void E.toast.offsetWidth;E.toast.classList.add('show');toastT=1.1;lastToast=msg}
