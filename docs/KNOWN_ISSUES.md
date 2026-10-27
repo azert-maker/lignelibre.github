@@ -10,8 +10,9 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 4 | 🟡 | Fichier HTML passé de 2,1 Mo à 2,6 Mo (GLB en base64) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
 | 6 | 🟡 | Clip « celebrate » disponible mais pas encore branché sur l'écran de fin | brancher `human.clip('celebrate')` sur l'écran de résultats |
-| 7 | 🟡 | IK des mains seulement sur le BMX (moto, wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains en P2 |
-| 8 | ⚪ | Réceptions : motocross, wakeboard, downhill et parkour gardent leur ancien retour (le ressort et la caméra ne sont branchés que sur BMX et snowboard) | brancher `ctx.land` sport par sport |
+| 7 | 🟡 | IK des mains sur BMX et motocross seulement (wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains |
+| 8 | ⚪ | Réceptions : wakeboard et downhill gardent leur ancien retour (BMX, snowboard, motocross et parkour sont branchés) | brancher `ctx.land` |
+| 18 | 🟡 | Moto fournie : licence non confirmée ; pas de variante légère (≈ 13 600 triangles aussi en éco, i/s en éco 41 → 33-38 en rendu logiciel) | confirmer la provenance ; décimer une variante éco si besoin |
 | 17 | ⚪ | Downhill longboard, wakeboard et wingsuit gardent l'ancienne chute (pas de fonction de relief exportée pour le longboard ; eau et vol traités à part) | exporter `_h` dans le longboard |
 | 15 | 🟡 | Chute physique : corps rigide (pas de vrai ragdoll membre par membre) ; le rider peut traverser un mur ou un module vertical | v2 : collisions avec les boîtes du parc |
 | 16 | ⚪ | Le replay ne rejoue pas la compression de réception (pose enregistrée sans le ressort) | enregistrer `landState` dans les images du replay |
