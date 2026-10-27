@@ -48,7 +48,7 @@ MODES.wakeboard=function(cfg,look,ctx){
   function wakeAt(x,z){const dx=x-B.sx,dz=z-B.sz,dl=-(dx*B.fx+dz*B.fz),lat=dx*B.rx+dz*B.rz;if(dl<=0)return 0;const xr=dl*TAN+1.1,d=(Math.abs(lat)-xr)/1.25;
     const fade=clamp(dl/7,0,1)*Math.exp(-dl/75);return HWK*fade*(Math.exp(-d*d)-.18*Math.exp(-(lat*lat)/(4+dl*.2)))}
   let tW=0;const Wf=(x,z)=>.06*Math.sin(.31*x+1.3*tW)+.05*Math.sin(.27*z-1.1*tW+.4*Math.sin(x*.05))+wakeAt(x,z);
-  const N=eco?40:S().quality==='high'?96:72,SIZE=110,ST=SIZE/N;
+  const N=eco?40:S().quality==='high'?84:60,SIZE=110,ST=SIZE/N;const WK=new Float32Array((N+1)*(N+1));
   const og=new THREE.BufferGeometry(),pos=new Float32Array((N+1)*(N+1)*3),col=new Float32Array((N+1)*(N+1)*3),idx=[],hg=new Float32Array((N+1)*(N+1));
   for(let j=0;j<=N;j++)for(let i=0;i<=N;i++){pos[(j*(N+1)+i)*3]=-SIZE/2+i*ST;pos[(j*(N+1)+i)*3+2]=-SIZE/2+j*ST}
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const a=j*(N+1)+i,b=a+1,c=a+N+1,d=c+1;idx.push(a,c,b,b,c,d)}
@@ -59,8 +59,8 @@ MODES.wakeboard=function(cfg,look,ctx){
   const far=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),eco?new THREE.MeshLambertMaterial({color:0x1d8f99}):waterMaterial(new THREE.MeshPhongMaterial({color:0x1d8f99,shininess:60,specular:0x557788})));far.rotation.x=-Math.PI/2;far.position.y=-.08;root.add(far);
   const cDeep=new THREE.Color(0x0f5f70),cMid=new THREE.Color(0x1f97a0),cFoam=new THREE.Color(0xeefcfb),tc=new THREE.Color();let gx=0,gz=0;
   function updateWater(cx0,cz0){gx=Math.round(cx0/ST)*ST;gz=Math.round(cz0/ST)*ST;water.position.set(gx,0,gz);
-    for(let n=0;n<(N+1)*(N+1);n++){const y=Wf(pos[n*3]+gx,pos[n*3+2]+gz);pos[n*3+1]=y;hg[n]=y}
-    for(let n=0;n<(N+1)*(N+1);n++){const y=hg[n],wk=wakeAt(pos[n*3]+gx,pos[n*3+2]+gz);tc.copy(cDeep).lerp(cMid,clamp(y*2+.5,0,1));if(wk>.12*HWK)tc.lerp(cFoam,clamp((wk/HWK-.12)*1.6,0,.85));col[n*3]=tc.r;col[n*3+1]=tc.g;col[n*3+2]=tc.b}
+    for(let n=0;n<(N+1)*(N+1);n++){const x=pos[n*3]+gx,z=pos[n*3+2]+gz,wk=wakeAt(x,z);WK[n]=wk;const y=.06*Math.sin(.31*x+1.3*tW)+.05*Math.sin(.27*z-1.1*tW+.4*Math.sin(x*.05))+wk;pos[n*3+1]=y;hg[n]=y}
+    for(let n=0;n<(N+1)*(N+1);n++){const y=hg[n],wk=WK[n];tc.copy(cDeep).lerp(cMid,clamp(y*2+.5,0,1));if(wk>.12*HWK)tc.lerp(cFoam,clamp((wk/HWK-.12)*1.6,0,.85));col[n*3]=tc.r;col[n*3+1]=tc.g;col[n*3+2]=tc.b}
     if(nor)for(let j=0;j<=N;j++)for(let i=0;i<=N;i++){const n=j*(N+1)+i,l=hg[j*(N+1)+Math.max(0,i-1)],r=hg[j*(N+1)+Math.min(N,i+1)],u=hg[Math.max(0,j-1)*(N+1)+i],d=hg[Math.min(N,j+1)*(N+1)+i];const nx=-(r-l)/(2*ST),nz=-(d-u)/(2*ST),il=1/Math.sqrt(nx*nx+1+nz*nz);nor[n*3]=nx*il;nor[n*3+1]=il;nor[n*3+2]=nz*il}
     og.attributes.position.needsUpdate=true;og.attributes.color.needsUpdate=true;if(nor)og.attributes.normal.needsUpdate=true}
   /* hauteur EXACTE du triangle affiché (même découpage que l'index) ; hors grille : la fonction directe */

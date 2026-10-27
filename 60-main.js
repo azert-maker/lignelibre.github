@@ -255,4 +255,4 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
 
 /* ---------- démarrage ---------- */
 resize();setCam(S().cam|0);previewSport(profile.last.sport||'wingsuit');go('home',false);requestAnimationFrame(frame);
-window.__ll={SPORT_IDS,SPORTS,MODES,forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
+window.__ll={SPORT_IDS,SPORTS,MODES,crashNow(){onCrash('Test','Chute de test')},forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
