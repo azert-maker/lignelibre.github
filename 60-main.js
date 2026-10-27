@@ -3,7 +3,7 @@
    récompenses, fantômes multijoueur
 ===================================================================== */
 let state='menu',cur=null,curCfg=null,camMode=S().cam|0,runT=0,countT=0,run=null,previewId=null,previewW=null,hudAcc=1;
-const DUMMY={trick(){},crash(){},finish(){},bonus(){},checkpoint(){},hud(){},cam:()=>0,boost:false};
+const DUMMY={trick(){},crash(){},finish(){},bonus(){},checkpoint(){},hud(){},keep(){},comboBreak(){},cam:()=>0,boost:false};
 function setCam(m){camMode=m;$$('[data-cam]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.cam===m))}
 $$('[data-cam]').forEach(b=>b.onclick=()=>setCam(+b.dataset.cam));
 function defaultParams(id){const p={};SPORTS[id].params.forEach(x=>p[x.k]=x.bool?x.def===1:x.def);return p}
@@ -40,7 +40,7 @@ async function startRun(cfg,opt={}){
   ghostStop();if(cur)cur.dispose();ghostsClear();previewId=null;demo=null;quiet=false;$('#demoTag').hidden=true;
   curCfg=cfg;run={cfg,use:opt.use||{},multi:!!opt.multi,pen:0,continues:0,snaps:[],snapT:0,finished:false,dnf:false,cp:0,final:0,finalized:false,coins:0,netT:0,doubled:false,engageBits:[]};run.goal=pickSessionGoal(cfg);
   const ctx={boost:!!run.use.boost,crash:onCrash,finish:onFinish,cam:()=>camMode,hud:setHud,
-    bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,comboBreak};combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
+    bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,comboBreak,keep:()=>{if(combo.n>0)combo.t=runT}};combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
   cur=MODES[cfg.sport](cfg,profile.look,ctx);flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
   $('#hMode').textContent=cur.name;E.inst.innerHTML=cur.inst;E.feed.innerHTML='';E.mp.innerHTML='';
   $('#keys').innerHTML=cur.keys.slice(0,4).map(k=>'<div><kbd>'+k[0]+'</kbd>'+k[1]+'</div>').join('');
@@ -251,4 +251,4 @@ function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;con
 
 /* ---------- démarrage ---------- */
 resize();setCam(S().cam|0);previewSport(profile.last.sport||'wingsuit');go('home',false);requestAnimationFrame(frame);
-window.__ll={SPORT_IDS,SPORTS,MODES,get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
+window.__ll={SPORT_IDS,SPORTS,MODES,forcePlay(){if(state==='count'){state='play';E.count.hidden=true}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
