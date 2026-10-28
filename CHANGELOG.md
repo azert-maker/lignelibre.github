@@ -1,5 +1,24 @@
 # Journal des versions · Ligne Libre
 
+## 0.22.0 · 28 octobre 2026 · Gameplay et lieux iconiques
+
+Gameplay
+- Snowboard : plus de blocage à l'arrêt (des pics rocheux poussaient dans la piste). Piste dégagée et relance automatique après 1,2 s bloqué.
+- Wakeboard : les réceptions sont maintenant jugées justes (avant, presque tout était « limite ») et passent par le système de réception commun.
+
+Lieux
+- Noms des cartes : Lauterbrunnen Valley (wingsuit), Mount Tamalpais (downhill), Whistler Blackcomb (snowboard), Venice Beach Park (BMX), Glen Helen MX (motocross), Lake Havasu (wakeboard), Paris Rooftops (parkour).
+- Venice Beach : béton clair à joints, palmiers, plage, océan, poste de sauveteur, façades colorées, montagnes au loin ; ciel et lumière de bord de mer.
+- Lauterbrunnen : falaises verticales, cascades animées, chalets, église, prairies vertes, ciel alpin.
+- Whistler : filets et drapeaux de piste, chalets, modules de snowpark sur les bords (hors trajectoire).
+- Module `36-places.js` (décor léger fusionné et instancié).
+
+3D
+- Modules de snowpark fournis intégrés (`snowpark.glb`, chargé à la demande) : rails du snowboard modélisés.
+
+Tests
+- `tests/feel.js` (10 contrôles) ajouté à `npm test`.
+
 ## 0.21.2 · 28 octobre 2026 · Pince non jouable
 
 - Retrait du mini-jeu de pince du garage (onglet « Machine », commandes, taux de prise). Récupérer un skin se fait uniquement par l'animation de la machine à skins.

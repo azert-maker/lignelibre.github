@@ -22,7 +22,7 @@ Principe : une priorité à la fois. On ne passe à la production en série (7 s
 | BMX Blender détaillé | pièces séparées sur les pivots du jeu, tailwhip / barspin / roues / pédalier animés | ✅ v1 |
 | Mains sur le guidon (IK) | écart main / poignée < 5 cm en roulant, lâcher pendant le barspin | ✅ en roulant (0,0 cm) · 🟡 lâcher au barspin codé, non testé |
 | Posture BMX crédible | genoux fléchis, buste penché, bras pliés (revue visuelle) | ✅ v1 |
-| Environnement skatepark soigné | béton à joints et taches, coping métal, éclairage chaud, décor de fond cohérent, 60 i/s éco sur téléphone milieu de gamme | 🔵 prochaine tâche |
+| Environnement skatepark soigné | béton à joints et taches, coping métal, éclairage chaud, décor de fond cohérent, 60 i/s éco sur téléphone milieu de gamme | 🟡 ambiance Venice en place, modules et mesure téléphone à faire |
 | Animations de réception et de chute | compression visible, chute en ragdoll simple ou clip Blender | ✅ v1 (BMX, snowboard ; chute aussi en motocross et parkour) |
 | Casque intégral v2 | forme organique, visière crédible, rendu de face | ✅ v2 (rendus `helmet_front.jpg`, `helmet_34.jpg`) |
 | Visage v2 | regard vivant (clignement), expressions | ⚪ |

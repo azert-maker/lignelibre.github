@@ -23,7 +23,7 @@ mkdir -p dist
   done
   echo '};'
 } > 17-assets.js
-JS="10-core.js 15-fx.js 16-sfx-data.js 17-assets.js 18-glb.js 20-gear.js 30-ads-net.js 35-valley.js 40-wingsuit.js 41-downhill.js 44-snowboard.js 45-park.js 46-bmx.js 47-moto.js 48-wake.js 49-parkour.js 50-ui.js 52-claw.js 55-engage.js 57-progress.js 58-replay.js 60-main.js"
+JS="10-core.js 15-fx.js 16-sfx-data.js 17-assets.js 18-glb.js 20-gear.js 30-ads-net.js 35-valley.js 36-places.js 40-wingsuit.js 41-downhill.js 44-snowboard.js 45-park.js 46-bmx.js 47-moto.js 48-wake.js 49-parkour.js 50-ui.js 52-claw.js 55-engage.js 57-progress.js 58-replay.js 60-main.js"
 SCRIPTS() {
   echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>'
   echo '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>'

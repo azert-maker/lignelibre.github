@@ -34,20 +34,19 @@ function buildBmx(look){const g=new THREE.Group();const bp=gearOf('bmx',look.gea
 
 MODES.bmx=function(cfg,look,ctx){
   const P_=cfg.params||{},course=cfg.mode==='course',eco=S().quality==='eco',seedI=strSeed(cfg.seed);const R=rngAt(seedI,3,7);
-  const env={fogNear:150,fogFar:560,hemiGround:0x4a3a5a,accent:'#b26bff',cloudY:140,light:.78};
+  const env={fogNear:170,fogFar:900,hemiGround:0x9a8a6a,accent:'#b26bff',cloudY:160,light:.86,tint:PLACE_TINT.bmx};
   const root=new THREE.Group();scene.add(root);
   const SZ=[96,124,150][P_.size??1],HS=SZ/2,QL=[3.4,3.9,4.4][P_.height??1],QH=[1.9,2.4,2.9][P_.height??1],JH=[.9,1.2,1.6][P_.height??1];
-  const park=makePark({root,top:0xbdb6ad,side:0x6a4fb0,lip:0x2ee6ff,rail:0xff8a2a});
+  /* Venice Beach : béton clair, flancs gris, coping acier poli, rails jaunes */
+  const park=makePark({root,top:0xcfc7b9,side:0x8f877d,lip:0xeef3f7,rail:0xf2b632});
   /* ---------- sol, murs, décor ---------- */
-  {const fl=new THREE.Mesh(new THREE.PlaneGeometry(SZ+40,SZ+40),detailMaterial(new THREE.MeshLambertMaterial({color:0x8e8a86}),{amp:.12}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;root.add(fl);
-   const out=new THREE.Mesh(new THREE.RingGeometry(SZ*.75,900,32,1),new THREE.MeshLambertMaterial({color:0x5f7d4a}));out.rotation.x=-Math.PI/2;out.position.y=-.02;root.add(out);
+  {const VD=veniceDecor(root,SZ,seedI,eco);const fl=new THREE.Mesh(new THREE.PlaneGeometry(SZ+40,SZ+40),detailMaterial(new THREE.MeshLambertMaterial({color:0xffffff,map:VD.floorMap}),{amp:.1}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;root.add(fl);
    /* lignes de sol peintes (repères de vitesse et de direction) */
-   const lm=new THREE.MeshBasicMaterial({color:0x8a6bff,transparent:true,opacity:.35,depthWrite:false});for(let i=-2;i<=2;i++){const s=new THREE.Mesh(new THREE.PlaneGeometry(.25,SZ-2*QL-8),lm);s.rotation.x=-Math.PI/2;s.position.set(i*SZ/6,.01,0);root.add(s)}
+   const lm=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.28,depthWrite:false});for(let i=-2;i<=2;i++){const s=new THREE.Mesh(new THREE.PlaneGeometry(.25,SZ-2*QL-8),lm);s.rotation.x=-Math.PI/2;s.position.set(i*SZ/6,.01,0);root.add(s)}
    /* tribunes et immeubles autour : profondeur, silhouette urbaine */
-   const bm=new THREE.MeshLambertMaterial({color:0x3b3550}),wm=new THREE.MeshBasicMaterial({color:0xffc86a});const rr=rngAt(seedI,9,9);
-   for(let i=0;i<(eco?14:28);i++){const a=i/(eco?14:28)*Math.PI*2+rr()*.2,d=SZ*.9+rr()*120,h=14+rr()*46,w=14+rr()*18;const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),bm);b.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d);b.rotation.y=rr()*3;root.add(b)}
+   const rr=rngAt(seedI,9,9);
    /* tribunes derrière les quarters (le public voit par-dessus les decks) */
-   const stM=new THREE.MeshLambertMaterial({color:0x2b2840});for(const [sx,sz,rot] of [[0,1,0],[0,-1,0],[1,0,1],[-1,0,1]])for(let k=0;k<3;k++){const st=new THREE.Mesh(new THREE.BoxGeometry(rot?2:SZ*.8,QH+.4+k*.9,rot?SZ*.8:2),stM);st.position.set(sx*(HS+1.6+k*2),(QH+.4+k*.9)/2,sz*(HS+1.6+k*2));root.add(st)}
+   const stM=new THREE.MeshLambertMaterial({color:0x7d8a96});for(const [sx,sz,rot] of [[0,1,0],[0,-1,0],[1,0,1],[-1,0,1]])for(let k=0;k<3;k++){const st=new THREE.Mesh(new THREE.BoxGeometry(rot?2:SZ*.8,QH+.4+k*.9,rot?SZ*.8:2),stM);st.position.set(sx*(HS+1.6+k*2),(QH+.4+k*.9)/2,sz*(HS+1.6+k*2));root.add(st)}
    const crowdN=eco?60:180,cg=new THREE.InstancedMesh(PEOPLE_GEO.b,new THREE.MeshLambertMaterial({color:0xffffff}),crowdN),hg=new THREE.InstancedMesh(PEOPLE_GEO.h,new THREE.MeshLambertMaterial({color:0xd9a77f}),crowdN);
    for(let i=0;i<crowdN;i++){const side=i%4,k=Math.floor(rr()*3),t=(rr()-.5)*SZ*.75,o=HS+1.6+k*2;const x=side<2?t:side===2?o:-o,z=side===0?o:side===1?-o:t;_dv.set(x,QH+.4+k*.9,z);_dq.setFromAxisAngle(_dy,Math.atan2(-x,-z));_ds.set(1,1,1);_dm.compose(_dv,_dq,_ds);cg.setMatrixAt(i,_dm);hg.setMatrixAt(i,_dm);cg.setColorAt(i,new THREE.Color(PEOPLE_COLS[i%PEOPLE_COLS.length]))}
    root.add(cg);root.add(hg)}

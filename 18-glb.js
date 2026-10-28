@@ -10,7 +10,7 @@
 const GLB={ready:false,models:{},err:null,stats:{}};
 function b64ToBuf(s){const bin=atob(s),n=bin.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 /* modèles décodés seulement quand on en a besoin (la machine à pinces n'apparaît qu'au garage) */
-const GLB_LAZY=['claw'];const GLB_PEND={};
+const GLB_LAZY=['claw','snowpark'];const GLB_PEND={};
 function glbLoad(n){if(GLB.models[n])return Promise.resolve(GLB.models[n]);if(GLB_PEND[n])return GLB_PEND[n];
   if(typeof ASSET_GLB==='undefined'||!ASSET_GLB[n]||!THREE.GLTFLoader)return Promise.resolve(null);
   return GLB_PEND[n]=new Promise(res=>{try{new THREE.GLTFLoader().parse(b64ToBuf(ASSET_GLB[n]),'',gl=>{GLB.models[n]=gl;res(gl)},e=>{GLB.err=n+': '+String(e&&e.message||e);res(null)})}catch(e){GLB.err=n+': '+e.message;res(null)}})}
