@@ -1,8 +1,8 @@
 # État du projet · Ligne Libre
 
-Mis à jour : 28 octobre 2026 (version 0.22.0 : gameplay snowboard et wakeboard, lieux iconiques, snowpark Blender).
+Mis à jour : 28 octobre 2026 (version 0.23.0 : économie recalibrée, pièces à ramasser dans les 7 sports, décor signature des 7 lieux).
 
-Lieux iconiques : Venice Beach (BMX), Lauterbrunnen (wingsuit) et Whistler (snowboard) ont un décor dédié ; les 4 autres cartes sont renommées seulement.
+Économie : voir `docs/ECONOMY.md` (moyenne mesurée 26 pièces par partie, une machine toutes les 6 parties). Lieux : les 7 cartes ont un décor et un ciel propres.
 
 Légende des statuts (utilisée dans tous les documents) :
 
@@ -20,7 +20,7 @@ Légende des statuts (utilisée dans tous les documents) :
 |---|---|---|
 | Lancement du jeu | `dist/ligne-libre-standalone.html` s'ouvre dans Chromium sans erreur JS ; 7 sports jouables | ✅ |
 | Build | `build.sh` assemble 21 modules JS + HTML en un fichier ; embarque les GLB en base64 ; `node --check` OK | ✅ |
-| Tests | Playwright + Chromium (rendu logiciel) : 62/62 régression, 10/10 ressenti et lieux (`feel.js`), 15/15 modèles Blender, figures BMX, wallrun parkour, clavier, tactile, fuites mémoire | ✅ |
+| Tests | Playwright + Chromium (rendu logiciel) : 62/62 régression, 10/10 ressenti et lieux (`feel.js`), 21/21 économie (`econ.js`), 11/11 version 0.23 (`v023.js`), 15/15 modèles Blender, figures BMX, wallrun parkour, clavier, tactile, fuites mémoire | ✅ |
 | Git | dépôt local `v3/` avec historique ; `.gitignore`, `CONTRIBUTING.md`, CI GitHub Actions prêts | ✅ |
 | GitHub | dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC (identifiants de ton poste) | ✅ |
 | Blender sur ton PC | l'outil Blender du PC répond « Cannot connect to Blender at localhost:9876 » (Blender non lancé ou extension MCP inactive) | ⛔ contourné |

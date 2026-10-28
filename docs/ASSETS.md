@@ -59,7 +59,8 @@ Le 28 octobre, Jean a confirmé que ces modèles sont libres d'utilisation (acco
 | Utilisé et bon | rider, rider_lo, BMX, moto, machine à skins, modules de snowpark | testés en jeu (`tests/glb.js`, `tests/feel.js`) |
 | Branché pendant cet audit | modules de snowpark | rails du snowboard (géométrie Blender à la place du cylindre) + 5 modules décoratifs par tronçon à Whistler |
 | Pauvre ou à améliorer | remontée mécanique et sapins `3d-model.3ds` (pas de textures), `Mountain_Snow` (8 M de triangles), `Realistic man` (345 000 triangles) | retexturer ; convertir la montagne en carte de hauteur ; décimer le personnage |
-| Décor procédural (pas de modèle) | palmiers, poste de sauveteur, façades de Venice ; chalets, église, cascades de Lauterbrunnen ; filets, drapeaux, chalets de Whistler (`36-places.js`) | légers (fusion des sommets, instanciation), à remplacer par des modèles Blender si besoin |
+| Décor procédural (pas de modèle) | palmiers, poste de sauveteur, façades de Venice ; chalets, église, cascades de Lauterbrunnen ; filets, drapeaux, chalets de Whistler ; tour Eiffel, toits en zinc (Paris) ; pont de pierre, palmiers (Havasu) ; tribune (Glen Helen) ; mer de nuages (Tamalpais) (`36-places.js`) | légers (fusion des sommets, instanciation), à remplacer par des modèles Blender si besoin |
+| Branché en 0.23 | clip `celebrate` du rider (écran d'arrivée) ; pièces à ramasser (un seul InstancedMesh) | `tests/v023.js`, `tests/econ.js` |
 
 ### Assets manquants, par priorité
 
@@ -69,9 +70,9 @@ Le 28 octobre, Jean a confirmé que ces modèles sont libres d'utilisation (acco
 | 2 | Clips Blender de réception et de chute | tous | rendre la compression et la chute plus organiques | 19 os du rig, 0,3 à 1 s, en place | ressort procédural + corps rigide |
 | 3 | Combinaison wingsuit (voilure entre bras et jambes) | Wingsuit | le rider ressemble à un piéton en vol | même squelette, voilure pondérée sur bras et jambes | rider standard bras écartés |
 | 4 | Kit Venice Beach (bowl, coping, bancs, poubelles, tags sous licence) | BMX | identité du lieu au sol | modules < 2 000 triangles, textures 512 | parc procédural + palmiers |
-| 5 | Kit toits de Paris (zinc, cheminées, lucarnes) | Parkour | carte seulement renommée | modules instanciables | blocs procéduraux |
-| 6 | Bouées, ponton, falaises rouges | Wakeboard (Lake Havasu) | carte seulement renommée | légers, eau existante | décor actuel |
-| 7 | Tribunes et bottes de paille de motocross | Motocross (Glen Helen) | carte seulement renommée | instanciation | décor actuel |
+| 5 | Kit toits de Paris (lucarnes, mansardes, cheminées à mitrons) | Parkour | silhouette Eiffel et couleurs en place, toits encore plats | modules instanciables | blocs procéduraux recolorés |
+| 6 | Bouées, ponton, phare | Wakeboard (Lake Havasu) | montagnes rouges, palmiers et pont en place | légers, eau existante | décor 0.23 |
+| 7 | Bottes de paille, bâches publicitaires sans marque, tour de chronométrage | Motocross (Glen Helen) | tribune et couleurs en place | instanciation | décor 0.23 |
 
 ## À produire (P2)
 

@@ -9,7 +9,7 @@ $$('[data-cam]').forEach(b=>b.onclick=()=>setCam(+b.dataset.cam));
 function defaultParams(id){const p={};SPORTS[id].params.forEach(x=>p[x.k]=x.bool?x.def===1:x.def);return p}
 /* aperçu en direct : le vrai mode piloté par son pilote automatique */
 let demo=null;
-function previewSport(id,w,force){if(!MODES[id])id=SPORT_IDS[0];w=w||(profile.last[id]&&profile.last[id].weather)||'soleil';
+function previewSport(id,w,force){coinsStop();if(!MODES[id])id=SPORT_IDS[0];w=w||(profile.last[id]&&profile.last[id].weather)||'soleil';
   if(!force&&cur&&!run&&demo&&previewId===id){if(previewW!==w){previewW=w;applyEnv(cur.env,w)}return}
   if(cur)cur.dispose();ghostsClear();run=null;previewId=id;previewW=w;quiet=true;
   const dctx=Object.assign({},DUMMY,{crash(){if(demo)demo.reset=.8},finish(){if(demo)demo.reset=.8}});
@@ -43,7 +43,7 @@ async function startRun(cfg,opt={}){
   curCfg=cfg;run={cfg,use:opt.use||{},multi:!!opt.multi,pen:0,continues:0,snaps:[],snapT:0,finished:false,dnf:false,cp:0,final:0,finalized:false,coins:0,netT:0,doubled:false,engageBits:[]};run.goal=pickSessionGoal(cfg);
   const ctx={boost:!!run.use.boost,crash:onCrash,finish:onFinish,cam:()=>camMode,hud:setHud,
     bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,land:landFx,comboBreak,slowmo,keep:()=>{if(combo.n>0)combo.t=runT}};SLOW.t=0;combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
-  cur=MODES[cfg.sport](cfg,profile.look,ctx);flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
+  cur=MODES[cfg.sport](cfg,profile.look,ctx);coinsStart();FOVS.v=null;flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
   $('#hMode').textContent=cur.name;E.inst.innerHTML=cur.inst;E.feed.innerHTML='';E.mp.innerHTML='';
   $('#keys').innerHTML=cur.keys.slice(0,4).map(k=>'<div><kbd>'+k[0]+'</kbd>'+k[1]+'</div>').join('');
   $('#tU span').textContent=cur.touch.u;$('#tD span').textContent=cur.touch.d;$('#tA').textContent=cur.touch.a||'';$('#tA').hidden=!cur.touch.a;$('#tG span').textContent=cur.touch.g||'Figure';$('#tG').hidden=cur.touch.g===false;
@@ -229,7 +229,19 @@ function onCrash(title,text){window.__llLastCrash={title,text};if(cur&&cur.silen
   /* le panneau de fin attend un peu : on voit la chute avant le bilan */const R=run,show=()=>{if(state==='over'&&run===R&&!R.finalized)showOver('crash',title,text)};if(crashFx&&crashFx.sim)setTimeout(show,1400);else show();netPush(true)}
 function onFinish(time){if(state!=='play')return;state='over';sfx.finish();run.finished=true;run.final=time+run.pen;finalizeRun();speedLines(0,0);
   const medal=medalOf(run.final,cur.target);const mtxt={g:'Médaille d\'or',s:'Médaille d\'argent',b:'Médaille de bronze',n:'Arrivée'}[medal];
+  /* clip Blender « celebrate » sur l'écran de fin (sports où le rider est debout, médaille obtenue) */
+  if(medal!=='n'&&['parkour','snowboard','longboard'].includes(curCfg.sport)){const R=run;setTimeout(()=>{const hm=riderHuman();if(state==='over'&&run===R&&hm&&hm.clip)hm.clip('celebrate')},700)}
   showOver('finish',mtxt,'Temps '+fmtT2(run.final)+(run.pen?' dont '+run.pen+' s de pénalités':'')+' · objectif or '+fmtT(cur.target)+'.',medal);netPush(true)}
+/* ÉCONOMIE (0.23, docs/ECONOMY.md) : pièces ramassées (plafond COIN_CAP) + bonus plafonnés.
+   Le score brut ne sert plus de base (échelles très différentes entre sports) : il est ramené à un « par » par sport. */
+const ECO={minT:15,finish:5,medal:{g:12,s:8,b:4},perf:10,goal:3};
+const SCORE_PAR={wingsuit:1500,longboard:4000,snowboard:2000,bmx:2500,motocross:2500,wakeboard:6000,parkour:2500};
+function runPayout(score,medal){const pick=COIN.on?COIN.val:0,ok=Math.max(runT,COIN.time)>=ECO.minT||run.finished;
+  const perf=ok?clamp(Math.floor(ECO.perf*score/(2*(SCORE_PAR[curCfg.sport]||2500))),0,ECO.perf):0;
+  const fin=run.finished?ECO.finish:0,med=run.finished?(ECO.medal[medal]||0):0,goal=ok&&run.goal&&run.goal.done?ECO.goal:0;
+  run.pay={pick,perf,fin,med,goal,got:COIN.got,spawned:COIN.spawnedV};return pick+perf+fin+med+goal}
+const FOVS={v:null};
+function riderHuman(){const r=cur&&cur._rig;return r?(r.clip?r:r.human||null):null}
 function finalizeRun(silent){if(!run||run.finalized)return;run.finalized=true;const st=cur.stats,cfg=curCfg,course=cfg.mode==='course';
   const score=Math.round(st.score*(run.use.x15?1.5:1));let medal='n';
   if(course&&run.finished){medal=medalOf(run.final,cur.target);const key=cfg.sport+'|course|'+cfg.len+'|'+cfg.seed+'|'+JSON.stringify(cfg.params);
@@ -240,27 +252,30 @@ function finalizeRun(silent){if(!run||run.finalized)return;run.finalized=true;co
     if(course&&run.finished){if(!old||run.final<old){profile.records[dk]=+run.final.toFixed(2);run.engageBits=run.engageBits||[];run.engageBits.push('Record du parcours du jour')}}else if(!course&&score>(old||0))profile.records[dk]=score}
   if(course&&run.finished){if(ghostSave(cfg,run.final,(a,b)=>a<b))run.engageBits.push('Nouveau fantôme : ton record')}else if(!course&&ghostSave(cfg,score,(a,b)=>a>b))run.engageBits.push('Nouveau fantôme : ton record');
   run.xpGain=xpFor(st,run);addXp(cfg.sport,run.xpGain);
-  run.coins=Math.floor(score/40)+(run.finished?40+({g:150,s:90,b:50}[medal]||0):0);profile.coins+=run.coins;engageFinalize(score,medal);
+  run.coins=runPayout(score,medal);profile.coins+=run.coins;engageFinalize(score,medal);
   profile.history.unshift({sport:cfg.sport,mode:cfg.mode,seed:cfg.seed,score,time:run.final||0,medal,dnf:course&&!run.finished,at:Date.now()});profile.history=profile.history.slice(0,40);
   saveProfile();netPush(true)}
 function showOver(kind,title,text,medal){const cfg=curCfg,course=cfg.mode==='course';
   $('#oMode').textContent=cur.name+' · '+(course?SPORTS[cfg.sport].modes.course:SPORTS[cfg.sport].modes.free)+(run.multi?' · multijoueur':'');
   $('#oTitle').innerHTML=(medal&&medal!=='n'?'<span class="medal '+medal+'"></span>':'')+esc(title);$('#oText').textContent=text;
   paintOverStats(kind);
-  const c=$('#btnContinue');const canCont=kind==='crash'&&run.continues<2&&!run.finalized&&(profile.cons.revive>0||Ads.available());c.hidden=!canCont;
-  if(canCont)c.textContent=profile.cons.revive>0?'Second souffle ('+profile.cons.revive+')':'Continuer · 1 pub';
+  const c=$('#btnContinue');/* monde libre : 1 reprise gratuite par partie (on repart 2,5 s avant la chute, combo perdu) */const freeC=curCfg.mode==='free'&&!run.multi&&!run.freeCont;
+  const canCont=kind==='crash'&&run.continues<2&&!run.finalized&&(freeC||profile.cons.revive>0||Ads.available());c.hidden=!canCont;
+  if(canCont)c.textContent=freeC?'Reprendre ici · gratuit':profile.cons.revive>0?'Second souffle ('+profile.cons.revive+')':'Continuer · 1 pub';
   $('#btnAgain').innerHTML=run.multi?'Retour au salon':'Encore une<kbd>R</kbd>';
   $('#over').hidden=false;E.touch.hidden=true;(canCont?c:$('#btnAgain')).focus()}
 function paintOverStats(kind){const st=cur.stats,course=curCfg.mode==='course';const score=Math.round(st.score*(run.use.x15?1.5:1));
   const rows=[[course?'Temps':'Score',course?(run.finished?fmtT2(run.final):'—'):fmt(score),run.rec],[course?'Record parcours':'Record',course?fmtT2(profile.records[curCfg.sport+'|course|'+curCfg.len+'|'+curCfg.seed+'|'+JSON.stringify(curCfg.params)]||Infinity):fmt(profile.records[curCfg.sport+'|free']||0)]].concat(cur.overStats());
   let h=rows.map(r=>`<div class="stat"><div class="l">${r[0]}</div><div class="v${r[2]?' rec':''}">${r[1]}</div></div>`).join('');
   if(run.finalized)h+=`<div class="stat"><div class="l">Pièces gagnées</div><div class="v rec">+${fmt(run.coins)}</div></div>`;
+  if(run.finalized&&run.pay){const p=run.pay,parts=[['ramassées',p.pick],['performance',p.perf],['arrivée',p.fin],['médaille',p.med],['objectif',p.goal]].filter(x=>x[1]>0);
+    h+=`<div class="stat wide"><div class="l">Détail des pièces</div><div class="v small">${parts.length?parts.map(x=>x[0]+' +'+x[1]).join(' · '):'aucune'}${run.doubled?' · ×2 (pub)':''}</div></div>`}
   $('#oStats').innerHTML=h;
   let extra=progOverHtml()+engageOverHtml();if(run.finalized&&run.coins>0&&!run.doubled&&Ads.available())extra+=`<div class="row"><button class="btn small" id="btnDouble">Doubler les pièces · 1 pub</button></div>`;
   if(run.multi){const course=curCfg.mode==='course';extra+=`<table class="rtable"><thead><tr><th>#</th><th>Joueur</th><th>${course?'Temps':'Score'}</th></tr></thead><tbody>${standings().map((r,i)=>`<tr class="${r.me?'me':''}"><td>${i+1}</td><td>${esc(r.n)}</td><td>${course?(r.ft?fmtT2(r.ft):r.dnf?'abandon':'en course · '+r.cp+'/'+curCfg.len):fmt(r.sc)}</td></tr>`).join('')}</tbody></table>`}
   $('#oMulti').innerHTML=extra;const d=$('#btnDouble');if(d)d.onclick=async()=>{d.disabled=true;if(await Ads.rewarded('Doubler les pièces')){profile.coins+=run.coins;run.coins*=2;run.doubled=true;saveProfile()}paintOverStats(kind)}}
 $('#btnContinue').onclick=async()=>{if(!run||run.finalized)return;let ok=false;
-  if(profile.cons.revive>0){profile.cons.revive--;saveProfile();ok=true}else ok=await Ads.rewarded('Continuer la partie');
+  if(curCfg.mode==='free'&&!run.multi&&!run.freeCont){run.freeCont=true;ok=true}else if(profile.cons.revive>0){profile.cons.revive--;saveProfile();ok=true}else ok=await Ads.rewarded('Continuer la partie');
   if(!ok){showOver('crash',$('#oTitle').textContent,$('#oText').textContent);return}
   const now=runT;let s=null;for(const x of run.snaps)if(now-x.t>=2.5)s=x;if(!s)s=run.snaps[0];crashUndo();crashFx=null;if(s)cur.restore(s.s);
   run.continues++;run.dnf=false;if(curCfg.mode==='course')run.pen+=3;$('#over').hidden=true;E.touch.hidden=!isTouch;
@@ -274,8 +289,8 @@ function pause(){if(state!=='play')return;state='pause';if(cur.silence)cur.silen
   $('#pCtl').innerHTML=cur.keys.map(k=>'<kbd>'+k[0]+'</kbd><span>'+k[1]+'</span>').join('');$('#pause').hidden=false;$('#btnResume').focus();sound(0,300,.8)}
 function resume(){if(state!=='pause')return;state='play';$('#pause').hidden=true;if(document.activeElement)document.activeElement.blur()}
 $('#btnPause').onclick=pause;$('#btnResume').onclick=resume;$('#btnRestart').onclick=()=>{if(run&&run.multi)return;startRun(curCfg,{})};
-$('#btnQuit').onclick=()=>{$('#pause').hidden=true;if(run)run.finalized=true;toMenu()};
-function toMenu(){$('#hud').hidden=true;E.touch.hidden=true;$('#over').hidden=true;E.count.hidden=true;speedLines(0,0);
+$('#btnQuit').onclick=()=>{$('#pause').hidden=true;/* quitter crédite ce qui est acquis (une seule fois) */if(run&&!run.multi)finalizeRun(true);else if(run)run.finalized=true;toMenu()};
+function toMenu(){coinsStop();$('#hud').hidden=true;E.touch.hidden=true;$('#over').hidden=true;E.count.hidden=true;speedLines(0,0);
   if(run&&run.multi){backToLobby();return}const sp=curCfg?curCfg.sport:'wingsuit',w=curCfg?curCfg.weather:'soleil';run=null;previewSport(sp,w,true);navStack.length=0;go('home',false)}
 function backToLobby(){$('#hud').hidden=true;E.touch.hidden=true;$('#over').hidden=true;$('#pause').hidden=true;const sp=curCfg.sport,w=curCfg.weather;run=null;previewSport(sp,w,true);
   myReady=isHost;pushLobbyState();navStack.length=0;navStack.push('multi');go('lobby',false)}
@@ -325,7 +340,7 @@ function frame(now){requestAnimationFrame(frame);
   if(toastT>0){toastT-=dt;if(toastT<=0)lastToast=''}
   if(state==='garage'){garageFrame(dt);renderer.render(gScene,gCam);return}
   if(!cur)return;
-  if(state==='play'){let pdt=dt;if(SLOW.t>0){SLOW.t-=dt;pdt=dt*SLOW.k}runT+=pdt;flowTick(pdt);cur.update(pdt,inp());trackRig(state==='play'?pdt:0);if(state==='play'){recFrame(runT);ghostFrame(runT)}if(run&&state==='play'){run.snapT+=dt;if(run.snapT>1){run.snapT=0;run.snaps.push({t:runT,s:cur.snapshot()});if(run.snaps.length>8)run.snaps.shift()}
+  if(state==='play'){let pdt=dt;if(SLOW.t>0){SLOW.t-=dt;pdt=dt*SLOW.k}runT+=pdt;flowTick(pdt);cur.update(pdt,inp());if(FOVS.v==null)FOVS.v=camera.fov;FOVS.v+=(camera.fov-FOVS.v)*(1-Math.exp(-7*dt));if(Math.abs(camera.fov-FOVS.v)>.05){camera.fov=FOVS.v;camera.updateProjectionMatrix()}trackRig(state==='play'?pdt:0);if(state==='play'){recFrame(runT);ghostFrame(runT)}if(run&&state==='play'){run.snapT+=dt;if(run.snapT>1){run.snapT=0;run.snaps.push({t:runT,s:cur.snapshot()});if(run.snaps.length>8)run.snaps.shift()}
       run.netT+=dt;if(run.netT>.066){run.netT=0;netPush()}}updateGhosts(dt)}
   else if(state==='count'){countT-=dt;cur.update(0,NEUTRAL);ghostFrame(0);const n=Math.ceil(countT);if(countT<=0){E.count.hidden=true;state='play';LOOK.go=1;sfx.whoosh();buzz([30]);toast('Go !',true);if(!run.cdS)ding(990,.25);maybeTutorial()}else if(E.count.textContent!==String(n)){E.count.textContent=n;if(!run.cdS)ding(440,.15)}updateGhosts(dt)}
   else if(state==='demo'&&demo){if(demo.reset>0){demo.reset-=dt;if(demo.reset<=0){previewSport(demo.sport,previewW,true);return}}else cur.update(dt,cur.auto?cur.auto():NEUTRAL)}
@@ -333,7 +348,7 @@ function frame(now){requestAnimationFrame(frame);
   else if(state==='menu')cur.attract(dt);else if(state!=='ad'){if(cur.idle)cur.idle(dt);updateGhosts(dt)}
   if(state==='play'||state==='count'||state==='demo'||state==='menu'){camBase.p.copy(camera.position);camBase.q.copy(camera.quaternion);camBase.ok=true}
   if(state==='over')crashFrame(dt);else if(crashFx&&state!=='pause')crashFx=null;
-  applyLook(dt);ringsTick(dt);if(typeof placesTick==='function')placesTick(dt);E.vig.style.opacity=state==='play'?vigT:0;
+  applyLook(dt);ringsTick(dt);coinsTick(state==='play'?(SLOW.t>0?dt*SLOW.k:dt):0);if(typeof placesTick==='function')placesTick(dt);E.vig.style.opacity=state==='play'?vigT:0;
   waterUniforms.uTime.value+=dt;musicTick(state);if(state==='play'&&cur)wind(hudKmh/(cur.vScale||100),curCfg.sport==='wingsuit');else wind(0,false);flakes.update(dt,camera.position);
   sky.position.copy(camera.position);sunSprite.position.copy(camera.position).addScaledVector(sunDir,1000);stars.position.copy(camera.position);clouds.update(camera.position);
   renderer.render(scene,camera);if(RP.exp)exportDraw()}
@@ -342,4 +357,4 @@ function frame(now){requestAnimationFrame(frame);
 resize();setCam(S().cam|0);previewSport(profile.last.sport||'wingsuit');go('home',false);requestAnimationFrame(frame);
 /* modèles Blender prêts : on reconstruit la scène de démo et le garage pour les afficher (le jeu démarre sans les attendre) */
 GLB_P.then(()=>{if(!GLB.models.rider&&!GLB.models.rider_lo)return;if(!run&&previewId&&(state==='demo'||state==='menu'||state==='garage'))previewSport(previewId,previewW,true);if(state==='garage'&&typeof garageObj==='function')garageObj()});
-window.__ll={GLB,SPORT_IDS,SPORTS,MODES,crashNow(){onCrash('Test','Chute de test')},forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};
+window.__ll={COIN,coinsTick,runPayout,ECO,GLB,SPORT_IDS,SPORTS,MODES,crashNow(){onCrash('Test','Chute de test')},forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};

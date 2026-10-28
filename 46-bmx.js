@@ -210,7 +210,9 @@ MODES.bmx=function(cfg,look,ctx){
     if(St.air){const t=St.airT;return {x:apTrick===1&&t<.5?1:0,y:apTrick===2&&t<.55?-1:0,a:false,g:apTrick===3&&t>.1&&t<.18}}
     const toLip=(apT.x-St.pos.x)*fx+(apT.z-St.pos.z)*fz;
     return {x:clamp(dY*2.2,-1,1),y:Math.abs(dY)>1.1&&sp>4?-1:sp<8.5?1:0,a:apPhase===1&&toLip<2.5&&toLip>-2,g:false}}
-  return {env,stats,name:'BMX',vScale:45,target:course?finishT:0,
+  /* pièces : approche au sol puis motif du module (en l'air au-dessus du saut, sur le rail, au-dessus du coping) */
+  const coinPlan=coinParkPlan(park,{every:5.5,r:1.25,cy:.9,refH:1.3,scale:1.25});
+  return {env,stats,name:'BMX',vScale:45,coins:coinPlan,target:course?finishT:0,
     keys:[['↑ / ↓','pédaler / freiner · en l\'air : flips'],['← →','tourner · en l\'air : rotations'],['Espace','maintenir = charger · relâcher = bunny hop · en l\'air : barspin'],['Shift / F','manual au sol · tailwhip en l\'air'],['C','caméra']],
     touch:{u:'Pédaler',d:'Freiner',a:'Saut',g:'Whip/Manual'},
     inst:`<div class="ihead">Ligne</div><div class="ro-grid"><div class="ro"><span>Air</span><b id="bAir">—</b></div><div class="ro"><span>Hauteur</span><b id="bH">—</b></div>

@@ -9,7 +9,7 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 3 | 🟡 | Le jeu a besoin d'internet au premier chargement (Three.js, GLTFLoader, SkeletonUtils, polices) | si GLTFLoader ne charge pas, le jeu reste jouable avec les modèles procéduraux ; option future : tout embarquer |
 | 4 | 🟡 | Fichier HTML : 4,5 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
-| 6 | 🟡 | Clip « celebrate » disponible mais pas encore branché sur l'écran de fin | brancher `human.clip('celebrate')` sur l'écran de résultats |
+| 6 | ⚪ | Clip « celebrate » branché à l'arrivée avec médaille en parkour, snowboard et downhill (0.23) ; pas en BMX, motocross, wakeboard (rider assis ou tenu par la corde) | clip dédié sur véhicule |
 | 7 | 🟡 | IK des mains sur BMX et motocross seulement (wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains |
 | 8 | ⚪ | Réceptions : le downhill n'a pas de sauts et le wingsuit pas de réception (seulement la chute) ; les 5 autres sports sont branchés | à traiter si on ajoute des sauts au downhill |
 | 18 | 🟡 | Moto fournie : pas de variante légère (≈ 13 600 triangles aussi en éco, i/s en éco 41 → 33-38 en rendu logiciel) | confirmer la provenance ; décimer une variante éco si besoin |
@@ -25,5 +25,8 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 13 | 🟡 | Multijoueur limité au réseau local (serveur Node à lancer soi-même) | serveur hébergé en P3, dépense soumise à ton accord |
 | 14 | ⚪ | Les rendus Blender sont écrits en PNG puis convertis à la main en JPG pour le dépôt | automatiser la conversion dans `common.render` |
 | 21 | 🟡 | Décor des lieux : coût mesuré en rendu logiciel éco de 5 à 12 % d'i/s (BMX, wingsuit, snowboard) | mesurer sur vrai GPU ; réduire palmiers ou chalets en éco si besoin |
-| 22 | 🟡 | Glen Helen, Lake Havasu, Paris Rooftops, Mount Tamalpais : seulement renommés, décor inchangé | kits listés dans ASSETS.md |
+| 22 | ⚪ | Glen Helen, Lake Havasu, Paris Rooftops, Mount Tamalpais : décor signature procédural (0.23), pas encore de modèles Blender dédiés | kits listés dans ASSETS.md |
 | 23 | ⚪ | Noms de lieux réels (Whistler Blackcomb, Glen Helen) : ce sont aussi des marques ; à vérifier avant une sortie commerciale | renommer en version fictive si besoin |
+| 24 | 🟡 | Économie 0.23 calibrée avec le pilote automatique (qui ignore les pièces) : gains d'un vrai joueur non mesurés | suivre `run.pay` sur les premières sessions, ajuster `ECO` et `COIN_CAP` |
+| 25 | ⚪ | Wingsuit : le pilote automatique vole souvent trop haut pour les couloirs de pièces (1 ramassée en 60 s) | sans impact joueur ; à revoir si on veut une démo qui ramasse |
+| 26 | ⚪ | Profils existants : les pièces gagnées avec l'ancienne économie (bien plus généreuse) sont conservées | décision volontaire : rien n'est retiré au joueur |

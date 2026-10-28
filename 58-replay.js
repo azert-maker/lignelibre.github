@@ -38,6 +38,7 @@ function rpShot(){RP.shot=(RP.shot+1)%5;RP.shotT=0;RP.orb=Math.random()*6.28;
   if(RP.shot===1){const i0=RP.i;rpSample(Math.min(RP.t1,RP.t+1.8),_sc);RP.i=i0;rpDir(RP.t,_rd);_rs.set(-_rd.z,0,_rd.x);RP.tri.copy(_sc.p).addScaledVector(_rs,(Math.random()<.5?-1:1)*(5+Math.random()*3));RP.tri.y+=1.6}}
 function replayOpen(){if(typeof crashUndo==='function'){crashUndo();crashFx=null}if(!cur||!cur._rig||REC.buf.length<15){toast('Pas assez d\'images pour le replay',true);return}
   RP.fr=REC.buf.slice();RP.t1=RP.fr[RP.fr.length-1].t;RP.t0=Math.max(RP.fr[0].t,RP.t1-15);RP.t=RP.t0;RP.i=0;RP.shot=-1;rpShot();
+  {const hm=riderHuman();if(hm&&hm.clip)hm.clip(null)}/* le replay pilote les os : on coupe un clip en cours */
   state='replay';crashFx=null;$('#over').hidden=true;$('#hud').hidden=true;$('#replay').hidden=false;cur._rig.visible=true;if(cur._rig.human)cur._rig.human.visible=true;
   if(cur._world){rpSample(RP.t0,_sa);cur._world(_sa,true)}paintReplay()}
 function replayClose(){if(RP.exp)exportEnd(true);if(state!=='replay')return;rpSample(RP.t1,_sa);const r=cur._rig;r.position.copy(_sa.p);r.quaternion.copy(_sa.q);if(cur._world)cur._world(_sa,true);

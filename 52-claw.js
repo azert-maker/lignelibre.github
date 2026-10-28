@@ -37,7 +37,7 @@ const SKINCAT=[
 ];
 const skinById=id=>SKINCAT.find(s=>s.id===id);
 /* objets de la boutique gagnables : cosmétiques seulement (jamais d'équipement qui change la physique) ; rareté selon le prix */
-const shopRarity=it=>it.price>=2000?'l':it.price>=1150?'e':it.price>=650?'r':'u';
+const shopRarity=it=>it.rar?it.rar:it.price>=2000?'l':it.price>=1150?'e':it.price>=650?'r':'u';
 function rewardPool(){return SKINCAT.map(s=>({id:s.id,r:s.r,name:s.name,kind:s.k==='s'?'Tenue':'Casque',desc:s.desc,skin:s}))
   
   .concat(SHOP.filter(it=>!it.cons&&it.kind==='Cosmétique'&&!it.phys).map(it=>({id:it.id,r:shopRarity(it),name:it.name,kind:it.kind,desc:it.effect,shop:it})))}
