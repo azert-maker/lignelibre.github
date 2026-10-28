@@ -1,5 +1,10 @@
 # Journal des versions · Ligne Libre
 
+## 0.21.1 · 28 octobre 2026 · Machine à skins : cosmétiques uniquement
+
+- Les machines (Boutique et garage) ne donnent plus que du cosmétique : 15 skins (tenues, casques) + casque carbone, couleurs néon et fumigènes. Les équipements qui changent la physique s'obtiennent uniquement par la boutique ou la progression.
+- Les équipements déjà gagnés avant ce changement sont conservés.
+
 ## 0.21.0 · 28 octobre 2026 · Machine à skins de la Boutique
 
 Ajouts

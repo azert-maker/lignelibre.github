@@ -17,7 +17,7 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 15 | 🟡 | Chute physique : corps rigide (pas de vrai ragdoll membre par membre) ; le rider peut traverser un mur ou un module vertical | v2 : collisions avec les boîtes du parc |
 | 16 | ⚪ | Le replay ne rejoue pas la compression de réception (pose enregistrée sans le ressort) | enregistrer `landState` dans les images du replay |
 | 19 | ⚪ | Skins : sur le modèle procédural de repli, seules les couleurs s'appliquent (pas les motifs ni les finitions) | sans impact tant que les GLB chargent |
-| 20 | 🟡 | Machines à skins : prix (150 pièces) et chances à valider avec des joueurs ; des équipements qui changent la physique sont gagnables (ils restent aussi achetables directement) | ajuster `CLAW_COST`, `RARITY` et `shopRarity` |
+| 20 | 🟡 | Machines à skins : prix (150 pièces) et chances à valider avec des joueurs (récompenses 100 % cosmétiques) | ajuster `CLAW_COST` et `RARITY` |
 | 9 | ⚪ | Pas de clignement des yeux ni d'expressions | P1, visage v2 |
 | 10 | 🟡 | Ressenti des commandes jamais validé par un joueur humain | sessions de test |
 | 11 | ✅ | Dépôt GitHub : résolu, dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC | CI à vérifier dans l'onglet Actions |
