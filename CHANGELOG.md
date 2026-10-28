@@ -1,5 +1,23 @@
 # Journal des versions · Ligne Libre
 
+## 0.21.0 · 28 octobre 2026 · Machine à skins de la Boutique
+
+Ajouts
+- Carte « Machine à skins » en tête de la Boutique : coût (150 pièces) et chances par rareté visibles avant d'ouvrir.
+- Tirage animé dans une fenêtre dédiée : pièce insérée (animation + son), la pince va chercher une peluche de la rareté tirée, descend, ferme les pinces, remonte, revient à la trappe et lâche ; puis révélation (rareté en couleur, nom, type, description). Environ 3,5 à 4 s.
+- 5 raretés communes à tout le jeu : Commun 50 % (gris), Peu commun 28 % (vert), Rare 14 % (bleu), Épique 6 % (violet), Légendaire 2 % (or avec halo animé). Fanfare plus forte pour Épique et Légendaire.
+- Récompenses : 15 skins + 15 objets non consommables de la boutique (rareté selon le prix), non possédés en priorité ; doublon remboursé 60 pièces (40 %), affiché. Épique ou Légendaire garanti au plus tard au 10e tirage.
+- Débit et enregistrement immédiats (profile.coins, profile.owned) avant l'animation : fermer l'onglet en pleine animation ne fait rien perdre.
+- Fermer et Tenter bloqués pendant l'animation, Échap ignoré tant qu'elle tourne ; compatible tactile ; repli 2D en CSS si le modèle 3D ne charge pas.
+- La scène de fond est mise en pause pendant que la machine est ouverte.
+
+Changements
+- Les skins possédés sont maintenant enregistrés dans `profile.owned` (migration automatique depuis `profile.skins.owned`).
+- La machine d'adresse du garage utilise les mêmes 5 raretés et les mêmes récompenses ; elle coûte aussi 150 pièces.
+
+Tests
+- `tests/shopclaw.js` : 26 contrôles (bureau et mobile, débit unique, séquence, révélation, doublon, chances mesurées sur 20 000 tirages, repli 2D).
+
 ## 0.20.0 · 28 octobre 2026 · Skins et machine à pinces
 
 Ajouts

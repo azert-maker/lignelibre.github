@@ -315,3 +315,37 @@ body.od #vig{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba
 .skinsw{display:inline-block;width:18px;height:18px;border-radius:50%;margin-right:8px;vertical-align:-3px;border:1px solid rgba(255,255,255,.35)}
 .item.skin[disabled]{opacity:.55;cursor:default}
 </style>
+<style>
+/* machine à skins (boutique) */
+#clawModal{position:fixed;inset:0;z-index:55;display:grid;place-items:center;background:rgba(3,6,10,.86);padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+#clawModal[hidden]{display:none}
+.cm-box{width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;gap:10px;background:var(--glass2,#121a22);border:1px solid var(--line,#2a3440);border-radius:8px;padding:12px;overflow:auto}
+.cm-head{display:flex;align-items:center;gap:10px}.cm-head h2{margin:0;font-size:20px;flex:1}.cm-coins{font-family:var(--mono);font-size:12px;color:var(--muted)}.cm-coins b{color:var(--gold);font-size:15px}
+.cm-stage{position:relative;height:min(52vh,420px);min-height:240px;border-radius:6px;overflow:hidden;background:#0d141b}
+.cm-stage canvas{width:100%;height:100%;display:block}
+.cm-coin{position:absolute;right:18%;top:-40px;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#f5c542 55%,#a87a12);color:#5a3d00;font:800 10px/34px var(--mono);text-align:center;opacity:0;pointer-events:none}
+.cm-coin.go{animation:cmCoin .45s ease-in forwards}
+@keyframes cmCoin{0%{opacity:1;transform:translateY(0) rotateY(0)}80%{opacity:1;transform:translateY(calc(min(52vh,420px)*.62)) rotateY(540deg) scale(.8)}100%{opacity:0;transform:translateY(calc(min(52vh,420px)*.66)) scale(.3)}}
+.cm-reveal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(88%,380px);text-align:center;background:rgba(10,14,20,.92);border:3px solid var(--c);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px;align-items:center;animation:cmPop .35s cubic-bezier(.2,1.6,.4,1)}
+.cm-reveal[hidden]{display:none}
+.cm-reveal h3{margin:0;font-size:22px}.cm-reveal p{margin:0;font-size:13px;color:var(--muted)}
+.cm-rar{font:900 15px var(--display,inherit);letter-spacing:.12em;text-transform:uppercase;color:#0b0f14;background:var(--c);padding:4px 12px;border-radius:999px}
+.cm-kind{font-family:var(--mono);font-size:11px;color:var(--muted)}.cm-dup{color:var(--gold)!important}.cm-new{color:#3ddc84!important}
+.cm-reveal.r-l{box-shadow:0 0 30px 6px rgba(245,197,66,.65),inset 0 0 22px rgba(245,197,66,.35);animation:cmPop .35s cubic-bezier(.2,1.6,.4,1),cmGlow 1.2s ease-in-out .35s infinite alternate}
+.cm-reveal.r-e{box-shadow:0 0 22px 3px rgba(178,107,255,.55)}
+@keyframes cmPop{from{transform:translate(-50%,-50%) scale(.4);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+@keyframes cmGlow{from{box-shadow:0 0 18px 3px rgba(245,197,66,.5)}to{box-shadow:0 0 44px 12px rgba(245,197,66,.85)}}
+.cm-odds{display:flex;flex-wrap:wrap;gap:6px 12px;font-family:var(--mono);font-size:11.5px}.cm-odds span{display:inline-flex;align-items:center;gap:5px;color:var(--c)}.cm-odds i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.cm-foot{display:flex;flex-direction:column;gap:8px}.cm-foot .btn.primary{min-height:48px;font-size:16px}
+.cm-card{border-color:var(--gold)!important}
+/* repli 2D */
+.cm-fb{position:absolute;inset:0;background:linear-gradient(#1b2633,#0d141b)}.cm-fb[hidden]{display:none}
+.cm-fb-rail{position:absolute;left:8%;right:8%;top:10%;height:6px;background:#8a96a3;border-radius:3px}
+.cm-fb-claw{position:absolute;left:50%;top:0;width:40px;height:44px;margin-left:-20px}
+.cm-fb-claw i{position:absolute;top:10px;width:6px;height:30px;background:#c9d3dc;border-radius:3px;transform-origin:top center;transition:transform .25s}
+.cm-fb-claw i:nth-child(1){left:6px;transform:rotate(22deg)}.cm-fb-claw i:nth-child(2){left:17px}.cm-fb-claw i:nth-child(3){right:6px;transform:rotate(-22deg)}
+.cm-fb-claw.closed i:nth-child(1){transform:rotate(-4deg)}.cm-fb-claw.closed i:nth-child(3){transform:rotate(4deg)}
+.cm-fb-balls{position:absolute;left:8%;right:8%;bottom:10%;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.cm-fb-balls b{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--c) 60%);transition:opacity .3s}
+.cm-fb-balls b.held{opacity:.6}.cm-fb-balls b.gone{opacity:0}
+</style>

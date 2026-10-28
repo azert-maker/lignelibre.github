@@ -5,7 +5,7 @@ const L=require('./lib');const shots=process.argv.includes('--shots');
   await p.evaluate(()=>{__ll.profile.coins=5000;go('garage');gTab='claw';paintGarage()});
   await p.waitForFunction(()=>CL.g&&gObj===CL.g.root,null,{timeout:15000}).catch(()=>{});
   const s0=await p.evaluate(()=>({loaded:!!GLB.models.claw,toys:CL.toys.length,rar:CL.toys.map(t=>t.r).join(''),panel:!!document.querySelector('#clawPlay')}));
-  chk(s0.loaded&&s0.toys===8&&s0.panel,`machine chargée à la demande, ${s0.toys} peluches (${s0.rar}), bouton Jouer`);
+  chk(s0.loaded&&s0.toys===8&&s0.panel&&/^[culre]{8}$/.test(s0.rar),`machine chargée à la demande, ${s0.toys} peluches (${s0.rar}), bouton Jouer`);
   if(shots)await p.screenshot({path:'test-results/claw_idle.png'});
   /* partie : pièces débitées, déplacement clavier, descente, prise, transport, trappe */
   const c0=await p.evaluate(()=>__ll.profile.coins);await p.click('#clawPlay');
@@ -20,12 +20,12 @@ const L=require('./lib');const shots=process.argv.includes('--shots');
   if(shots)await p.screenshot({path:'test-results/claw_grab.png'});
   const held=await p.evaluate(()=>!!CL.held&&CL.held===window.__target);chk(held,'peluche saisie quand la pince est centrée');
   await p.waitForFunction(()=>CL.st==='idle',null,{timeout:20000});
-  const r=await p.evaluate(()=>{for(const r in RARITY)RARITY[r].grip=RARITY[r].__g;return {last:CL.last,owned:skinState().owned.slice(),gone:window.__target.gone}});
-  chk(r.gone&&r.last&&(r.last.sk||r.last.dup),'peluche tombée dans la trappe : '+(r.last&&r.last.sk?r.last.sk.name+' ('+r.last.sk.r+')':'doublon'));
-  chk(r.owned.length===1,'skin ajouté à la collection');
+  const r=await p.evaluate(()=>{for(const r in RARITY)RARITY[r].grip=RARITY[r].__g;return {last:CL.last,owned:SKINCAT.filter(x=>profile.owned[x.id]).map(x=>x.id).concat(SHOP.filter(x=>!x.cons&&profile.owned[x.id]).map(x=>x.id)),gone:window.__target.gone}});
+  chk(r.gone&&r.last&&r.last.item,'peluche tombée dans la trappe : '+(r.last&&r.last.item?r.last.item.name+' ('+r.last.item.r+')':'?'));
+  chk(r.owned.length===1,'objet ajouté à profile.owned');
   if(shots)await p.screenshot({path:'test-results/claw_win.png'});
   /* équiper puis voir le rider avec le skin */
-  const eq=await p.evaluate(()=>{const id=skinState().owned[0],s=skinById(id);profile.look.sk[s.k]=id;gTab='skins';paintGarage();
+  const eq=await p.evaluate(()=>{const id='h_menthe';profile.owned[id]=true;const s=skinById(id);profile.look.sk[s.k]=id;gTab='skins';paintGarage();
     let mat=null;gObj.traverse(n=>{if(n.isSkinnedMesh&&n.material&&(n.material.customProgramCacheKey&&n.material.customProgramCacheKey().startsWith('sk')||n.material.isMeshMatcapMaterial||(s.k==='h'&&n.material.color&&n.material.color.getHex()===s.c1)||(s.k==='s'&&n.material.color&&n.material.color.getHex()===s.c1)))mat=n.material});
     return {k:s.k,ok:!!mat,cards:document.querySelectorAll('#garageBody .item.skin').length}});
   chk(eq.ok,'skin équipé visible sur le rider Blender ('+(eq.k==='s'?'tenue':'casque')+')');

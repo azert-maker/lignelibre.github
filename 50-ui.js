@@ -175,6 +175,7 @@ async function offerUnlock(id){go('shop');setTimeout(()=>{const el=$('#shop [dat
 /* ---------- boutique : pièces ou pubs ---------- */
 function paintShop(){const groups=['Équipement','Consommable','Cosmétique'];
   $('#shopBody').innerHTML=`<div class="row" style="justify-content:space-between"><span class="lbl">Tes pièces <b>${fmt(profile.coins)}</b></span><span class="note">Gagne des pièces à chaque partie, ou regarde des pubs.</span></div>`+
+  (typeof clawShopCard==='function'?clawShopCard():'')+
   groups.map(gk=>`<div class="grp"><span class="lbl">${gk}s</span><div class="items">${SHOP.filter(s=>s.kind===gk).map(it=>{const got=!it.cons&&owns(it.id),p=profile.adp[it.id]||0;
     return `<div class="shopcard" data-shop="${it.id}"><span class="kind">${it.kind}${it.cons?' · '+(profile.cons[it.id]||0)+' en stock':''}</span><span></span><h4>${it.name}</h4>${got?'<span class="owned">débloqué</span>':'<span></span>'}<p>${it.effect}${!got&&LVL_UNLOCK[it.id]?'<br><small class="note">Gratuit au '+lvlLabel(it.id)+'</small>':''}</p>
     ${got?'':`<div class="adprog"><span class="dots">${Array.from({length:it.ads},(_,i)=>`<i class="${i<p?'on':''}"></i>`).join('')}</span><span class="note">${p}/${it.ads} pub${it.ads>1?'s':''}</span></div>
@@ -182,6 +183,7 @@ function paintShop(){const groups=['Équipement','Consommable','Cosmétique'];
   (Ads.available()?'':'<p class="note">Les pubs de démonstration sont désactivées dans les réglages.</p>');
   $$('#shopBody [data-ad]').forEach(b=>b.onclick=async()=>{const it=SHOP.find(s=>s.id===b.dataset.ad);b.disabled=true;const ok=await Ads.rewarded('Boutique · '+it.name);
     if(ok){profile.adp[it.id]=(profile.adp[it.id]||0)+1;if(profile.adp[it.id]>=it.ads){grant(it);profile.adp[it.id]=0}saveProfile()}paintShop()});
+  {const oc=$('#openClaw');if(oc)oc.onclick=()=>clawModalOpen()}
   $$('#shopBody [data-buy]').forEach(b=>b.onclick=()=>{const it=SHOP.find(s=>s.id===b.dataset.buy);if(profile.coins<it.price)return;profile.coins-=it.price;grant(it);saveProfile();paintShop()})}
 function grant(it){if(it.cons){profile.cons[it.id]=(profile.cons[it.id]||0)+1;toastMenu(it.name+' +1')}else{profile.owned[it.id]=true;if(it.slot)profile.look.gear[it.slot]=it.id;toastMenu(it.name+' débloqué')}}
 function toastMenu(t){const d=document.createElement('div');d.className='fi';d.textContent=t;Object.assign(d.style,{position:'fixed',right:'16px',top:'16px',zIndex:60});document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
