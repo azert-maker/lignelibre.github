@@ -169,7 +169,7 @@ async function offerUnlock(id){go('shop');setTimeout(()=>{const el=$('#shop [dat
 
 /* ---------- boutique : pièces ou pubs ---------- */
 function paintShop(){const groups=['Équipement','Consommable','Cosmétique'];
-  $('#shopBody').innerHTML=`<div class="row" style="justify-content:space-between"><span class="lbl">Tes pièces <b>${fmt(profile.coins)}</b></span><span class="note">Gagne des pièces à chaque partie, ou regarde des pubs.</span></div>`+
+  $('#shopBody').innerHTML=`<div class="row" style="justify-content:space-between"><span class="lbl">Tes pièces <b>${fmt(profile.coins)}</b></span><span class="note">Ramasse des pièces pendant tes parties (cyan = 2 pièces), bonus en fin de partie.</span></div>`+
   (typeof clawShopCard==='function'?clawShopCard():'')+
   groups.map(gk=>`<div class="grp"><span class="lbl">${gk}s</span><div class="items">${SHOP.filter(s=>s.kind===gk).map(it=>{const got=!it.cons&&owns(it.id),p=profile.adp[it.id]||0;
     return `<div class="shopcard" data-shop="${it.id}"><span class="kind">${it.kind}${it.cons?' · '+(profile.cons[it.id]||0)+' en stock':''}</span><span></span><h4>${it.name}</h4>${got?'<span class="owned">débloqué</span>':'<span></span>'}<p>${it.effect}${!got&&LVL_UNLOCK[it.id]?'<br><small class="note">Gratuit au '+lvlLabel(it.id)+'</small>':''}</p>

@@ -5,7 +5,7 @@
 ===================================================================== */
 function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/* street luge retirée (refonte 7 sports) : variante neutralisée */
   const P_=cfg.params||{};const course=cfg.mode==='course';
-  const env={fogNear:90,fogFar:520,hemiGround:0x3a3426,accent:luge?'#ff5a7a':'#ff9a3c',cloudY:160};
+  const env={fogNear:110,fogFar:620,hemiGround:0x6a5a3a,accent:luge?'#ff5a7a':'#ff9a3c',cloudY:160,tint:PLACE_TINT.longboard};
   const eco=S().quality==='eco';const seedI=strSeed(cfg.seed),R0=mulberry(seedI);const root=new THREE.Group();scene.add(root);
   const bp0=gearOf('board',look.gear.board).phys,wp=gearOf('wheel',look.gear.wheel).phys;const bp=luge?{alat:8.4,tuck:.0009,len:1.9,wob:0}:bp0;const BRAKE=luge?4.5:wp.slide;
   const STEP=2,PER=100,ALAT=bp.alat+wp.alat;
@@ -35,7 +35,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
   const NZ_=[8,4,1,0,0,0,0,0,0,0,0,0,0,-4,-8];
   const snowy=cfg.weather==='neige';
   /* Neige : en météo « neige légère », bas-côtés et pentes passent en neige (route déneigée), grain + paillettes */
-  const BAND=snowy?[0xe6eaf0,0xdfe4ea,0xcfd3d8,0x9a9894,0x8d8a82,0xe9e6dc,0x3a3b40,0,0x3a3b40,0xe9e6dc,0xb9bcc0,0xe2e6ec,0xd6dbe2,0xcdd2d9]:[0x6f7f4a,0x6a7a45,0x7a7468,0x6c665c,0x8d8a82,0xe9e6dc,0x3a3b40,0,0x3a3b40,0xe9e6dc,0x8a7f6c,0x58753a,0x6a6152,0x5c5548];
+  const BAND=snowy?[0xe6eaf0,0xdfe4ea,0xcfd3d8,0x9a9894,0x8d8a82,0xe9e6dc,0x3a3b40,0,0x3a3b40,0xe9e6dc,0xb9bcc0,0xe2e6ec,0xd6dbe2,0xcdd2d9]:[0xb39a5c,0xa88f55,0x8f8466,0x6c665c,0x8d8a82,0xe9e6dc,0x3a3b40,0,0x3a3b40,0xe9e6dc,0x8a7f6c,0xa8924f,0x7f7450,0x9a8550];/* Tamalpais : prairies dorées l'été */
   const terrMat=detailMaterial(new THREE.MeshLambertMaterial({vertexColors:true}),{snow:snowy,amp:.12});
   const treeGeo=treeGeometry(1.4,4.6);const treeMat=new THREE.MeshLambertMaterial({color:snowy?0x3d5a4a:0x2e4f2f});
   const postGeo=new THREE.BoxGeometry(.12,.75,.12);postGeo.translate(0,.37,0);const postMat=new THREE.MeshLambertMaterial({color:0x5a5f66});
@@ -96,6 +96,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
     for(let k=Math.max(0,kc-1);k<=kc+3;k++)if(!chunks.has(k)){chunks.set(k,buildChunk(k));if(!all)break}
     for(const [k,c] of chunks)if(k<kc-1||k>kc+4){root.remove(c.g);c.geo.dispose();c.rg.dispose();c.g.traverse(n=>{if(n.isSprite||(n.material&&n.material.map&&n.material.map!==chevTex)){if(n.material.map&&n.material.map!==chevTex)n.material.map.dispose();if(n.material!==signMat)n.material.dispose()}});chunks.delete(k)}}
   const peaks=mountainRing(root,18,560,760,180,420,0x6b6e78,0xf4f4f0,new THREE.Color(WEATHER[cfg.weather].horizon),mulberry(seedI+3));
+  /* mer de nuages 120 m sous la route : elle suit le rider avec les sommets (groupe peaks, 160 m plus bas) */if(!snowy){const fs=fogSea();fs.position.y=40;peaks.add(fs)}
 
   const rig=buildLongboard(look);castAll(rig,true,false);root.add(rig);const human=rig.human;
   const dust=makeParticles(eco?36:120,.9,.5,root);const blob=makeBlob(root,luge?1.5:1.3);let leanS=0,camY=null;const _t=V3(),_sd=V3(),_n=V3();const dustFade=new THREE.Color(WEATHER[cfg.weather].horizon);
@@ -110,8 +111,14 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
   const sevName=t=>isPin(t)?'Épingle '+(t.dir>0?'droite':'gauche'):(t.dir>0?'Droite ':'Gauche ')+(t.R<38?1:t.R<52?2:t.R<72?3:t.R<95?4:5);
   const ARROWS={turn:'<path d="M12 36 V20 Q12 10 22 10 H30"/><path d="M26 4 L33 10 L26 16"/>',pin:'<path d="M12 36 V16 Q12 6 21 6 Q30 6 30 16 V24"/><path d="M24 20 L30 27 L36 20"/>',flag:'<path d="M10 36 V6"/><path d="M10 6 H30 L26 12 L30 18 H10"/>'};
   const crash=(t,x)=>{ding(90,.7);buzz([40,30,60]);ctx.crash(t,x)};
+  /* pièces : dans un virage, 5 pièces sur la corde (intérieur, +dir = droite) dont la sortie serrée en cyan ; en ligne droite, ligne centrale ou 3 pièces cyan au bord */
+  const coinPlan=(()=>{let sc=null,k=0;return {r:1.25,cy:.75,scale:1.25,every:.25,life:20,behind:25,cull:220,
+    spawn(api){if(sc===null)sc=L.s+45;if(sc>L.s+95)return;const t=nextTurn(sc);const inT=t&&t.i0*STEP<sc+35&&t.th>.45;
+      if(inT){const s0=Math.max(sc,t.i0*STEP),len=Math.max(20,(t.i1-t.i0)*STEP);for(let i=0;i<5;i++){const s=s0+len*(.15+i*.17),deep=i>=2&&i<=3,a=at(s,t.dir*HW*(deep?.78:.5));api.add(a[0],a[1]+.75,a[2],deep)}sc=s0+len+40}
+      else{if(k++%2===0){for(let i=0;i<5;i++){const a=at(sc+i*6,0);api.add(a[0],a[1]+.75,a[2],false)}}else{const sd=(k>>1)%2?1:-1;for(let i=0;i<3;i++){const a=at(sc+i*6,sd*(HW-.7));api.add(a[0],a[1]+.75,a[2],true)}}sc+=110}}}})();
   return {env,stats,name:luge?'Street luge':'Downhill',vScale:luge?160:140,target:course?LEN/24:0,
     keys:luge?[['← →','se pencher pour tourner'],['↓','tête baissée : plus aéro (6 s = figure)'],['↑','se redresser (frein à air)'],['Espace','freiner avec les pieds'],['C','caméra']]:[['← →','carver (frôle la glissière = figure)'],['↓','tuck : position aéro'],['Espace + ← →','slide : Coleman, Pendulum (change de côté)'],['↑ + Espace','stand-up slide'],['C','caméra']],
+    coins:coinPlan,
     touch:{u:'Debout',d:'Tuck',a:'Slide',g:false},
     inst:`<div class="ihead">Notes de virage</div>
       <div class="pace" id="iPace"><svg id="iArrow" viewBox="0 0 40 40"></svg><div><div class="pn" id="iPn">Ligne droite</div><div class="pd" id="iPd"></div></div></div>

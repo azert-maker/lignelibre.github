@@ -37,7 +37,7 @@ function buildMoto(look){const g=new THREE.Group();const gp=gearOf('moto',look.g
 
 MODES.motocross=function(cfg,look,ctx){
   const P_=cfg.params||{},course=cfg.mode==='course',eco=S().quality==='eco',seedI=strSeed(cfg.seed);const R=rngAt(seedI,5,11);
-  const env={fogNear:170,fogFar:720,hemiGround:0x6a4a2a,accent:'#ff6a1f',cloudY:170,light:.85};
+  const env={fogNear:170,fogFar:760,hemiGround:0x7a5a34,accent:'#ff6a1f',cloudY:170,light:.9,tint:PLACE_TINT.motocross};
   const root=new THREE.Group();scene.add(root);
   const JS=[.8,1,1.25][P_.jumps??1],GP=gearOf('moto',look.gear.moto).phys;
   const park=makePark({root,top:0x8a5a34,side:0x5a3a20,lip:0xffd23a,rail:0xff6a1f});
@@ -80,7 +80,7 @@ MODES.motocross=function(cfg,look,ctx){
     const lipX=k.x+k.fx*k.lipU,lipZ=k.z+k.fz*k.lipU;const D=(land.x-lipX)*k.fx+(land.z-lipZ)*k.fz+(land.us?land.us[13]||0:0);const th=Math.atan(1.7*k.H/k.lipU),g=9.81*.92,c2=Math.cos(th)**2,den=2*c2*(k.H+D*Math.tan(th)-land.H);if(den<=0)continue;
     const vl=Math.sqrt(g*D*D/den),va=Math.sqrt(vl*vl+2*9.81*k.H)*1.18;k.vRec=va;const sp=textSprite('Saut '+Math.round(D)+' m · '+Math.round(va*3.6/5)*5+' km/h',0xffd23a,5.2);sp.position.set(k.x-k.fx*6,3.2,k.z-k.fz*6);root.add(sp)}}
   /* ---------- sol, piste peinte, décor ---------- */
-  {const S_=course?900:420;const gm=detailMaterial(new THREE.MeshLambertMaterial({color:0x6d7d3e}),{amp:.18});const fl=new THREE.Mesh(new THREE.PlaneGeometry(S_*2,S_*2),gm);fl.rotation.x=-Math.PI/2;fl.position.set(0,-.01,course?-S_*.6:0);fl.receiveShadow=true;root.add(fl);
+  {const S_=course?900:420;const gm=detailMaterial(new THREE.MeshLambertMaterial({color:0xa8955a}),{amp:.2});/* herbe sèche de Californie du Sud */const fl=new THREE.Mesh(new THREE.PlaneGeometry(S_*2,S_*2),gm);fl.rotation.x=-Math.PI/2;fl.position.set(0,-.01,course?-S_*.6:0);fl.receiveShadow=true;root.add(fl);
     /* ruban de terre sur la ligne centrale (visuel ; le relief des sauts vient des modules) */
     const pos=[],col=[];const c1=new THREE.Color(0x8a5a34),c2=new THREE.Color(0x7a4e2c);const w=HW+.5;
     for(let i=0;i<C.length-1;i++){const a=C[i],b=C[i+1];if(Math.hypot(a.x-b.x,a.z-b.z)>6)continue;const ra=[Math.cos(a.h),Math.sin(a.h)],rb=[Math.cos(b.h),Math.sin(b.h)];const cc=i%2?c1:c2;
@@ -91,11 +91,13 @@ MODES.motocross=function(cfg,look,ctx){
     /* piquets + rubalise en bord de piste (repères de trajectoire, sans collision) */
     const stakeN=Math.min(eco?160:420,Math.floor(C.length*2/3));const sg=new THREE.CylinderGeometry(.04,.04,1,5);sg.translate(0,.5,0);const st=new THREE.InstancedMesh(sg,new THREE.MeshLambertMaterial({color:0xf2f2ee}),stakeN);let n=0;
     for(let i=0;i<C.length&&n<stakeN;i+=3)for(const sd of [-1,1]){if(n>=stakeN)break;const p=C[i];_dv.set(p.x+Math.cos(p.h)*(HW+1.6)*sd,0,p.z+Math.sin(p.h)*(HW+1.6)*sd);_dq.identity();_ds.set(1,1,1);_dm.compose(_dv,_dq,_ds);st.setMatrixAt(n++,_dm)}st.count=n;root.add(st);
-    const rr=rngAt(seedI,8,8);mountainRing(root,eco?10:18,600,780,60,160,0x6a6250,0xb9b19b,new THREE.Color(0xcfe3ef),rr);
-    const treeG=treeGeometry(1.6,5.5),treeN=eco?80:220,trees=new THREE.InstancedMesh(treeG,new THREE.MeshLambertMaterial({color:0x2e5030}),treeN);n=0;
+    const rr=rngAt(seedI,8,8);mountainRing(root,eco?10:18,560,760,90,230,0x7d6446,0xb79a6c,new THREE.Color(0xe9d5b0),rr);/* monts San Bernardino, bruns */
+    const treeG=treeGeometry(1.6,5.5),treeN=eco?80:220,trees=new THREE.InstancedMesh(treeG,new THREE.MeshLambertMaterial({color:0x58633a}),treeN);n=0;
     for(let i=0;i<treeN*3&&n<treeN;i++){const x=(rr()-.5)*(course?500:420),z=course?-rr()*Math.max(200,-Math.min(0,...C.map(p=>p.z).slice(-1)))-40+60:(rr()-.5)*420;if(nearC(x,z).d<22||Math.abs(x)<A*.95&&Math.abs(z)<A*.7&&!course)continue;_dv.set(x,0,z);_ds.setScalar(.8+rr()*.8);_dq.identity();_dm.compose(_dv,_dq,_ds);trees.setMatrixAt(n++,_dm)}trees.count=n;root.add(trees);
     /* public le long de la piste */const crowdN=eco?50:150,cg=new THREE.InstancedMesh(PEOPLE_GEO.b,new THREE.MeshLambertMaterial({color:0xffffff}),crowdN),hg=new THREE.InstancedMesh(PEOPLE_GEO.h,new THREE.MeshLambertMaterial({color:0xd9a77f}),crowdN);n=0;
     for(let i=0;i<crowdN;i++){const p=C[Math.floor(rr()*C.length)];const sd=rr()<.5?-1:1,o=HW+6+rr()*5;_dv.set(p.x+Math.cos(p.h)*o*sd,0,p.z+Math.sin(p.h)*o*sd);_dq.setFromAxisAngle(_dy,p.h+(sd>0?-Math.PI/2:Math.PI/2));_ds.set(1,1,1);_dm.compose(_dv,_dq,_ds);cg.setMatrixAt(n,_dm);hg.setMatrixAt(n,_dm);cg.setColorAt(n,new THREE.Color(PEOPLE_COLS[n%PEOPLE_COLS.length]));n++}root.add(cg);root.add(hg)}
+  /* tribune (hors piste) : au départ en course, au sud de l'arène en freestyle */
+  {const gs=new THREE.Mesh(grandstandGeo(course?36:60),VCOL());gs.name='grandstand';if(course){const p=C[Math.min(8,C.length-1)];gs.position.set(p.x-Math.cos(p.h)*(HW+16),0,p.z-Math.sin(p.h)*(HW+16));gs.rotation.y=-p.h-Math.PI/2}else{gs.position.set(0,0,A*.6+30);}root.add(gs)}
   if(course&&C.length){const a=C[C.length-1];root.add(finishArch(a.x,0,a.z,-a.h,HW+2,7))}
   const groundH=(x,z)=>park.H(x,z);
   /* ---------- rider + moto ---------- */
@@ -202,7 +204,9 @@ MODES.motocross=function(cfg,look,ctx){
       if(apI.ph===0){tx=l.x-fx*32;tz=l.z-fz*32;if(Math.hypot(tx-St.pos.x,tz-St.pos.z)<9)apI.ph=1}else{tx=l.x+fx*60;tz=l.z+fz*60;if((St.pos.x-l.x)*fx+(St.pos.z-l.z)*fz>40)apI.ph=2}}
     if(St.air){if(St.airT<.1)apTrick=St.vel.y>4?Math.floor(Math.random()*4):0;const t=St.airT,up=St.vel.y>.5;return {x:apTrick===1&&up&&t>.15?1:0,y:0,a:false,g:apTrick===2&&up&&t>.2}}
     const want=Math.atan2(tx-St.pos.x,-(tz-St.pos.z)),dY=wrapA(want-St.yaw);const vT=course?(St.apCurve>.9?11:St.apCurve>.5?14:19):apI&&apI.ph===1?(apI.l.k==='fmx'?19:15):11;return {x:clamp(dY*2,-1,1),y:Math.abs(dY)>.9&&sp>9?-1:sp<vT?1:0,a:false,g:false}}
-  return {env,stats,name:'Motocross',vScale:100,target:finishT,
+  /* pièces : ligne propre au sol, arc cyan au-dessus des tables et doubles, crêtes des whoops */
+  const coinPlan=coinParkPlan(park,{every:6.5,r:1.7,cy:1.0,scale:1.45,refH:1.8,jump:[[4,1.7],[9,2.8],[14,2.3]]});
+  return {env,stats,name:'Motocross',vScale:100,coins:coinPlan,target:finishT,
     keys:[['↑ / ↓','gaz / frein · en l\'air : plonger / cabrer (backflip)'],['← →','braquer · en l\'air : whip'],['Shift / F','figure freestyle en l\'air (+ ← → / ↓)'],['Espace','maintenir = précharger la suspension · relâcher = saut'],['C','caméra']],
     touch:{u:'Gaz',d:'Frein',a:'Saut',g:'Freestyle'},
     inst:`<div class="ihead">Moto</div><div class="ro-grid"><div class="ro"><span>Rapport</span><b id="mGear">1</b></div><div class="ro"><span>Air</span><b id="mAir">—</b></div>

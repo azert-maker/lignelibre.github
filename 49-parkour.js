@@ -10,7 +10,7 @@
 ===================================================================== */
 MODES.parkour=function(cfg,look,ctx){
   const P_=cfg.params||{},course=cfg.mode==='course',eco=S().quality==='eco',seedI=strSeed(cfg.seed);const R=rngAt(seedI,7,17);
-  const env={fogNear:120,fogFar:520,hemiGround:0x3a2a4a,accent:'#ff3fbf',cloudY:160,light:.9};
+  const env={fogNear:160,fogFar:780,hemiGround:0x4a4038,accent:'#ff3fbf',cloudY:160,light:.82,tint:PLACE_TINT.parkour};
   const root=new THREE.Group();scene.add(root);const SH=gearOf('shoe',look.gear.shoe).phys;
   const GAP=[[1.6,3.0],[2.0,3.8],[2.4,4.4]][P_.gaps??1],HV=[2,3,4.5][P_.height??1];
   /* ---------- boîtes : [x0,x1,y0,y1,z0,z1,type] ---------- */
@@ -47,16 +47,16 @@ MODES.parkour=function(cfg,look,ctx){
   {const winTex=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#ffffff';g.fillRect(0,0,w,h);for(let y=0;y<2;y++)for(let x=0;x<2;x++){g.fillStyle=(x+y)%3?'#2a2f45':'#ffd27a';g.fillRect(x*64+12,y*64+14,40,34)}},true);
     const facM=new THREE.MeshLambertMaterial({vertexColors:true,map:winTex}),topM=detailMaterial(new THREE.MeshLambertMaterial({vertexColors:true}),{amp:.12});
     const F={P:[],U:[],C:[]},T={P:[],C:[]};const col=new THREE.Color();
-    const pal=[0x3b2f5c,0x2d3a5e,0x4a2f50,0x2f4552,0x3d3348];
+    const pal=[0xd8cbb0,0xcfc0a2,0xe2d6bd,0xc9b99c,0xdacdb4];/* pierre de taille haussmannienne */
     function boxGeo(b,c,ct){const {x0,x1,y0,y1,z0,z1}=b;const q=(A,Uv,C,p,u,cc)=>{for(const k of [0,1,2,0,2,3]){A.push(...p[k]);if(Uv)Uv.push(...u[k]);C.push(cc.r,cc.g,cc.b)}};
       const sides=[[[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1],x1-x0],[[x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0],x1-x0],[[x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],z1-z0],[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0],z1-z0]];
       for(const s of sides){const w=s[4]/4,hh=(y1-y0)/3.2,v0=y0/3.2;q(F.P,F.U,F.C,s.slice(0,4),[[0,v0],[w,v0],[w,v0+hh],[0,v0+hh]],c)}
       q(T.P,null,T.C,[[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]],null,ct)}
-    for(const b of roofs){col.setHex(pal[(b.r*3+b.c)%pal.length]);boxGeo(b,col.clone(),new THREE.Color(0x6c6878).multiplyScalar(.9+((b.r+b.c)%2)*.1))}
+    for(const b of roofs){col.setHex(pal[(b.r*3+b.c)%pal.length]);boxGeo(b,col.clone(),new THREE.Color(0x66727e).multiplyScalar(.9+((b.r+b.c)%2)*.1))}
     const mk=(G,mat,uv)=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(G.P,3));g.setAttribute('color',new THREE.Float32BufferAttribute(G.C,3));if(uv)g.setAttribute('uv',new THREE.Float32BufferAttribute(G.U,2));g.computeVertexNormals();const m=new THREE.Mesh(g,mat);m.receiveShadow=true;root.add(m);return m};
     winTex.wrapS=winTex.wrapT=THREE.RepeatWrapping;mk(F,facM,true);mk(T,topM,false);
     /* éléments de jeu : couleurs codées (jaune = vault, magenta = glissade, cyan = wallrun, blanc = précision) + rayures */
-    const cols={vault:0xffd23a,bar:0xff3fbf,post:0x5a2a5a,chim:0x6a6070,pad:0xf2f2ee,beam:0xe8d9b0,wall:0x2b2f4a};
+    const cols={vault:0xffd23a,bar:0xff3fbf,post:0x5a2a5a,chim:0xa65a3f,pad:0xf2f2ee,beam:0xe8d9b0,wall:0x2b2f4a};
     const geo=new THREE.BoxGeometry(1,1,1);const mats={};for(const k in cols)mats[k]=new THREE.MeshLambertMaterial({color:cols[k]});
     /* obstacles regroupés par type en InstancedMesh (un appel de dessin par type au lieu d'un par objet) */
     const byT={};for(const b of boxes){if(b.t==='roof')continue;(byT[b.t]=byT[b.t]||[]).push(b)}
@@ -65,9 +65,10 @@ MODES.parkour=function(cfg,look,ctx){
       if(b.wr){/* panneau néon de wallrun, bien visible */const pm=new THREE.Mesh(new THREE.PlaneGeometry(b.z1-b.z0-1,4),new THREE.MeshBasicMaterial({color:0x2ee6ff,transparent:true,opacity:.85}));pm.rotation.y=b.face>0?Math.PI/2:-Math.PI/2;pm.position.set(b.face>0?b.x1+.02:b.x0-.02,b.y1-4.6,(b.z0+b.z1)/2);root.add(pm);
         const ar=textSprite('WALLRUN',0x2ee6ff,3);ar.position.set(b.face>0?b.x1+.4:b.x0-.4,b.y1-2,(b.z0+b.z1)/2);root.add(ar)}}
     /* rue en contrebas, enseignes, ciel nocturne de la ville au loin */
-    const st=new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshLambertMaterial({color:0x2a2633}));st.rotation.x=-Math.PI/2;st.position.y=-.02;root.add(st);
-    const rr=rngAt(seedI,9,4),bm=new THREE.MeshLambertMaterial({color:0x2a2440});for(let i=0;i<(eco?20:46);i++){const a=rr()*Math.PI*2,d=160+rr()*240,h=30+rr()*80,w=16+rr()*22;const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),bm);m.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d+(course?-ROWS*7:0));root.add(m)}
+    const st=new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshLambertMaterial({color:0x56524d}));st.rotation.x=-Math.PI/2;st.position.y=-.02;root.add(st);
+    const rr=rngAt(seedI,9,4),bm=new THREE.MeshLambertMaterial({color:0xc4b89f});for(let i=0;i<(eco?20:46);i++){const a=rr()*Math.PI*2,d=160+rr()*240,h=30+rr()*80,w=16+rr()*22;const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),bm);m.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d+(course?-ROWS*7:0));root.add(m)}
     const signC=[0xff3fbf,0x2ee6ff,0xffd23a];for(let i=0;i<Math.min(roofs.length,eco?8:18);i++){const b=roofs[Math.floor(rr()*roofs.length)];const s=new THREE.Mesh(new THREE.PlaneGeometry(4,1.2),new THREE.MeshBasicMaterial({color:signC[i%3]}));s.position.set(b.x0-.03,b.y1-2-rr()*4,(b.z0+b.z1)/2);s.rotation.y=-Math.PI/2;root.add(s)}}
+  parisDecor(root,Math.min(...rowZ)-BW,eco);
   /* ---------- départ, portes (parcours), spots (libre) ---------- */
   const startB=roofs.find(o=>o.r===0&&o.c===Math.floor(COLS/2));
   const St={pos:V3((startB.x0+startB.x1)/2,startB.y1,startB.z1-2),vel:V3(),h:0,sp:0,mode:'run',t:0,onG:true,coy:0,peak:0,from:null,jumpT:0,height:1.8,wr:null,wrUsed:null,vault:null,climb:null,slide:0,roll:0,stun:0,prevA:false,prevD:false,runT:0,phase:0,aBuf:-9,lastBox:null,flow:0};
@@ -159,7 +160,23 @@ MODES.parkour=function(cfg,look,ctx){
     const want=Math.atan2(tx-St.pos.x,-(tz-St.pos.z));const dY=wrapA(want-St.h);const ahead=V3t.set(St.pos.x+Math.sin(St.h)*1.4,0,St.pos.z-Math.cos(St.h)*1.4);
     const gA=groundTop(ahead.x,ahead.z,St.pos.y+.3);const edge=St.mode==='run'&&gA<St.pos.y-.6&&St.sp>4;let bar=false;for(const b of near(ahead.x,ahead.z,.6,_N)){if(b.t==='bar'&&Math.abs(b.y0-St.pos.y-1.15)<.3&&ahead.x>b.x0-.5&&ahead.x<b.x1+.5&&ahead.z>b.z0-.8&&ahead.z<b.z1+.8)bar=true}
     return {x:clamp(dY*2,-1,1),y:bar?-1:1,a:edge,g:false}}
-  return {env,stats,name:'Parkour',vScale:32,target:finishT,
+  /* pièces : 3 pièces sur ton toit vers le bord, 2 cyan au-dessus de l'écart, 1 à la réception ; ou 3 cyan le long d'un panneau de wallrun */
+  const coinPlan=(()=>{const st={next:1.2,last:null};const inProp=(x,y,z)=>near(x,z,.5,_N2).some(b=>b.t!=='roof'&&x>b.x0-.3&&x<b.x1+.3&&z>b.z0-.3&&z<b.z1+.3&&y>b.y0-.2&&y<b.y1+.9);
+    return {r:1.2,cy:.95,scale:1.2,every:.3,life:15,behind:0,cull:120,
+    spawn(api,p,dir){if(api.time<st.next||api.live>3)return;st.next=api.time+4.5;const y0=p.y-.95;
+      const here=roofs.find(b=>p.x>=b.x0&&p.x<=b.x1&&p.z>=b.z0&&p.z<=b.z1&&Math.abs(b.y1-y0)<1.5);if(!here)return;
+      const hc={x:(here.x0+here.x1)/2,z:(here.z0+here.z1)/2};const cand=[];
+      for(const b of roofs){if(b===here||b===st.last)continue;const c={x:(b.x0+b.x1)/2,z:(b.z0+b.z1)/2},dx=c.x-hc.x,dz=c.z-hc.z,d=Math.hypot(dx,dz);if(d<8||d>17)continue;if((dx*dir.x+dz*dir.z)/d<.35)continue;if(b.y1>here.y1+2.2)continue;cand.push({b,c,dx:dx/d,dz:dz/d})}
+      const wr=boxes.filter(b=>b.wr&&Math.hypot((b.x0+b.x1)/2-p.x,(b.z0+b.z1)/2-p.z)<22&&(((b.z0+b.z1)/2-p.z)*dir.z+((b.x0+b.x1)/2-p.x)*dir.x)>0);
+      if(wr.length&&Math.random()<.35){const w=wr[0],x=w.face>0?w.x1+.7:w.x0-.7,y=w.y1-3.4;for(const t of [.3,.5,.7]){const z=lerp(w.z1,w.z0,t);api.add(x,y,z,true)}st.last=w;return}
+      if(!cand.length)return;const c=cand[Math.floor(Math.random()*cand.length)];st.last=c.b;const b=c.b;
+      /* point de sortie (bord de mon toit face à la cible) et d'entrée (bord du toit cible) */
+      const ex=clamp(hc.x+c.dx*99,here.x0+.6,here.x1-.6),ez=clamp(hc.z+c.dz*99,here.z0+.6,here.z1-.6),ix=clamp(ex,b.x0+.6,b.x1-.6),iz=clamp(ez,b.z0+.6,b.z1-.6);
+      const sx=clamp(p.x,here.x0+.8,here.x1-.8),sz=clamp(p.z,here.z0+.8,here.z1-.8);
+      for(const t of [.35,.6,.85]){const x=lerp(sx,ex,t),z=lerp(sz,ez,t),y=here.y1+.95;if(!inProp(x,y-.95,z))api.add(x,y,z,false)}
+      const top=Math.max(here.y1,b.y1)+.95;for(const [t,h] of [[.36,.9],[.64,.9]])api.add(lerp(ex,ix,t),top+h,lerp(ez,iz,t),true);
+      {const x=lerp(ix,(b.x0+b.x1)/2,.25),z=lerp(iz,(b.z0+b.z1)/2,.25);if(!inProp(x,b.y1,z))api.add(x,b.y1+.95,z,false)}}}})();
+  return {env,stats,name:'Parkour',vScale:32,coins:coinPlan,target:finishT,
     keys:[['↑','courir · ← → tourner'],['Espace','sauter (bord du toit) · walljump en wallrun · kong vault'],['↓','glissade en course · roulade à la réception'],['Panneaux cyan','wallrun : arrive en biais, saute pour enchaîner'],['C','caméra']],
     touch:{u:'Courir',d:'Glisser',a:'Saut',g:false},
     inst:`<div class="ihead">Flow</div><div class="ro-grid"><div class="ro"><span>Mouvement</span><b id="pkMode" style="font-size:15px">—</b></div><div class="ro"><span>Hauteur</span><b id="pkH">—</b></div>

@@ -26,7 +26,7 @@ function buildBoat(look){const g=new THREE.Group();const hull=new THREE.MeshPhon
 
 MODES.wakeboard=function(cfg,look,ctx){
   const P_=cfg.params||{},course=cfg.mode==='course',eco=S().quality==='eco',seedI=strSeed(cfg.seed);const R=rngAt(seedI,6,13);
-  const env={fogNear:200,fogFar:900,hemiGround:0x1e6a72,accent:'#22d3c5',cloudY:170,light:.86};
+  const env={fogNear:220,fogFar:1000,hemiGround:0x8a6a4a,accent:'#22d3c5',cloudY:170,light:.9,tint:PLACE_TINT.wakeboard};
   const root=new THREE.Group();scene.add(root);const WP=gearOf('wboard',look.gear.wboard).phys;
   const VB=[8.1,9.2,10.3][P_.speed??1],HWK=[.55,.75,.95][P_.wake??1]*(VB/9.2),LR=20,TAN=Math.tan(15*Math.PI/180);
   /* ---------- parcours du bateau : polyligne à abscisse curviligne (2 m) ---------- */
@@ -76,12 +76,14 @@ MODES.wakeboard=function(cfg,look,ctx){
   park.finalize();
   const surfH=(x,z)=>{const w=waterH(x,z),g=park.ground(x,z);return g.m?Math.max(w,g.h):w};
   /* ---------- rivage, décor ---------- */
-  {const rr=rngAt(seedI,8,3);mountainRing(root,eco?10:16,700,900,40,120,0x5f7b55,0xa9b88f,new THREE.Color(0xcfe3ef),rr);
-    const shoreM=new THREE.MeshLambertMaterial({color:0x6f9a55}),sandM=new THREE.MeshLambertMaterial({color:0xe2cf9c}),treeG=treeGeometry(1.8,6),treeM=new THREE.MeshLambertMaterial({color:0x2c5a34});
+  {const rr=rngAt(seedI,8,3);mountainRing(root,eco?10:16,650,880,70,190,0xa4553a,0xd99b6a,new THREE.Color(0xf0d9bc),rr);/* roche rouge du désert de Mojave */
+    const shoreM=new THREE.MeshLambertMaterial({color:0xc9a26c}),sandM=new THREE.MeshLambertMaterial({color:0xe2cf9c}),treeG=treeGeometry(1.8,6),treeM=new THREE.MeshLambertMaterial({color:0x2c5a34});
     let minX=1e9,maxX=-1e9,minZ=1e9,maxZ=-1e9;for(let i=0;i<PN;i++){minX=Math.min(minX,PX[i]);maxX=Math.max(maxX,PX[i]);minZ=Math.min(minZ,PZ[i]);maxZ=Math.max(maxZ,PZ[i])}
     const cxl=(minX+maxX)/2,czl=(minZ+maxZ)/2,rx=(maxX-minX)/2+160,rz=(maxZ-minZ)/2+160;const shore=new THREE.Mesh(new THREE.RingGeometry(1,1.6,48,1),shoreM);shore.rotation.x=-Math.PI/2;shore.scale.set(rx,rz,1);shore.position.set(cxl,.3,czl);root.add(shore);
     const beach=new THREE.Mesh(new THREE.RingGeometry(.97,1.02,48,1),sandM);beach.rotation.x=-Math.PI/2;beach.scale.set(rx,rz,1);beach.position.set(cxl,.32,czl);root.add(beach);
-    const TN=eco?90:240,inst=new THREE.InstancedMesh(treeG,treeM,TN);for(let i=0;i<TN;i++){const a=rr()*Math.PI*2,k=1.05+rr()*.45;_dv.set(cxl+Math.cos(a)*rx*k,.3,czl+Math.sin(a)*rz*k);_dq.identity();_ds.setScalar(.8+rr()*.9);_dm.compose(_dv,_dq,_ds);inst.setMatrixAt(i,_dm)}root.add(inst);
+    const pl=[];for(let i=0;i<(eco?30:70);i++){const a=rr()*Math.PI*2,k=1.02+rr()*.12;pl.push([cxl+Math.cos(a)*rx*k,.3,czl+Math.sin(a)*rz*k,rr()*6.3,.9+rr()*.6])}instanceAll(palmGeo(),VCOL(),pl,root);/* palmiers sur la rive (désert) */
+    {const TN=eco?30:80,inst=new THREE.InstancedMesh(treeG,new THREE.MeshLambertMaterial({color:0x6b6a3a}),TN);for(let i=0;i<TN;i++){const a=rr()*Math.PI*2,k=1.15+rr()*.4;_dv.set(cxl+Math.cos(a)*rx*k,.3,czl+Math.sin(a)*rz*k);_dq.identity();_ds.set(.9,.35+rr()*.25,.9);_dm.compose(_dv,_dq,_ds);inst.setMatrixAt(i,_dm)}root.add(inst)}/* buissons secs */
+    {const br=new THREE.Mesh(stoneBridgeGeo(),VCOL());br.position.set(cxl-rx*1.0,0,czl);br.rotation.y=Math.PI/2;root.add(br)}/* pont à arches de pierre, signature de Lake Havasu City */
     /* pontons et cabanes sur la rive */const dm=new THREE.MeshLambertMaterial({color:0x8a6a48});for(let i=0;i<6;i++){const a=rr()*Math.PI*2;const d=new THREE.Mesh(new THREE.BoxGeometry(3,.3,18),dm);d.position.set(cxl+Math.cos(a)*rx*.97,.35,czl+Math.sin(a)*rz*.97);d.rotation.y=-a+Math.PI/2;root.add(d)}}
   /* ---------- bouées du slalom (parcours) ---------- */
   let gates=null,finishT=0;const buoyM=new THREE.MeshLambertMaterial({color:0xff7a1a}),buoyG=new THREE.SphereGeometry(.45,10,8);
@@ -168,7 +170,15 @@ MODES.wakeboard=function(cfg,look,ctx){
     if(St.air){const t=St.airT;return {x:apTrick===1&&t<.55?apDir:0,y:apTrick===2&&t<.6?-1:apTrick===4&&t<.6?1:0,a:false,g:apTrick===3&&t>.15}}
     const xr=(Math.sqrt(LR*LR-St.X*St.X)-1.6)*TAN+1.1;apT+=1/60;if(St.X*apDir>xr+3.5||apT>6){apDir=-Math.sign(St.X)||1;apT=0;apTrick=Math.floor(Math.random()*5)}
     const d=Math.abs(St.X-(-apDir*0))-xr,near=(St.X*apDir<-xr+1.6&&St.X*apDir>-xr-1)&&Math.abs(St.U)>4;return {x:apDir,y:0,a:St.X*apDir<-xr-.2&&St.X*apDir>-xr-2.8,g:false}}
-  return {env,stats,name:'Wakeboard',vScale:55,target:finishT,
+  /* pièces : couloir hors du sillage (facile), arc cyan au-dessus du sillage (wake to wake), au-dessus d'un kicker ou le long d'un slider */
+  const coinPlan=(()=>{let sc=null,k=0;return {r:1.4,cy:.8,scale:1.3,every:.25,life:24,behind:20,cull:170,
+    spawn(api){const sr=B.s-LR;if(sc===null)sc=sr+35;if(sc>sr+70)return;const xr=LR*TAN+1.1,pat=k++%3;const P=s=>pathAt(s,{});const W=(s,lat,h,risk)=>{const p=P(s);api.add(p.x+Math.cos(p.h)*lat,h,p.z+Math.sin(p.h)*lat,risk)};
+      let done=false;
+      if(pat===2){const f=feats.find(q=>{const d=q.s-sc;return d>-5&&d<45})||null;
+        if(f){const fx=Math.sin(f.h),fz=-Math.cos(f.h);if(f.k==='kicker'){for(const [d,h] of [[5.5,1.5],[8,2],[10.5,1.6]])api.add(f.x+fx*d,h+.8,f.z+fz*d,true)}else{for(const d of [3,5.5,8,10.5])api.add(f.x+fx*d,.42+.6,f.z+fz*d,true)}done=true;sc=f.s+30}}
+      if(!done&&pat===1){const sd=k%2?1:-1;for(let i=0;i<4;i++){const u=i/3;W(sc+i*2.6,sd*lerp(-(xr+1),xr+1,u),.8+Math.sin(Math.PI*(.15+u*.7))*1.5,true)}done=true;sc+=60}
+      if(!done){const sd=(k>>1)%2?1:-1;for(let i=0;i<5;i++)W(sc+i*4,sd*(xr+2.5),.8,false);sc+=60}}}})();
+  return {env,stats,name:'Wakeboard',vScale:55,coins:coinPlan,target:finishT,
     keys:[['← →','carre : traverser le sillage · en l\'air : rotations'],['Espace','maintenir = charger · relâcher sur la crête = pop'],['↑ / ↓','en l\'air : Tantrum / Backroll'],['Shift / F','grab (+ ← = Melon)'],['C','caméra']],
     touch:{u:'Tantrum',d:'Backroll',a:'Pop',g:'Grab'},
     inst:`<div class="ihead">Sillage</div><div class="ro-grid"><div class="ro"><span>Position</span><b id="wkPos">—</b></div><div class="ro"><span>Air</span><b id="wkAir">—</b></div>

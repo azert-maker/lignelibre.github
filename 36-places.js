@@ -6,6 +6,10 @@
                                    façades du boardwalk, montagnes de Santa Monica au loin, lumière dorée
      Wingsuit  Lauterbrunnen       falaises verticales (makeValley cliff), cascades, chalets, église au clocher pointu
      Snowboard Whistler Blackcomb  snowpark (modules fournis), filets orange, drapeaux, sommets glaciaires
+     Parkour   Paris Rooftops      façades crème haussmanniennes, toits en zinc, cheminées en terre cuite, tour Eiffel au loin
+     Wakeboard Lake Havasu         montagnes de roche rouge, rive de désert, palmiers, pont à arches en pierre sur la rive
+     Motocross Glen Helen MX       herbe sèche dorée, collines brunes, tribune
+     Downhill  Mount Tamalpais     prairies dorées, mer de nuages sous la route (le sommet émerge du brouillard)
 ===================================================================== */
 /* fusion de géométries (non indexées) avec une couleur par pièce */
 function mergeColored(parts){let n=0;const geos=parts.map(([g,c,m])=>{let x=g.index?g.toNonIndexed():g;if(m)x.applyMatrix4(m);if(!x.attributes.normal)x.computeVertexNormals();n+=x.attributes.position.count;return [x,new THREE.Color(c)]});
@@ -53,7 +57,9 @@ function waterfall(x,yTop,yBot,z,ry,w){const h=Math.max(10,yTop-yBot),t=fallTex(
   const g=new THREE.Group();g.add(m);g.add(mist);FALLS.push(t);return g}
 function placesTick(dt){for(const t of FALLS)t.offset.y+=dt*.9;if(FALLS.length>40)FALLS.splice(0,FALLS.length-40)}
 /* ciel / brouillard propres au lieu (mélangés à la météo choisie) */
-const PLACE_TINT={bmx:{top:0x3d6fb3,horizon:0xffc59a,glow:0xffb36b,k:.55},wingsuit:{top:0x3a7bd5,horizon:0xd8ecf7,glow:0xfff6dc,k:.4},snowboard:{top:0x1f63c6,horizon:0xe4f1ff,glow:0xffffff,k:.45}};
+const PLACE_TINT={bmx:{top:0x3d6fb3,horizon:0xffc59a,glow:0xffb36b,k:.55},wingsuit:{top:0x3a7bd5,horizon:0xd8ecf7,glow:0xfff6dc,k:.4},snowboard:{top:0x1f63c6,horizon:0xe4f1ff,glow:0xffffff,k:.45},
+  /* Paris : fin de journée dorée ; Lake Havasu : ciel de désert, horizon chaud ; Glen Helen : poussière ; Tamalpais : air marin clair au-dessus de la mer de nuages */
+  parkour:{top:0x4d6cb0,horizon:0xffcfa3,glow:0xffaa66,k:.6},wakeboard:{top:0x2f6fd0,horizon:0xf6d9b0,glow:0xffd08a,k:.5},motocross:{top:0x4f7fc0,horizon:0xefd3a6,glow:0xffc070,k:.5},longboard:{top:0x3c74c8,horizon:0xf2e6cf,glow:0xffe0a8,k:.45}};
 
 /* ---------- Venice Beach Park (BMX) ---------- */
 function veniceDecor(root,SZ,seedI,eco){const R=rngAt(seedI,21,5),HS=SZ/2;
@@ -100,3 +106,35 @@ function whistlerChunk(V,k,g,R,eco,kicks){const CH=160,z0=-k*CH;if(!_fence){_fen
   if(GLB.models.snowpark&&k>=1&&!eco){const gl=GLB.models.snowpark,names=['sp_bonk','sp_aframe','sp_rainbow','sp_kink','sp_srail'].filter(n=>gl.scene.getObjectByName(n));
     for(let i=0;i<2;i++){const nm=names[Math.floor(R()*names.length)];if(!nm)break;const z=z0-CH*(.3+.4*i),c=V.cx(z),w=V.vw(z),side=(k+i)%2?1:-1,x=c+side*(w+5);
       const o=gl.scene.getObjectByName(nm).clone(true);o.traverse(n=>n.userData.shared=true);o.position.set(x,V.groundH(x,z),z);o.rotation.y=-V.yawAt(z);g.add(o)}}}
+
+/* ---------- Paris Rooftops : tour Eiffel (silhouette, ~145 m) ---------- */
+function eiffelGeo(){const P=[],C=0x6b5646,V_=new THREE.Vector3(),U=new THREE.Vector3(0,1,0);
+  for(const [sx,sz] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const a=new THREE.Vector3(sx*22,0,sz*22),b=new THREE.Vector3(sx*9,38,sz*9);const d=V_.copy(b).sub(a),L=d.length();
+    const m=new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(.5),new THREE.Quaternion().setFromUnitVectors(U,d.clone().normalize()),new THREE.Vector3(1,1,1));P.push([new THREE.BoxGeometry(5,L,5),C,m])}
+  /* arches entre les pieds */for(let i=0;i<4;i++){const ar=new THREE.TorusGeometry(13,1.1,4,12,Math.PI);P.push([ar,C,_pm(Math.sin(i*Math.PI/2)*15.5,10,Math.cos(i*Math.PI/2)*15.5,0,i*Math.PI/2,0)])}
+  P.push([new THREE.BoxGeometry(28,3,28),C,_pm(0,39,0)]);const mid=new THREE.CylinderGeometry(4.6,10.5,52,4,1,true);mid.rotateY(Math.PI/4);P.push([mid,C,_pm(0,66,0)]);
+  P.push([new THREE.BoxGeometry(12,2.4,12),C,_pm(0,92,0)]);const top=new THREE.CylinderGeometry(1.2,4.6,44,4,1,true);top.rotateY(Math.PI/4);P.push([top,C,_pm(0,115,0)]);
+  P.push([new THREE.BoxGeometry(3.4,3,3.4),C,_pm(0,138,0)]);P.push([new THREE.CylinderGeometry(.35,.35,10,5),C,_pm(0,144,0)]);return mergeColored(P)}
+function parisDecor(root,zFar,eco){/* silhouette dans la brume de fin de journée : couleur déjà « atmosphérique », hors brouillard pour rester lisible */const m=new THREE.Mesh(eiffelGeo(),new THREE.MeshBasicMaterial({color:0x7d7068,fog:false}));m.position.set(-130,0,zFar-150);m.rotation.y=.3;root.add(m);
+  /* toits lointains en zinc (bandeaux bas, pour que la ville continue jusqu'à la tour) */
+  const zinc=new THREE.MeshLambertMaterial({color:0x8d98a3}),cream=new THREE.MeshLambertMaterial({color:0xd6c9ae}),R=mulberry(77);const g1=[],g2=[];
+  for(let i=0;i<(eco?18:40);i++){const x=-260+R()*520,z=zFar-60-R()*260;if(Math.abs(x+150)<40&&z<zFar-180)continue;const w=14+R()*16,h=16+R()*12,d=10+R()*10;g1.push([x,h/2,z,w,h,d]);g2.push([x,h+1.6,z,w*1.02,3.2,d*1.02])}
+  const box=new THREE.BoxGeometry(1,1,1);const put=(L,mat)=>{const im=new THREE.InstancedMesh(box,mat,L.length);const M=new THREE.Matrix4();L.forEach((t,i)=>{M.compose(new THREE.Vector3(t[0],t[1],t[2]),new THREE.Quaternion(),new THREE.Vector3(t[3],t[4],t[5]));im.setMatrixAt(i,M)});root.add(im)};put(g1,cream);put(g2,zinc)}
+
+/* ---------- Lake Havasu : pont à arches en pierre (rive ouest) ---------- */
+function stoneBridgeGeo(){const P=[],S=0xc9b48e,D=0xa8946e;const L=150,W=14,H=12;
+  P.push([new THREE.BoxGeometry(L,2.2,W),S,_pm(0,H,0)]);for(const s of [-1,1])P.push([new THREE.BoxGeometry(L,1.3,.8),D,_pm(0,H+1.7,s*(W/2-.4))]);
+  const n=5,sp=L/n;for(let i=0;i<=n;i++){const x=-L/2+i*sp;P.push([new THREE.BoxGeometry(5,H,W),D,_pm(x,H/2-.5,0)])}
+  for(let i=0;i<n;i++){const x=-L/2+(i+.5)*sp;const ar=new THREE.CylinderGeometry((sp-5)/2,(sp-5)/2,W,10,1,true,0,Math.PI);ar.rotateX(Math.PI/2);ar.rotateZ(Math.PI/2);P.push([ar,S,_pm(x,H-.6-(sp-5)/2*.1,0,0,0,0,1,.75,1)])}
+  for(let i=0;i<=n;i++)P.push([new THREE.CylinderGeometry(.12,.12,3,5),0x2a2a2a,_pm(-L/2+i*sp,H+3,W/2-.4)]);return mergeColored(P)}
+
+/* ---------- Glen Helen : tribune ---------- */
+function grandstandGeo(len){const P=[];const rows=6;for(let r=0;r<rows;r++)P.push([new THREE.BoxGeometry(len,.5,1.2),r%2?0xd9d4c8:0xc7c1b3,_pm(0,.6+r*.65,-r*1.2)]);
+  P.push([new THREE.BoxGeometry(len,5.2,.3),0x8d8a83,_pm(0,2.6,-rows*1.2)]);P.push([new THREE.BoxGeometry(len+1,.25,rows*1.2+2),0xe8e3d8,_pm(0,7,-rows*.6+.4,.08)]);
+  for(const x of [-len/2,0,len/2])P.push([new THREE.BoxGeometry(.25,7,.25),0x5a5a5a,_pm(x,3.5,.4)]);
+  for(let i=0;i<Math.round(len/2.2);i++)P.push([new THREE.BoxGeometry(.5,.9,.4),[0xe63946,0x2a9d8f,0xf4a261,0x457b9d,0xffffff,0x222222][i%6],_pm(-len/2+1+i*2.2,1.3+(i%rows)*.65,-(i%rows)*1.2)]);return mergeColored(P)}
+
+/* ---------- Mount Tamalpais : mer de nuages (texture douce répétée) ---------- */
+let _fogTex=null;function fogSeaTex(){if(_fogTex)return _fogTex;_fogTex=canvasTex(256,256,(c,w,h)=>{c.fillStyle='#e9eef3';c.fillRect(0,0,w,h);for(let i=0;i<70;i++){const x=Math.random()*w,y=Math.random()*h,r=18+Math.random()*50;const gr=c.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=gr;
+  for(const dx of [-w,0,w])for(const dy of [-h,0,h]){c.beginPath();c.arc(x+dx,y+dy,r,0,7);c.fill()}}},true);_fogTex.wrapS=_fogTex.wrapT=THREE.RepeatWrapping;_fogTex.repeat.set(10,10);return _fogTex}
+function fogSea(){const m=new THREE.Mesh(new THREE.PlaneGeometry(3600,3600),new THREE.MeshBasicMaterial({map:fogSeaTex(),transparent:true,opacity:.96,depthWrite:false}));m.rotation.x=-Math.PI/2;m.renderOrder=1;return m}

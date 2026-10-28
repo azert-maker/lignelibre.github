@@ -212,7 +212,16 @@ MODES.snowboard=function(cfg,look,ctx){
     if(live){if(hw[2].y<groundH(hw[2].x,hw[2].z)+.05)return ['Chute','La tête a touché la pente.'];
       if(V.treeHit(hw,.12,St.pos))return ['Collision','Sapin ou pylône de télésiège percuté.']}
     return null}
-  return {env,stats,name:'Snowboard',vScale:120,target:course?((cfg.len+1.5)*CH)/16:0,
+  /* pièces : ligne de pente (dans ta trajectoire), arc cyan au-dessus d'un tremplin ou le long d'un rail, ligne cyan hors-piste au bord des sapins */
+  const coinPlan=(()=>{let zc=null,k=0;return {r:1.3,cy:.8,scale:1.3,every:.25,life:22,behind:25,cull:260,
+    spawn(api,p){if(zc===null)zc=p.z-45;if(zc<p.z-115)return;const pat=k++%3,off=clamp(p.x-V.cx(p.z),-V.vw(p.z)*.7,V.vw(p.z)*.7)*.7;let done=false;
+      if(pat===1){const kk=kickers.find(q=>q.z<zc+25&&q.z>zc-80&&q.z<p.z-35);
+        if(kk){const lx=kk.x+kk.fx*KL,lz=kk.z+kk.fz*KL,gl=V.groundH(lx,lz)+KH;const app=[];for(const d of [-9,-5])app.push([kk.x+kk.fx*d,V.groundH(kk.x+kk.fx*d,kk.z+kk.fz*d)+.8,kk.z+kk.fz*d]);api.line(app,false);
+          for(const [d,h] of [[3,1.9],[6.5,2.5],[10,2.2]])api.add(lx+kk.fx*d,gl+h,lz+kk.fz*d,true);done=true;zc=Math.min(zc,lz)-70}
+        else{const rr=rails.find(q=>q.z0<zc+25&&q.z0>zc-80&&q.z0<p.z-30);if(rr){for(const t of [.15,.4,.65,.9])api.add(rr.x0+rr.dx*t,rr.y0+rr.dy*t+.62,rr.z0+rr.dz*t,true);done=true;zc=Math.min(zc,rr.z0+rr.dz)-70}}}
+      if(!done&&pat===2){const sd=k%2?1:-1;for(let i=0;i<3;i++){const z=zc-i*8,x=V.cx(z)+sd*V.vw(z)*.85;api.add(x,V.groundH(x,z)+.8,z,true)}done=true;zc-=95}
+      if(!done){for(let i=0;i<5;i++){const z=zc-i*7,x=V.cx(z)+off+Math.sin(i*.9)*1.2;api.add(x,V.groundH(x,z)+.8,z,false)}zc-=95}}}})();
+  return {env,stats,name:'Snowboard',vScale:120,coins:coinPlan,target:course?((cfg.len+1.5)*CH)/16:0,
     keys:[['Espace','maintenir = charger · relâcher = saut'],['← →','carver · en l\'air : rotations'],['Shift / F','grab en l\'air (ou ré-appui Espace)'],['↑ / ↓','frein / tuck · en l\'air : flips'],['C','caméra']],
     touch:{u:'Frein',d:'Tuck',a:'Saut',g:'Grab'},
     inst:`<div class="ihead">Ride</div><div class="ro-grid"><div class="ro"><span>Pente</span><b id="iSl">0<small>°</small></b></div><div class="ro"><span>Air</span><b id="iAir">—</b></div>

@@ -15,20 +15,20 @@ function touchStreakOnLaunch(){const today=dayKey();if(profile.lastPlayDay===tod
    check(st, run, medal, score) · stats réellement suivies par les modes :
    wingsuit: rings · longboard: slideTime · snowboard: airs, grabs · bmx: tricks, manualT · motocross: bigAir · wakeboard: wakeAirs · parkour: flowMax · tous: score, time · run.finished */
 const DAILY_POOL=[
-  {id:'ws_rings',sport:'wingsuit',mode:'free',label:'Wingsuit libre : passe 8 anneaux',check:st=>(st.rings||0)>=8,reward:120},
-  {id:'ws_score',sport:'wingsuit',mode:'free',label:'Wingsuit libre : fais 3 000 points',check:(st,r,m,sc)=>sc>=3000,reward:100},
-  {id:'lb_slide',sport:'longboard',mode:'free',label:'Downhill libre : 12 s de slide cumulées',check:st=>(st.slideTime||0)>=12,reward:120},
-  {id:'lb_score',sport:'longboard',mode:'free',label:'Downhill libre : fais 4 000 points',check:(st,r,m,sc)=>sc>=4000,reward:100},
-  {id:'any_medal',sport:'*',mode:'course',label:'N\'importe quel parcours : décroche une médaille',check:(st,r,m)=>m!=='n',reward:150},
-  {id:'sb_airs',sport:'snowboard',mode:'free',label:'Snowboard freeride : enchaîne 5 sauts',check:st=>(st.airs||0)>=5,reward:110},
-  {id:'bx_tricks',sport:'bmx',mode:'free',label:'BMX jam : réussis 8 figures',check:st=>(st.tricks||0)>=8,reward:120},
-  {id:'bx_line',sport:'bmx',mode:'course',label:'BMX : termine une ligne chrono',check:(st,r)=>!!r.finished,reward:110},
-  {id:'mx_big',sport:'motocross',mode:'free',label:'Motocross : pose 2 big airs',check:st=>(st.bigAir||0)>=2,reward:130},
-  {id:'mx_race',sport:'motocross',mode:'course',label:'Motocross : termine une course',check:(st,r)=>!!r.finished,reward:110},
-  {id:'wk_w2w',sport:'wakeboard',mode:'free',label:'Wakeboard : 5 wake to wake',check:st=>(st.w2w||0)>=5,reward:120},
-  {id:'wk_slalom',sport:'wakeboard',mode:'course',label:'Wakeboard : slalom sans bouée manquée',check:(st,r)=>!!r.finished&&!st.pen,reward:140},
-  {id:'pk_flow',sport:'parkour',mode:'free',label:'Parkour : 12 s de flow continu',check:st=>(st.flowMax||0)>=12,reward:120},
-  {id:'pk_race',sport:'parkour',mode:'course',label:'Parkour : termine la course des toits',check:(st,r)=>!!r.finished,reward:110}
+  {id:'ws_rings',sport:'wingsuit',mode:'free',label:'Wingsuit libre : passe 8 anneaux',check:st=>(st.rings||0)>=8,reward:30},
+  {id:'ws_score',sport:'wingsuit',mode:'free',label:'Wingsuit libre : fais 3 000 points',check:(st,r,m,sc)=>sc>=3000,reward:25},
+  {id:'lb_slide',sport:'longboard',mode:'free',label:'Downhill libre : 12 s de slide cumulées',check:st=>(st.slideTime||0)>=12,reward:30},
+  {id:'lb_score',sport:'longboard',mode:'free',label:'Downhill libre : fais 4 000 points',check:(st,r,m,sc)=>sc>=4000,reward:25},
+  {id:'any_medal',sport:'*',mode:'course',label:'N\'importe quel parcours : décroche une médaille',check:(st,r,m)=>m!=='n',reward:40},
+  {id:'sb_airs',sport:'snowboard',mode:'free',label:'Snowboard freeride : enchaîne 5 sauts',check:st=>(st.airs||0)>=5,reward:30},
+  {id:'bx_tricks',sport:'bmx',mode:'free',label:'BMX jam : réussis 8 figures',check:st=>(st.tricks||0)>=8,reward:30},
+  {id:'bx_line',sport:'bmx',mode:'course',label:'BMX : termine une ligne chrono',check:(st,r)=>!!r.finished,reward:30},
+  {id:'mx_big',sport:'motocross',mode:'free',label:'Motocross : pose 2 big airs',check:st=>(st.bigAir||0)>=2,reward:30},
+  {id:'mx_race',sport:'motocross',mode:'course',label:'Motocross : termine une course',check:(st,r)=>!!r.finished,reward:30},
+  {id:'wk_w2w',sport:'wakeboard',mode:'free',label:'Wakeboard : 5 wake to wake',check:st=>(st.w2w||0)>=5,reward:30},
+  {id:'wk_slalom',sport:'wakeboard',mode:'course',label:'Wakeboard : slalom sans bouée manquée',check:(st,r)=>!!r.finished&&!st.pen,reward:35},
+  {id:'pk_flow',sport:'parkour',mode:'free',label:'Parkour : 12 s de flow continu',check:st=>(st.flowMax||0)>=12,reward:30},
+  {id:'pk_race',sport:'parkour',mode:'course',label:'Parkour : termine la course des toits',check:(st,r)=>!!r.finished,reward:30}
 ].filter(c=>c.sport==='*'||MODES[c.sport]);
 function dailyChallenge(){const c=DAILY_POOL[strSeed('daily-'+dayKey())%DAILY_POOL.length];return Object.assign({},c,{done:profile.dailyDone===dayKey()})}
 const dailyMatches=(c,cfg)=>(c.sport==='*'||c.sport===cfg.sport)&&c.mode===cfg.mode;
@@ -54,11 +54,11 @@ function goalProgress(){const el=$('#hGoal');if(!el)return;const g=run&&run.goal
 
 /* ---------- bonus de fin de partie (appelé par finalizeRun) ---------- */
 function engageFinalize(score,medal){const bits=run.engageBits=run.engageBits||[];let extra=0;
-  if(profile.streak>=3){const b=Math.min(50,10*profile.streak);extra+=b;bits.push('Série de '+profile.streak+' jours · +'+b+' pièces')}
+  if(profile.streak>=2&&profile.streakPaid!==dayKey()&&Math.max(runT,COIN.time)>=ECO.minT){const b=Math.min(15,3*profile.streak);profile.streakPaid=dayKey();extra+=b;bits.push('Série de '+profile.streak+' jours · +'+b+' pièces (1 fois par jour)')}
   const dc=dailyChallenge();
   if(!dc.done&&dailyMatches(dc,curCfg)&&!run.multi){let ok=false;try{ok=!!dc.check(cur.stats,run,medal,score)}catch(e){ok=false}
     if(ok){extra+=dc.reward;profile.dailyDone=dayKey();bits.push('Défi du jour réussi · +'+dc.reward+' pièces');toast('Défi du jour réussi',true)}}
-  if(profile.runs<=3&&score<800){extra+=40;bits.push('Bonus débutant · +40 pièces')}
+  if(profile.runs<=3&&Math.max(runT,COIN.time)>=10){extra+=40;bits.push('Bonus débutant · +40 pièces')}
   if(run.goal&&run.goal.done&&!bits.some(b=>b.startsWith('Objectif')))bits.push('Objectif de session : '+run.goal.label);
   run.coins+=extra;profile.coins+=extra;return extra}
 function engageOverHtml(){if(!run)return '';const bits=run.engageBits||[];

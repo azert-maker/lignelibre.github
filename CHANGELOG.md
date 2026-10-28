@@ -1,5 +1,31 @@
 # Journal des versions · Ligne Libre
 
+## 0.23.0 · 28 octobre 2026 · Économie, pièces à ramasser, 7 lieux
+
+Économie (détail : `docs/ECONOMY.md`)
+- Fin de la faille `score / 40` : le wakeboard rapportait jusqu'à 1 101 pièces en 90 s. Les gains viennent maintenant des pièces ramassées (plafond 40) et de bonus plafonnés (performance ramenée au par du sport, arrivée, médaille, objectif).
+- Moyenne mesurée : 26 pièces par partie, soit une machine à skins toutes les 6 parties environ.
+- Série de jours payée une fois par jour (max 15), défis du jour et de figures, niveaux et prix de la boutique recalibrés (÷3 à ÷4).
+- Quitter depuis la pause crédite enfin les pièces acquises, une seule fois.
+
+Pièces à ramasser dans les 7 sports (`37-coins.js`)
+- Dorées (1) sur la ligne, cyan (2) à l'écart : couloirs et rase-mottes (wingsuit), corde des virages (downhill), sauts, rails et hors-piste (snowboard), modules et rails (BMX), tables et whoops (motocross), sillage, kickers et sliders (wakeboard), toits, écarts et wallruns (parkour).
+- Son, envol, aimant léger pour les dorées, compteur au HUD (PC et mobile), détail des gains en fin de partie.
+
+Gameplay
+- Monde libre : une reprise gratuite par partie après une chute (« Reprendre ici »).
+- Champ de vision lissé (il sautait à l'impact).
+- Clip Blender « celebrate » à l'arrivée avec médaille (parkour, snowboard, downhill).
+
+Lieux
+- Paris Rooftops : façades crème, toits en zinc, cheminées en terre cuite, tour Eiffel au loin, lumière de fin de journée.
+- Lake Havasu : montagnes de roche rouge, rive de désert, palmiers, pont à arches en pierre.
+- Glen Helen MX : herbe sèche, collines brunes, tribune.
+- Mount Tamalpais : prairies dorées, mer de nuages sous la route.
+
+Tests
+- `tests/econ.js` (21 contrôles) et `tests/v023.js` (11 contrôles) ajoutés à `npm test`.
+
 ## 0.22.0 · 28 octobre 2026 · Gameplay et lieux iconiques
 
 Gameplay

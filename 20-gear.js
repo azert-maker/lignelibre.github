@@ -39,24 +39,24 @@ const SKINS=[0xf1c9a5,0xd9a77f,0xb07a55,0x8a5a3c,0x5e3b26];
 
 /* Objets débloquables en regardant des pubs (récompense proportionnelle à l'avantage) */
 const SHOP=[
-  {id:'aura',price:2400,kind:'Équipement',slot:'wing',name:'Wingsuit Aura Pro',effect:'Finesse 3,6 au lieu de 3,2 et +8 % de vitesse. Décroche plus tôt.',ads:3},
-  {id:'speed85',price:1600,kind:'Équipement',slot:'board',name:'Speedboard 85',effect:'Traînée en tuck −13 %, jusqu\'à ~130 km/h. Moins d\'adhérence.',ads:2},
-  {id:'drop105',price:800,kind:'Équipement',slot:'board',name:'Drop-through 105',effect:'Adhérence +7 %, slides plus stables.',ads:1},
-  {id:'w86',price:700,kind:'Équipement',slot:'wheel',name:'Roues Race 86A',effect:'Résistance au roulement −33 %.',ads:1},
-  {id:'park',price:700,kind:'Équipement',slot:'bmx',name:'BMX Park 20,75"',effect:'Cadre long : réception plus stable (même tolérance, moins de rebond).',ads:1},
-  {id:'flat',price:1400,kind:'Équipement',slot:'bmx',name:'BMX Flatland Light',effect:'Rotations +12 %, tailwhip +15 %. Accélération +8 %.',ads:2},
-  {id:'125',price:900,kind:'Équipement',slot:'moto',name:'Moto 125 2T',effect:'Assiette en l\'air +18 %, braquage +15 %. Vitesse de pointe −9 %.',ads:1},
-  {id:'450f',price:2200,kind:'Équipement',slot:'moto',name:'Moto 450 4T',effect:'Puissance +18 %, pointe +11 %, encaisse des réceptions plus dures. Plus lourde.',ads:3},
-  {id:'stiff',price:900,kind:'Équipement',slot:'wboard',name:'Wakeboard Boat 144',effect:'Coupe +10 % vers le sillage : sauts plus hauts.',ads:1},
-  {id:'parkw',price:1300,kind:'Équipement',slot:'wboard',name:'Wakeboard Park 136',effect:'Rotations +13 %.',ads:2},
-  {id:'grip',price:700,kind:'Équipement',slot:'shoe',name:'Chaussures Grip Pro',effect:'Détente +6 % (sauts un peu plus hauts), sprint −3 %.',ads:1},
-  {id:'light',price:1200,kind:'Équipement',slot:'shoe',name:'Chaussures Racer Light',effect:'Sprint +5 %, détente −2 %.',ads:2},
-  {id:'carbon',price:500,kind:'Cosmétique',slot:'helmet',name:'Casque carbone',effect:'Coque carbone brillante.',ads:1},
-  {id:'neon',price:400,kind:'Cosmétique',name:'Pack couleurs néon',effect:'4 teintes fluo pour tout l\'équipement.',ads:1},
-  {id:'smoke',price:400,kind:'Cosmétique',name:'Fumigènes couleur',effect:'Fumée aux couleurs de ta voilure en wingsuit.',ads:1},
-  {id:'revive',price:250,kind:'Consommable',name:'Second souffle',effect:'Après une chute, reprends quelques secondes avant. 1 charge par pub.',ads:1,cons:true},
-  {id:'boost',price:200,kind:'Consommable',name:'Départ lancé',effect:'+20 % de vitesse au départ d\'une partie. 1 charge par pub.',ads:1,cons:true},
-  {id:'x15',price:450,kind:'Consommable',name:'Score ×1,5',effect:'Score majoré de 50 % sur une partie en monde libre. 1 charge pour 2 pubs.',ads:2,cons:true}
+  {id:'aura',price:800,kind:'Équipement',slot:'wing',name:'Wingsuit Aura Pro',effect:'Finesse 3,6 au lieu de 3,2 et +8 % de vitesse. Décroche plus tôt.',ads:3},
+  {id:'speed85',price:550,kind:'Équipement',slot:'board',name:'Speedboard 85',effect:'Traînée en tuck −13 %, jusqu\'à ~130 km/h. Moins d\'adhérence.',ads:2},
+  {id:'drop105',price:280,kind:'Équipement',slot:'board',name:'Drop-through 105',effect:'Adhérence +7 %, slides plus stables.',ads:1},
+  {id:'w86',price:240,kind:'Équipement',slot:'wheel',name:'Roues Race 86A',effect:'Résistance au roulement −33 %.',ads:1},
+  {id:'park',price:240,kind:'Équipement',slot:'bmx',name:'BMX Park 20,75"',effect:'Cadre long : réception plus stable (même tolérance, moins de rebond).',ads:1},
+  {id:'flat',price:480,kind:'Équipement',slot:'bmx',name:'BMX Flatland Light',effect:'Rotations +12 %, tailwhip +15 %. Accélération +8 %.',ads:2},
+  {id:'125',price:300,kind:'Équipement',slot:'moto',name:'Moto 125 2T',effect:'Assiette en l\'air +18 %, braquage +15 %. Vitesse de pointe −9 %.',ads:1},
+  {id:'450f',price:750,kind:'Équipement',slot:'moto',name:'Moto 450 4T',effect:'Puissance +18 %, pointe +11 %, encaisse des réceptions plus dures. Plus lourde.',ads:3},
+  {id:'stiff',price:300,kind:'Équipement',slot:'wboard',name:'Wakeboard Boat 144',effect:'Coupe +10 % vers le sillage : sauts plus hauts.',ads:1},
+  {id:'parkw',price:450,kind:'Équipement',slot:'wboard',name:'Wakeboard Park 136',effect:'Rotations +13 %.',ads:2},
+  {id:'grip',price:240,kind:'Équipement',slot:'shoe',name:'Chaussures Grip Pro',effect:'Détente +6 % (sauts un peu plus hauts), sprint −3 %.',ads:1},
+  {id:'light',price:400,kind:'Équipement',slot:'shoe',name:'Chaussures Racer Light',effect:'Sprint +5 %, détente −2 %.',ads:2},
+  {id:'carbon',price:180,rar:'u',kind:'Cosmétique',slot:'helmet',name:'Casque carbone',effect:'Coque carbone brillante.',ads:1},
+  {id:'neon',price:150,rar:'u',kind:'Cosmétique',name:'Pack couleurs néon',effect:'4 teintes fluo pour tout l\'équipement.',ads:1},
+  {id:'smoke',price:150,rar:'u',kind:'Cosmétique',name:'Fumigènes couleur',effect:'Fumée aux couleurs de ta voilure en wingsuit.',ads:1},
+  {id:'revive',price:80,kind:'Consommable',name:'Second souffle',effect:'Après une chute, reprends quelques secondes avant. 1 charge par pub.',ads:1,cons:true},
+  {id:'boost',price:60,kind:'Consommable',name:'Départ lancé',effect:'+20 % de vitesse au départ d\'une partie. 1 charge par pub.',ads:1,cons:true},
+  {id:'x15',price:150,kind:'Consommable',name:'Score ×1,5',effect:'Score majoré de 50 % sur une partie en monde libre. 1 charge pour 2 pubs.',ads:2,cons:true}
 ];
 const owns=id=>{const it=SHOP.find(s=>s.id===id);return !it||!!profile.owned[id]||(!it.cons&&lvlUnlocked(id))};
 const gearCost=(slot,id)=>{const g=gearOf(slot,id);return g.cost||0};
