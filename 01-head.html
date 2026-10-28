@@ -304,3 +304,14 @@ body.od #vig{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba
   body.touch .inst .ro-grid{display:none}body.touch .spd{bottom:auto;top:calc(6px + env(safe-area-inset-top,0px));width:92px;height:92px}body.touch .spd-n b{font-size:26px}
   body.touch .hud-tr{bottom:auto;top:calc(100px + env(safe-area-inset-top,0px))}body.touch .goal{display:none}}
 </style>
+<style>
+/* skins et machine à pinces */
+.clawpad{display:grid;grid-template-columns:repeat(4,1fr) 1.4fr;gap:6px}
+.clawpad[aria-disabled="true"]{opacity:.45;pointer-events:none}
+.clawpad .btn{min-height:44px;font-size:18px;touch-action:none}
+.odds{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.odds th,.odds td{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left}
+.clawres{border:2px solid;border-radius:6px;padding:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.skinsw{display:inline-block;width:18px;height:18px;border-radius:50%;margin-right:8px;vertical-align:-3px;border:1px solid rgba(255,255,255,.35)}
+.item.skin[disabled]{opacity:.55;cursor:default}
+</style>

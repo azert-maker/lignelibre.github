@@ -90,7 +90,7 @@ function applyStance(h,sport,I,v){if(!h||!h.setPose)return;I=I||NEUTRAL;const sp
   if(I.y<0)return h.setPose('tuck',1,{side:I.x*.12});if(I.a)return h.setPose('slide',1,{handDown:I.x>=0?-1:1});if(I.y>0)return h.setPose('stand',1);
   if(I.x)return h.setPose(I.x<0?'carve_L':'carve_R',.5+sp*.5);h.setPose('carve',.6+sp*.4)}
 function buildHuman(look){
-  const g=new THREE.Group();const L=look;const lo=S().quality==='eco';const seg=lo?6:10;
+  const g=new THREE.Group();const L=look&&look.sk&&typeof skinLookColors==='function'?skinLookColors(look):look;const lo=S().quality==='eco';const seg=lo?6:10;
   const mS=new THREE.MeshLambertMaterial({color:L.suit,map:TEX.fabric}),mT=new THREE.MeshLambertMaterial({color:L.accent,map:TEX.fabric}),
     mV=new THREE.MeshPhongMaterial({color:0x0b0e11,shininess:110,specular:0x8899aa}),mK=new THREE.MeshLambertMaterial({color:L.skin}),
     mSole=new THREE.MeshLambertMaterial({color:0xe9e6dc}),mG=new THREE.MeshLambertMaterial({color:0x1b2026}),mShoe=new THREE.MeshLambertMaterial({color:{trail:0x2a3038,grip:0xff6a1f,light:0x39e07a}[(L.gear&&L.gear.shoe)||'trail']||0x2a3038}),mPad=new THREE.MeshLambertMaterial({color:new THREE.Color(L.suit).multiplyScalar(.55)});
@@ -232,8 +232,8 @@ function buildLongboard(look){
   const human=buildHuman(L);human.position.y=deck.position.y+.02;g.add(human);g.human=human;g.len=len;return g}
 
 /* look compact pour le réseau (≤ 300 octets) */
-function packLook(L){return {n:String(L.name||'Rider').slice(0,16),s:L.skin,u:L.suit,a:L.accent,h:L.helmet,w1:L.wing1,w2:L.wing2,pt:L.pattern,d:L.deck,wh:L.wheel,b:L.boardCol,bx:L.bmxCol,mc:L.motoCol,g:L.gear}}
+function packLook(L){return {n:String(L.name||'Rider').slice(0,16),s:L.skin,u:L.suit,a:L.accent,h:L.helmet,w1:L.wing1,w2:L.wing2,pt:L.pattern,d:L.deck,wh:L.wheel,b:L.boardCol,bx:L.bmxCol,mc:L.motoCol,g:L.gear,k:L.sk&&{s:L.sk.s||'',h:L.sk.h||''}}}
 function unpackLook(k){k=k||{};const num=(v,d)=>Number.isFinite(v)?v>>>0&0xffffff:d;const D=PROFILE_DEFAULT.look;const gr=k.g&&typeof k.g==='object'?k.g:{};
   const gear={};for(const s of Object.keys(GEAR))gear[s]=GEAR[s].some(x=>x.id===gr[s])?gr[s]:D.gear[s];
   return {name:String(k.n||'Rider').slice(0,16),skin:num(k.s,D.skin),suit:num(k.u,D.suit),accent:num(k.a,D.accent),helmet:num(k.h,D.helmet),wing1:num(k.w1,D.wing1),wing2:num(k.w2,D.wing2),
-    pattern:clamp(k.pt|0,0,3),deck:num(k.d,D.deck),wheel:num(k.wh,D.wheel),boardCol:num(k.b,D.boardCol),bmxCol:num(k.bx,D.bmxCol),motoCol:num(k.mc,D.motoCol),gear}}
+    pattern:clamp(k.pt|0,0,3),deck:num(k.d,D.deck),wheel:num(k.wh,D.wheel),boardCol:num(k.b,D.boardCol),bmxCol:num(k.bx,D.bmxCol),motoCol:num(k.mc,D.motoCol),gear,sk:{s:typeof k.k?.s==='string'&&typeof skinById==='function'&&skinById(k.k.s)?k.k.s:'',h:typeof k.k?.h==='string'&&typeof skinById==='function'&&skinById(k.k.h)?k.k.h:''}}}

@@ -9,10 +9,15 @@
    Tous les sports, le replay, le fantôme et le multijoueur continuent donc d'utiliser la même API de pose. */
 const GLB={ready:false,models:{},err:null,stats:{}};
 function b64ToBuf(s){const bin=atob(s),n=bin.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u.buffer}
+/* modèles décodés seulement quand on en a besoin (la machine à pinces n'apparaît qu'au garage) */
+const GLB_LAZY=['claw'];const GLB_PEND={};
+function glbLoad(n){if(GLB.models[n])return Promise.resolve(GLB.models[n]);if(GLB_PEND[n])return GLB_PEND[n];
+  if(typeof ASSET_GLB==='undefined'||!ASSET_GLB[n]||!THREE.GLTFLoader)return Promise.resolve(null);
+  return GLB_PEND[n]=new Promise(res=>{try{new THREE.GLTFLoader().parse(b64ToBuf(ASSET_GLB[n]),'',gl=>{GLB.models[n]=gl;res(gl)},e=>{GLB.err=n+': '+String(e&&e.message||e);res(null)})}catch(e){GLB.err=n+': '+e.message;res(null)}})}
 const GLB_P=(function(){
   if(typeof THREE==='undefined'||!THREE.GLTFLoader||typeof ASSET_GLB==='undefined'||!Object.keys(ASSET_GLB).length){GLB.err='chargeur ou modèles absents';return Promise.resolve(GLB)}
   const ld=new THREE.GLTFLoader(),t0=performance.now();
-  return Promise.all(Object.keys(ASSET_GLB).map(n=>new Promise(res=>{
+  return Promise.all(Object.keys(ASSET_GLB).filter(n=>!GLB_LAZY.includes(n)).map(n=>new Promise(res=>{
     try{ld.parse(b64ToBuf(ASSET_GLB[n]),'',gl=>{GLB.models[n]=gl;res()},e=>{GLB.err=n+': '+String(e&&e.message||e);res()})}catch(e){GLB.err=n+': '+String(e&&e.message||e);res()}
   }))).then(()=>{GLB.ready=true;GLB.stats.parseMs=Math.round(performance.now()-t0);return GLB})})();
 
@@ -39,6 +44,7 @@ function riderTemplate(key){
 /* matériaux du modèle -> matériaux du jeu (couleurs du profil) ; skinning obligatoire en r128 */
 function riderMaterial(src,L,hid){
   const nm=src.name||'',base=src.color?src.color.getHex():0xffffff;
+  if(typeof skinMat==='function'){const sm=skinMat(nm,L);if(sm)return sm}
   const shoe={trail:0x2a3038,grip:0xff6a1f,light:0x39e07a}[(L.gear&&L.gear.shoe)||'trail']||0x2a3038;
   const col={skin:L.skin,accent:L.accent,suit:L.suit,shoe,helmet:hid==='carbon'?0x22262b:L.helmet}[nm];
   const c=col!=null?col:base;

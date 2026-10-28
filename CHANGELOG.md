@@ -1,5 +1,18 @@
 # Journal des versions · Ligne Libre
 
+## 0.20.0 · 28 octobre 2026 · Skins et machine à pinces
+
+Ajouts
+- 15 skins cosmétiques (7 tenues, 8 casques) en 4 raretés : commun, rare, épique, légendaire. Motifs calculés dans le shader (bandes, camouflage, damier, dégradé, chevrons, aurore animée) et finitions (brillant, mat, chrome, or, néon, carbone).
+- Machine à pinces jouable au garage (modèle fourni par Jean) : pince pilotable au clavier ou aux boutons tactiles, descente, prise selon le centrage et la rareté, transport jusqu'à la trappe, gain d'un skin.
+- Uniquement des pièces gagnées en jouant (120 pièces la partie), aucune monnaie réelle. Composition de la machine et taux de prise affichés ; garantie d'une peluche épique au plus tard toutes les 10 parties ; doublons remboursés en pièces.
+- Onglets du garage « Skins » (collection, équiper, retirer) et « Machine ».
+- Skins transmis en multijoueur (identifiants validés).
+- Modèle de la machine chargé seulement à l'ouverture de l'onglet (pas de ralentissement au démarrage).
+
+Tests
+- `tests/claw.js` : 12 contrôles. `tests/all.js` : 63 contrôles (2 onglets de garage en plus).
+
 ## 0.19.0 · 28 octobre 2026 · Réceptions motocross et parkour, moto fournie intégrée
 
 Ajouts
