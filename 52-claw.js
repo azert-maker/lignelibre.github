@@ -1,21 +1,20 @@
 /* =====================================================================
    SKINS, RÉCOMPENSES ET MACHINES À PINCES
    - Raretés communes à tout le jeu : Commun, Peu commun, Rare, Épique, Légendaire.
-   - Deux façons de tenter sa chance, toutes deux payées en pièces gagnées en jouant (aucune monnaie réelle) :
-       Boutique « Machine à skins » : tirage animé automatique (paiement → grappin → capture → révélation),
-                                     chances affichées par rareté ;
-       Garage « Machine »          : mini-jeu d'adresse, on pilote la pince soi-même.
+   - Boutique « Machine à skins » : on paie en pièces gagnées en jouant (aucune monnaie réelle), puis une animation
+     joue la récupération (paiement → grappin → capture → révélation). Le joueur ne pilote pas la pince :
+     le résultat est tiré avec les chances affichées.
    - Récompenses : uniquement du cosmétique (skins de tenue et de casque, cosmétiques de la boutique : casque carbone,
      couleurs néon, fumigènes), en priorité ceux qu'on n'a pas. Les équipements qui changent la physique ne sortent
      jamais de la machine : ils s'obtiennent par la boutique ou la progression. Doublon : 40 % du prix remboursés, affiché à l'écran.
    - Tout est enregistré tout de suite dans profile.owned et profile.coins.
 ===================================================================== */
 const RARITY={
-  c:{n:'Commun',col:'#b9c3cc',p:.50,grip:.9},
-  u:{n:'Peu commun',col:'#3ddc84',p:.28,grip:.82},
-  r:{n:'Rare',col:'#4da3ff',p:.14,grip:.72},
-  e:{n:'Épique',col:'#b26bff',p:.06,grip:.55},
-  l:{n:'Légendaire',col:'#f5c542',p:.02,grip:.4}};
+  c:{n:'Commun',col:'#b9c3cc',p:.50},
+  u:{n:'Peu commun',col:'#3ddc84',p:.28},
+  r:{n:'Rare',col:'#4da3ff',p:.14},
+  e:{n:'Épique',col:'#b26bff',p:.06},
+  l:{n:'Légendaire',col:'#f5c542',p:.02}};
 const RAR_KEYS=['c','u','r','e','l'];
 const CLAW_COST=150,CLAW_REFUND=Math.round(CLAW_COST*.4),CLAW_PITY=10;
 /* pat : 0 uni, 1 bandes, 2 camouflage, 3 damier, 4 dégradé, 5 chevrons, 6 aurore animée */
@@ -101,8 +100,8 @@ function skinMat(nm,L){const k=L&&L.sk;if(!k)return null;
 function skinLookColors(L){const k=L.sk||{},o={};const s=skinById(k.s),h=skinById(k.h);if(s){o.accent=s.c1;o.suit=s.pants??s.c3??s.c1}if(h)o.helmet=h.c1;return Object.assign({},L,o)}
 
 
-/* ---------- machine à pinces (3D, modèle fourni) : une seule logique pour le mini-jeu et le tirage animé ---------- */
-const CL={g:null,st:'idle',mode:'skill',x:-.34,z:.29,drop:0,open:0,toys:[],held:null,t:0,msg:'',last:null,btn:{},timer:0,sp:1};
+/* ---------- machine à pinces (3D, modèle fourni) : animation de récupération du skin ---------- */
+const CL={g:null,st:'idle',x:-.34,z:.29,drop:0,open:0,toys:[],held:null,t:0,sp:1.9,target:null};
 function clawBuild(){const gl=GLB.models.claw;if(!gl)return null;skinState();
   const root=new THREE.Group();const m=gl.scene.getObjectByName('claw_machine').clone(true);root.add(m);
   const play=m.userData.play||{x0:-.46,x1:.46,z0:-.39,z1:.37,floor:1.161},chute=m.userData.chute||[-.34,1.161,.29];
@@ -133,37 +132,22 @@ function clawPose(){const G=CL.g;if(!G)return;
   G.cable.position.copy(a).add(b).multiplyScalar(.5);G.cable.scale.y=Math.max(.01,a.y-b.y);G.cable.position.x=b.x;G.cable.position.z=b.z}
 function clawBelow(){let best=null,bd=9;for(const t of CL.toys){if(t.gone)continue;const d=Math.hypot(t.o.position.x-CL.x,t.o.position.z-CL.z);if(d<bd){bd=d;best=t}}return {t:best,d:bd}}
 function clawWhirr(){burst('bandpass',220,3,.35,.12,320)}
-/* mini-jeu d'adresse (garage) */
-function clawPlay(){const S_=skinState();if(CL.st!=='idle'||!CL.g||CL.mode!=='skill')return false;if(profile.coins<CLAW_COST){toast('Il faut '+CLAW_COST+' pièces',true);return false}
-  profile.coins-=CLAW_COST;S_.plays++;saveProfile();CL.st='move';CL.timer=15;CL.msg='';CL.last=null;CL.sp=1;if(sfx.coin)sfx.coin();paintClawPanel();return true}
-function clawRelease(){if(CL.st==='move'&&CL.mode==='skill'){CL.st='down';paintClawPanel()}}
 function clawFrame(dt){const G=CL.g;if(!G)return;CL.t+=dt;const P=G.play,k_=CL.sp;
   for(const t of CL.toys){if(t.ring)t.ring.rotation.z+=dt*(t.r==='l'?2.5:.6);const gm=t.o.userData.gem;if(gm){gm.rotation.y+=dt*2;gm.visible=!t.gone&&CL.held!==t}}
-  if(CL.st==='move'){if(CL.mode==='auto'){const t=CL.target,dx=t.o.position.x-CL.x,dz=t.o.position.z-CL.z,dd=Math.hypot(dx,dz),s=Math.min(dd,dt*1.05);if(dd>1e-3){CL.x+=dx/dd*s;CL.z+=dz/dd*s}CL.open=Math.min(1,CL.open+dt*3.5);if(dd<.004&&CL.open>=1){CL.st='down';clawWhirr()}}
-    else{const k=keys,b=CL.btn;const dx=((k.ArrowRight||k.KeyD||b.r)?1:0)-((k.ArrowLeft||k.KeyA||b.l)?1:0),dz=((k.ArrowDown||k.KeyS||b.d)?1:0)-((k.ArrowUp||k.KeyW||b.u)?1:0);const sp=.42*dt;
-      CL.x=clamp(CL.x+dx*sp,P.x0+.04,P.x1-.04);CL.z=clamp(CL.z+dz*sp,P.z0+.04,P.z1-.04);CL.timer-=dt;CL.open=Math.min(1,CL.open+dt*2);
-      if(k.Space||k.Enter||CL.timer<=0)CL.st='down';const el=$('#clawTimer');if(el)el.textContent=Math.max(0,Math.ceil(CL.timer))+' s'}}
+  if(CL.st==='move'){{const t=CL.target,dx=t.o.position.x-CL.x,dz=t.o.position.z-CL.z,dd=Math.hypot(dx,dz),s=Math.min(dd,dt*1.05);if(dd>1e-3){CL.x+=dx/dd*s;CL.z+=dz/dd*s}CL.open=Math.min(1,CL.open+dt*3.5);if(dd<.004&&CL.open>=1){CL.st='down';clawWhirr()}}
+}
   else if(CL.st==='down'){const {t,d}=clawBelow();const stop=t&&d<.16?t.h*.85:0.03;const maxDrop=G.hw0.y-(P.floor+stop+.11);CL.drop=Math.min(maxDrop,CL.drop+dt*.55*k_);if(CL.drop>=maxDrop){CL.st='close';CL.tc=0}}
   else if(CL.st==='close'){CL.tc+=dt*k_;CL.open=Math.max(0,1-CL.tc*2.2);if(CL.tc>.55){if(CL.tc<.6)ding(220,.06);
-      if(CL.mode==='auto'){const t=CL.target;CL.held=t;t.off=new THREE.Vector3(t.o.position.x-CL.x,0,t.o.position.z-CL.z)}
-      else{const {t,d}=clawBelow();/* prise : centrage × adhérence de la rareté */const p=t?clamp(1-d/.15,0,1)*RARITY[t.r].grip:0;CL.lastP=p;
-        if(t&&Math.random()<p){CL.held=t;t.off=new THREE.Vector3(t.o.position.x-CL.x,0,t.o.position.z-CL.z)}else CL.held=null;if(!CL.held)CL.msg=t&&d<.15?'Raté de peu… la peluche a glissé.':'Raté : vise le centre d\'une peluche.'}
+      {const t=CL.target;CL.held=t;t.off=new THREE.Vector3(t.o.position.x-CL.x,0,t.o.position.z-CL.z)}
       CL.st='up';clawWhirr()}}
   else if(CL.st==='up'){CL.drop=Math.max(0,CL.drop-dt*.5*k_);if(CL.drop<=0)CL.st='carry'}
   else if(CL.st==='carry'){const tx=G.chute.x,tz=G.chute.z,dx=tx-CL.x,dz=tz-CL.z,dd=Math.hypot(dx,dz),s=Math.min(dd,dt*.35*k_);if(dd>1e-3){CL.x+=dx/dd*s;CL.z+=dz/dd*s}
-    /* mini-jeu : une peluche légendaire peut encore glisser pendant le transport */
-    if(CL.mode==='skill'&&CL.held&&CL.held.r==='l'&&!CL.slipTested&&dd<.25){CL.slipTested=true;if(Math.random()<.2){const t=CL.held;CL.held=null;t.vy=0;t.falling=true;CL.msg='Elle a glissé au dernier moment !'}}
     if(dd<.005){CL.st='drop';CL.tc=0}}
   else if(CL.st==='drop'){CL.tc+=dt*k_;CL.open=Math.min(1,CL.tc*2.5);if(CL.held&&CL.tc>.25){const t=CL.held;CL.held=null;t.falling=true;t.vy=0;t.toChute=true}
-    if(CL.tc>(CL.mode==='auto'?.85:1.3)){CL.st='idle';CL.slipTested=false;if(CL.mode==='auto')clawAutoDone();else clawEnd()}}
+    if(CL.tc>.85){CL.st='idle';clawAutoDone()}}
   if(CL.held){const t=CL.held;const hw=G.head.getWorldPosition(new THREE.Vector3());t.o.position.set(CL.x+t.off.x*.4,hw.y-.16-t.h,CL.z+t.off.z*.4)}
   for(const t of CL.toys){if(!t.falling)continue;t.vy-=9.8*dt;t.o.position.y+=t.vy*dt;const fl=t.toChute?.55:P.floor;if(t.o.position.y<=fl){t.o.position.y=fl;t.falling=false;if(t.toChute){t.gone=true;t.o.visible=false;CL.won=t;if(t.toChute)ding(330,.08)}}}
   clawPose()}
-function clawEnd(){const S_=skinState();const t=CL.won;CL.won=null;
-  if(t){const res=grantReward(t.r);CL.last=res;rewardFanfare(t.r);toast((res.dup?'Doublon · +'+res.refund+' pièces':RARITY[t.r].n+' : '+res.item.name),true);if(CL.toys.filter(x=>!x.gone).length<=3)clawRefill()}
-  else{S_.pity++;CL.last=null}
-  saveProfile();paintClawPanel()}
-
 /* ---------- tirage animé (Boutique « Machine à skins ») ---------- */
 const CM={open:false,busy:false,ren:null,scene:null,cam:null,res:null,r:null,raf:0,last:0,fallback:false};
 function clawModalHtml(){return `<div class="cm-box" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
@@ -180,14 +164,14 @@ function clawModalOpen(){let el=$('#clawModal');if(!el){el=document.createElemen
   glbLoad('claw').then(gl=>{if(!CM.open)return;if(gl&&clawModalScene()){CM.fallback=false}else{CM.fallback=true;clawFallbackInit()}clawModalSync();cancelAnimationFrame(CM.raf);CM.last=performance.now();CM.raf=requestAnimationFrame(clawModalLoop)})}
 function clawModalKey(e){if(!CM.open)return;if(e.code==='Escape'){e.stopPropagation();e.preventDefault();if(!CM.busy)clawModalClose()}else if((e.code==='Enter'||e.code==='Space')&&!CM.busy&&e.target===document.body){e.preventDefault();e.stopPropagation();clawTry()}}
 function clawModalClose(){if(CM.busy)return;CM.open=false;cancelAnimationFrame(CM.raf);removeEventListener('keydown',clawModalKey,true);const el=$('#clawModal');if(el){el.hidden=true;el.innerHTML=''}
-  if(CL.g&&CM.scene){CM.scene.remove(CL.g.root);disposeTree(CL.g.root)}CL.g=null;if(CM.ren){CM.ren.dispose();CM.ren.forceContextLoss&&CM.ren.forceContextLoss();CM.ren=null}CL.mode='skill';if(typeof paintShop==='function'&&screen==='shop')paintShop()}
+  if(CL.g&&CM.scene){CM.scene.remove(CL.g.root);disposeTree(CL.g.root)}CL.g=null;if(CM.ren){CM.ren.dispose();CM.ren.forceContextLoss&&CM.ren.forceContextLoss();CM.ren=null}CL.mode='skill';if(typeof paintShop==='function'&&screen==='shop')paintShop();else if(state==='garage'&&typeof paintGarage==='function')paintGarage()}
 function clawModalSync(){const c=$('#cmCoins');if(c)c.textContent=fmt(profile.coins);const t=$('#cmTry');if(t)t.disabled=CM.busy||profile.coins<CLAW_COST;const x=$('#cmClose');if(x)x.disabled=CM.busy;
   const tb=$('#cmTry');if(tb&&!CM.busy)tb.textContent=profile.coins<CLAW_COST?'Il faut '+CLAW_COST+' pièces':'Tenter · '+CLAW_COST+' pièces'}
 function clawModalScene(){/* un rendu dédié, recréé à chaque ouverture (le canvas est neuf), libéré à la fermeture */
   try{CM.ren=new THREE.WebGLRenderer({canvas:$('#cmCanvas'),antialias:S().quality!=='eco'});CM.ren.outputEncoding=renderer.outputEncoding}catch(e){CM.ren=null;return false}
   if(!CM.scene){CM.scene=new THREE.Scene();CM.scene.background=new THREE.Color(0x0d141b);CM.scene.add(new THREE.HemisphereLight(0xfff4e0,0x1a2026,1.05));const d=new THREE.DirectionalLight(0xffffff,.8);d.position.set(1.5,4,3);CM.scene.add(d);
     const fl=new THREE.Mesh(new THREE.CircleGeometry(6,32),new THREE.MeshLambertMaterial({color:0x151d26}));fl.rotation.x=-Math.PI/2;CM.scene.add(fl);CM.cam=new THREE.PerspectiveCamera(36,1,.05,40)}
-  const root=clawBuild();if(!root)return false;CM.scene.add(root);CL.mode='auto';CL.sp=1.9;CM.camK=0;return true}
+  const root=clawBuild();if(!root)return false;CM.scene.add(root);CL.sp=1.9;CM.camK=0;return true}
 function clawModalLoop(now){if(!CM.open)return;CM.raf=requestAnimationFrame(clawModalLoop);const dt=Math.min(.1,(now-CM.last)/1000);CM.last=now;
   if(CM.fallback)return;const st=$('#cmStage');if(!st||!CM.ren)return;const w=st.clientWidth,h=st.clientHeight;const cv=CM.ren.domElement;
   if(cv.width!==Math.round(w*Math.min(2,devicePixelRatio))||cv.height!==Math.round(h*Math.min(2,devicePixelRatio))){CM.ren.setPixelRatio(Math.min(2,devicePixelRatio));CM.ren.setSize(w,h,false);CM.cam.aspect=w/h;CM.cam.updateProjectionMatrix()}
@@ -228,30 +212,13 @@ function clawShopCard(){return `<div class="shopcard cm-card" data-shop="claw"><
   <div class="row" style="grid-column:1/-1"><button class="btn small primary" id="openClaw">${profile.coins>=CLAW_COST?'Ouvrir la machine':'Ouvrir · il faut '+CLAW_COST+' pièces'}</button></div></div>`}
 
 /* ---------- panneaux du garage ---------- */
-function paintClawPanel(){const el=$('#garageBody');if(!el||gTab!=='claw')return;const S_=skinState();
-  const res=CL.last?(()=>{const it=CL.last.item,R=RARITY[it.r];return CL.last.dup?`<div class="clawres" style="border-color:${R.col}">Doublon ${R.n.toLowerCase()} (${esc(it.name)}) · +${CL.last.refund} pièces</div>`:
-    `<div class="clawres" style="border-color:${R.col}"><span><b style="color:${R.col}">${R.n}</b> · ${esc(it.name)}</span>${it.skin||(it.shop&&it.shop.slot)?'<button class="btn small primary" id="clawEquip">Équiper</button>':''}</div>`})():(CL.msg?`<p class="note">${CL.msg}</p>`:'');
-  el.innerHTML=`<div class="row" style="justify-content:space-between"><span class="lbl">Tes pièces <b>${fmt(profile.coins)}</b></span><span class="note">Une partie : ${CLAW_COST} pièces</span></div>
-    ${CL.st==='idle'?`<button class="btn primary" id="clawPlay" ${profile.coins>=CLAW_COST?'':'disabled'}>Jouer · ${CLAW_COST} pièces</button>`:`<div class="row"><span class="lbl">Temps <b id="clawTimer">${Math.ceil(CL.timer)} s</b></span></div>`}
-    <div class="clawpad" ${CL.st==='move'?'':'aria-disabled="true"'}><button class="btn" data-m="l" aria-label="Gauche">◀</button><button class="btn" data-m="u" aria-label="Fond">▲</button><button class="btn" data-m="d" aria-label="Avant">▼</button><button class="btn" data-m="r" aria-label="Droite">▶</button><button class="btn primary" id="clawDrop">Lâcher</button></div>
-    <p class="note">Mode adresse : flèches pour viser, Espace pour lâcher la pince. Plus tu es centré sur la peluche, plus la prise tient. La couleur de l'anneau indique la rareté de ce que tu gagnes.</p>
-    ${res}
-    <div class="grp"><span class="lbl">Raretés <b>pièces du jeu uniquement</b></span>
-      <table class="odds"><tr><th>Rareté</th><th>Chance par peluche</th><th>Prise si bien centré</th></tr>
-      ${RAR_KEYS.map(k=>{const v=RARITY[k];return `<tr><td style="color:${v.col}">${v.n}</td><td>${Math.round(v.p*100)} %</td><td>${Math.round(v.grip*100)} %</td></tr>`}).join('')}</table>
-      <p class="note">La machine contient toujours 3 communes, 2 peu communes, 1 rare, et 2 peluches tirées avec ces chances. Doublon : +${CLAW_REFUND} pièces. Tu préfères un tirage automatique ? Boutique, « Machine à skins ».</p></div>
-    <div class="grp"><span class="lbl">Collection <b>${S_.list.length}/${SKINCAT.length} skins</b></span><button class="btn small" id="clawToSkins">Voir mes skins</button></div>`;
-  const pb=$('#clawPlay');if(pb)pb.onclick=()=>clawPlay();const db=$('#clawDrop');if(db)db.onclick=()=>clawRelease();
-  $$('#garageBody .clawpad [data-m]').forEach(b=>{const m=b.dataset.m;const on=e=>{e.preventDefault();CL.btn[m]=true},off=()=>{CL.btn[m]=false};b.onpointerdown=on;b.onpointerup=off;b.onpointerleave=off;b.onpointercancel=off});
-  const eq=$('#clawEquip');if(eq)eq.onclick=()=>{equipReward(CL.last.item);toast(CL.last.item.name+' équipé',true);eq.disabled=true};
-  const ts=$('#clawToSkins');if(ts)ts.onclick=()=>{gTab='skins';paintGarage()}}
 function skinsPanelHtml(){const S_=skinState(),L=profile.look;const by=k=>SKINCAT.filter(s=>s.k===k);
   const card=s=>{const own=!!profile.owned[s.id],on=L.sk[s.k]===s.id,R=RARITY[s.r];
     const sw=`<span class="skinsw" style="background:linear-gradient(135deg,${hexCss(s.c1)} 0 55%,${hexCss(s.c2??s.c1)} 55% 100%)"></span>`;
     return `<button class="item skin" data-sk="${s.id}" aria-pressed="${on}" ${own?'':'disabled'} style="border-left:3px solid ${R.col}"><h4>${sw}${own?s.name:'???'}</h4><span class="tagr" style="color:${R.col}">${R.n}${on?' · équipé':own?'':' · à gagner'}</span></button>`};
-  return `<div class="row" style="justify-content:space-between"><span class="lbl">Collection <b>${S_.list.length}/${SKINCAT.length}</b></span><button class="btn small primary" id="toClaw">Machine à pinces</button></div>
+  return `<div class="row" style="justify-content:space-between"><span class="lbl">Collection <b>${S_.list.length}/${SKINCAT.length}</b></span><button class="btn small primary" id="toClaw">Machine à skins</button></div>
     <p class="note">Les skins sont purement cosmétiques. Ils s'appliquent au rider de tous les sports. Tant qu'aucun skin n'est équipé, tes couleurs de l'onglet Teintes s'appliquent.</p>
     <div class="grp"><span class="lbl">Tenues</span><div class="items">${by('s').map(card).join('')}</div><button class="btn small" data-unsk="s">Retirer la tenue</button></div>
     <div class="grp"><span class="lbl">Casques</span><div class="items">${by('h').map(card).join('')}</div><button class="btn small" data-unsk="h">Retirer le casque</button></div>`}
 function bindSkinsPanel(){const L=profile.look;$$('#garageBody .item.skin').forEach(b=>b.onclick=()=>{const s=skinById(b.dataset.sk);if(!s)return;L.sk[s.k]=L.sk[s.k]===s.id?'':s.id;saveProfile();paintGarage()});
-  $$('#garageBody [data-unsk]').forEach(b=>b.onclick=()=>{L.sk[b.dataset.unsk]='';saveProfile();paintGarage()});const c=$('#toClaw');if(c)c.onclick=()=>{gTab='claw';paintGarage()}}
+  $$('#garageBody [data-unsk]').forEach(b=>b.onclick=()=>{L.sk[b.dataset.unsk]='';saveProfile();paintGarage()});const c=$('#toClaw');if(c)c.onclick=()=>clawModalOpen()}

@@ -1,5 +1,11 @@
 # Journal des versions · Ligne Libre
 
+## 0.21.2 · 28 octobre 2026 · Pince non jouable
+
+- Retrait du mini-jeu de pince du garage (onglet « Machine », commandes, taux de prise). Récupérer un skin se fait uniquement par l'animation de la machine à skins.
+- Le bouton « Machine à skins » de l'onglet Skins ouvre cette animation.
+- `tests/claw.js` réécrit (9 contrôles) : plus d'onglet de pince, flèches sans effet, gain depuis le garage.
+
 ## 0.21.1 · 28 octobre 2026 · Machine à skins : cosmétiques uniquement
 
 - Les machines (Boutique et garage) ne donnent plus que du cosmétique : 15 skins (tenues, casques) + casque carbone, couleurs néon et fumigènes. Les équipements qui changent la physique s'obtiennent uniquement par la boutique ou la progression.

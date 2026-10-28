@@ -1,6 +1,6 @@
 {
   "name": "ligne-libre",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "private": true,
   "description": "Jeu de sports extrêmes arcade 3D (Three.js), un seul fichier HTML.",
   "license": "UNLICENSED",
