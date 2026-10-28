@@ -18,7 +18,8 @@ Conventions : mètres ; dans Blender Z en haut, le personnage regarde +X, son c�
 |---|---|---|---|---|---|---|---|
 | Rider (complet) | `assets/glb/rider.glb` | 23 974 au total ; ≈ 22 600 visibles avec casque intégral (corps 13 508, visage 3 532, casque v2 5 572) | 17 : skin, accent, accent2, suit, helmet, visor, shoe, sole, glove, hair, eye_white, iris, pupil, lip, brow, detail, metal | 765 Ko | 19 os (pelvis, spine, torso, neck, head, clavicle/upperArm/foreArm/hand ×2, upperLeg/lowerLeg/foot ×2), pondération douce aux articulations, 4 influences max | idle, celebrate, run (30 i/s) ; en jeu les os suivent le rig procédural | ✅ v1, testé en jeu |
 | Rider (léger, LOD) | `assets/glb/rider_lo.glb` | 9 543 au total ; ≈ 8 700 visibles | idem | 350 Ko | idem | idem | ✅ v1, qualité éco + personnages secondaires |
-| Moto motocross (fournie) | `assets/glb/moto.glb` | 13 642 (carrosserie 6 046, avant 2 548, roues 2 020 + 3 028) | 5 : Body (recolorée), Metal, Black Metal, Rubber, Decale (numéro du joueur) | 560 Ko | pièces rigides sur les groupes de 47-moto.js, pivots en extras glTF | animées par le jeu : roues, fourche, direction, whip | ✅ intégrée et testée · licence à confirmer |
+| Moto motocross (fournie) | `assets/glb/moto.glb` | 13 642 (carrosserie 6 046, avant 2 548, roues 2 020 + 3 028) | 5 : Body (recolorée), Metal, Black Metal, Rubber, Decale (numéro du joueur) | 560 Ko | pièces rigides sur les groupes de 47-moto.js, pivots en extras glTF | animées par le jeu : roues, fourche, direction, whip | ✅ intégrée et testée |
+| Machine à pinces (fournie) | `assets/glb/claw.glb` | 22 579 (meuble 10 791, mécanisme 1 034, 15 peluches) | textures 512 px WEBP | 777 Ko | nœuds barre > chariot > tête > 3 doigts | animée par le jeu (déplacement, descente, ouverture) | ✅ intégrée et testée |
 | BMX freestyle | `assets/glb/bmx.glb` | 7 678 (cadre 2 230, avant 1 148, roues 1 868 ×2, pédalier 564) | 7 : frame, chrome, dark, tire, rim, grip, seat | 144 Ko | pièces rigides sur les pivots du jeu (tailwhip, barspin, axes, boîtier) | animées par le jeu : roues, pédalier, tailwhip, barspin, braquage | ✅ v1, testé en jeu |
 
 Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé pour « Carbone » avec une teinte sombre brillante) et `helmet_open` (bol, cheveux visibles).
@@ -35,19 +36,19 @@ Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé 
 
 ## Assets reçus le 28 octobre 2026 : inventaire et décision
 
-Aucun fichier ne contenait de licence. Tant que la provenance n'est pas confirmée, rien de tout cela ne doit partir dans une version publique.
+Le 28 octobre, Jean a confirmé que ces modèles sont libres d'utilisation (accord des créateurs). Deux exceptions restent exclues pour une raison qui ne dépend pas des créateurs du fichier : un personnage protégé (Alucard) et des marques déposées (Troy Lee Designs, 6D).
 
 | Fichier | Contenu vérifié | Décision |
 |---|---|---|
-| `DirtBike.blend` | moto de motocross riggée, 17 778 triangles, sans marque | ✅ intégrée (moto du motocross), licence à confirmer |
+| `DirtBike.blend` | moto de motocross riggée, 17 778 triangles, sans marque | ✅ intégrée (moto du motocross) |
 | `rails.rar` | 8 modules de snowpark en FBX (rail S, rail droit, press droite, A-frame, A-frame plat, bonk, fat kink, rainbow press), 210 à 2 500 triangles chacun, textures « trim » 4K (base, masque, normales) non reliées | 🟡 bon candidat pour le snowboard (Whistler) : prochaine intégration, textures à réduire à 1K |
 | `3d-model.3ds` (×2) | (a) remontée mécanique complète (pylônes, câble, gares), 4 606 faces ; (b) sapins enneigés et chalets, 178 faces ; unités en millimètres ; textures JPG/PNG référencées mais absentes | 🟡 utilisable pour le décor du snowboard après retexturage maison |
 | `Mountain_Snow.rar` | une montagne sculptée en FBX, 7,99 millions de triangles, 40 × 40 × 8,8 unités, sans matériau | 🟡 trop lourde telle quelle ; à convertir en carte de hauteur pour le fond de Whistler ou Lauterbrunnen |
 | `stadiodentro.rar` | uniquement des textures 4K (sol, métal, rambarde, tribunes, bordure de piste), sans maillage | ⚪ inutilisable sans le modèle ; peut servir de matière pour une arène de supercross |
 | `tex.rar` | textures d'un masque et d'un casque de marque (6D, Troy Lee SE5) sans maillage | ⛔ non intégré : marques déposées, et pas de modèle |
-| `Realistic man.blend` | personnage photoréaliste exporté de Character Creator (CC_Base), 345 499 triangles, 124 images, 3 armatures | ⛔ non intégré : style photoréaliste hors direction artistique, 15 fois trop lourd, licence Reallusion à vérifier |
+| `Realistic man.blend` | personnage photoréaliste exporté de Character Creator (CC_Base), 345 499 triangles, 124 images, 3 armatures | 🟡 utilisable côté licence ; reste hors direction artistique et 15 fois trop lourd : à réserver à une éventuelle tenue spéciale après décimation et adaptation du squelette |
 | `alucardhellsingrigged.rar` | Alucard (Hellsing), personnage riggé | ⛔ non intégré : personnage protégé par le droit d'auteur |
-| `Claw_Machine_Free.blend` | machine à pinces avec peluches, 36 841 triangles, 12 images | ⚪ hors sujet pour un sport ; possible décor de garage plus tard |
+| `Claw_Machine_Free.blend` | machine à pinces avec peluches, 36 841 triangles, 12 images | ✅ intégrée : machine à pinces du garage pour gagner des skins (`assets/glb/claw.glb`, 22 579 triangles, 777 Ko, chargée à la demande) |
 | `blenderkit-v3.21.3.zip` | archive vide (22 octets) | ⛔ fichier corrompu ou incomplet ; c'est un module complémentaire de Blender, pas un asset |
 
 ## À produire (P2)

@@ -1,6 +1,6 @@
 # État du projet · Ligne Libre
 
-Mis à jour : 28 octobre 2026 (version 0.19.0 : réceptions motocross et parkour, moto fournie intégrée).
+Mis à jour : 28 octobre 2026 (version 0.20.0 : skins et machine à pinces).
 
 Note d'audit du 28 octobre : le brief annonce un skatepark « Venice Beach », des cartes renommées (Lauterbrunnen, Whistler, Venice Beach, Glen Helen, Lake Havasu, Paris Rooftops, Mount Tamalpais) et une correction des montagnes du snowboard. Rien de cela n'est dans le dépôt : ni sur GitHub (dernier commit `54f1f38`), ni en local. Ces changements ont été faits ailleurs et doivent être envoyés pour être intégrés aux modules.
 

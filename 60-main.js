@@ -299,7 +299,7 @@ function press(code){
   if(code==='KeyM'){muteAll(!audioMuted);return}
   if(state==='play'&&cur&&cur.press)cur.press(code)}
 addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;
-  if((state==='play'||state==='count')&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
+  if((state==='play'||state==='count'||(state==='garage'&&gTab==='claw'))&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
   if(!keys[e.code])press(e.code);keys[e.code]=true});
 addEventListener('keyup',e=>{keys[e.code]=false});
 /* son : l'audio démarre au premier geste (règle des navigateurs) ; clic UI */

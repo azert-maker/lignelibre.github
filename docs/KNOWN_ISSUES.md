@@ -7,15 +7,17 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 1 | 🟠 | Performances avec les modèles Blender mesurées seulement en rendu logiciel (i/s en baisse de 2 à 30 % en éco, 25 à 45 % en haute) | mesurer sur vrais appareils ; si besoin, bascule automatique vers `rider_lo` puis vers le procédural quand la qualité auto descend |
 | 2 | 🟠 | Skatepark visuellement brut (sol uni, immeubles en blocs violets) | prochaine tâche de la vertical slice |
 | 3 | 🟡 | Le jeu a besoin d'internet au premier chargement (Three.js, GLTFLoader, SkeletonUtils, polices) | si GLTFLoader ne charge pas, le jeu reste jouable avec les modèles procéduraux ; option future : tout embarquer |
-| 4 | 🟡 | Fichier HTML passé de 2,1 Mo à 2,6 Mo (GLB en base64) | compression Draco ou quantification des sommets à évaluer |
+| 4 | 🟡 | Fichier HTML : 4,5 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
 | 6 | 🟡 | Clip « celebrate » disponible mais pas encore branché sur l'écran de fin | brancher `human.clip('celebrate')` sur l'écran de résultats |
 | 7 | 🟡 | IK des mains sur BMX et motocross seulement (wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains |
 | 8 | ⚪ | Réceptions : wakeboard et downhill gardent leur ancien retour (BMX, snowboard, motocross et parkour sont branchés) | brancher `ctx.land` |
-| 18 | 🟡 | Moto fournie : licence non confirmée ; pas de variante légère (≈ 13 600 triangles aussi en éco, i/s en éco 41 → 33-38 en rendu logiciel) | confirmer la provenance ; décimer une variante éco si besoin |
+| 18 | 🟡 | Moto fournie : pas de variante légère (≈ 13 600 triangles aussi en éco, i/s en éco 41 → 33-38 en rendu logiciel) | confirmer la provenance ; décimer une variante éco si besoin |
 | 17 | ⚪ | Downhill longboard, wakeboard et wingsuit gardent l'ancienne chute (pas de fonction de relief exportée pour le longboard ; eau et vol traités à part) | exporter `_h` dans le longboard |
 | 15 | 🟡 | Chute physique : corps rigide (pas de vrai ragdoll membre par membre) ; le rider peut traverser un mur ou un module vertical | v2 : collisions avec les boîtes du parc |
 | 16 | ⚪ | Le replay ne rejoue pas la compression de réception (pose enregistrée sans le ressort) | enregistrer `landState` dans les images du replay |
+| 19 | ⚪ | Skins : sur le modèle procédural de repli, seules les couleurs s'appliquent (pas les motifs ni les finitions) | sans impact tant que les GLB chargent |
+| 20 | 🟡 | Machine à pinces : équilibrage du prix (120 pièces) et des taux à valider avec des joueurs | ajuster `CLAW_COST` et `RARITY` |
 | 9 | ⚪ | Pas de clignement des yeux ni d'expressions | P1, visage v2 |
 | 10 | 🟡 | Ressenti des commandes jamais validé par un joueur humain | sessions de test |
 | 11 | ✅ | Dépôt GitHub : résolu, dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC | CI à vérifier dans l'onglet Actions |

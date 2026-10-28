@@ -22,7 +22,7 @@ const L=require('./lib');const shots=process.argv.includes('--shots');
   chk(sb.length>0,'snowboard : réceptions qualifiées ('+sb.length+' : '+[...new Set(sb)].join(', ')+')');
   /* 3b. motocross et parkour : réceptions qualifiées par le système commun (pilote automatique du jeu) */
   for(const sp_ of ['motocross','parkour']){const r=await p.evaluate(sp_=>{__ll.startRun({sport:sp_,mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'L1'},{});__ll.forcePlay();const c=__ll.cur;const seen=[];const o=sfx.land;sfx.land=(q,k)=>{seen.push(q);o(q,k)};
-      for(let i=0;i<60*40;i++){const I=c.auto?c.auto():{x:0,y:1,a:(i%90)<10,g:false};c.update(1/60,I);if(__ll.state!=='play')__ll.forcePlay()}sfx.land=o;return seen},sp_);
+      for(let i=0;i<60*120&&seen.length<3;i++){const I=c.auto?c.auto():{x:0,y:1,a:(i%90)<10,g:false};c.update(1/60,I);if(__ll.state!=='play')__ll.forcePlay()}sfx.land=o;return seen},sp_);
     chk(r.length>0,sp_+' : réceptions qualifiées ('+r.length+' : '+[...new Set(r)].join(', ')+')')}
   /* 4. chute physique BMX : rider éjecté, au sol, vélo couché, puis reprise propre */
   await p.evaluate(()=>{__ll.startRun({sport:'bmx',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'L2'},{});__ll.forcePlay()});

@@ -124,16 +124,20 @@ function garageObj(){if(gObj){gScene.remove(gObj);disposeTree(gObj)}const L=prof
   else if(gTab==='moto'){o=buildMoto(L);hu=o.human;ps={crouch:.45,lean:.6,back:.9,spread:.18,stance:0};ty=.95;d=5.6}
   else if(gTab==='wake'){o=buildWake(L);hu=o.human;ps={crouch:.4,lean:-.15,twist:1.15,back:.85,spread:.15,side:.35};ty=.85;d=4.4}
   else if(gTab==='pk'){o=buildHuman(L);hu=o;ps={crouch:.25,lean:.35,spread:.15,stance:0};ty=.95;d=4.2}
+  else if(gTab==='skins'){o=buildHuman(L);hu=o;ps={crouch:.12,spread:.3,twist:.15,look:.15};ty=1.05;d=3.9}
+  else if(gTab==='claw'){o=(GLB.models.claw&&clawBuild())||null;
+    if(!o){o=new THREE.Group();glbLoad('claw').then(gl=>{if(gl&&gTab==='claw'&&state==='garage'){garageObj();paintClawPanel()}})}ty=1.3;d=3.7}
   if(hu){hu.snapPose?hu.snapPose(ps):hu.pose(ps)}o.userData.hu=hu;o.userData.ps=ps;
   gObj=o;gScene.add(o);gScene.userData.ring.material.color.set(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#8fd3ff');
-  gCam.userData={ty,d}}
-function garageFrame(dt){if(!gObj)return;if(gAuto&&!gDrag)gRot+=dt*.35;gObj.rotation.y=gTab==='equip'?Math.sin(gRot)*.7:gRot;
+  gCam.userData={ty,d,cy:gTab==='claw'?2.85:undefined}}
+function garageFrame(dt){if(!gObj)return;if(gAuto&&!gDrag)gRot+=dt*.35;gObj.rotation.y=gTab==='equip'?Math.sin(gRot)*.7:gTab==='claw'?0:gRot;
+  if(gTab==='claw'&&typeof clawFrame==='function'&&CL.g&&gObj===CL.g.root)clawFrame(dt);
   const u=gObj.userData,tn=performance.now()/1000;if(u.hu&&u.ps){const p=Object.assign({},u.ps);p.look=(p.look||0)+Math.sin(tn*.7)*.25;p.crouch+=Math.sin(tn*1.3)*.03;p.lean=(p.lean||0)+Math.sin(tn*.9)*.04;p.side=Math.sin(tn*.6)*.07;p.spread=(p.spread||0)+Math.max(0,Math.sin(tn*.45))*.15;u.hu.pose(p)}
-  if(u.fly&&u.fly.wing)u.fly.wing.scale.y=1+Math.sin(tn*9)*.12;const {ty,d}=gCam.userData;gCam.position.set(0,ty+.7,d);gCam.lookAt(0,ty,0);
+  if(u.fly&&u.fly.wing)u.fly.wing.scale.y=1+Math.sin(tn*9)*.12;const {ty,d,cy}=gCam.userData;gCam.position.set(0,cy??ty+.7,d);gCam.lookAt(0,ty,0);
   const w=innerWidth,h=innerHeight;gCam.aspect=w/h;if(w>700){gCam.setViewOffset(w,h,-Math.min(580,w)/2,0,w,h)}else{gCam.setViewOffset(w,h,0,h*.29,w,h)}gCam.updateProjectionMatrix()}
 renderer.domElement.addEventListener('pointerdown',e=>{if(state!=='garage')return;gDrag={x:e.clientX,r:gRot};gAuto=false});
 addEventListener('pointermove',e=>{if(gDrag)gRot=gDrag.r+(e.clientX-gDrag.x)*.01});addEventListener('pointerup',()=>{gDrag=null});
-const GTABS=[['corps','Corps'],['equip','Wingsuit'],['board','Downhill'],['velo','BMX'],['moto','Moto'],['wake','Wake'],['pk','Parkour'],['teintes','Teintes']];
+const GTABS=[['skins','Skins'],['claw','Machine'],['corps','Corps'],['equip','Wingsuit'],['board','Downhill'],['velo','BMX'],['moto','Moto'],['wake','Wake'],['pk','Parkour'],['teintes','Teintes']];
 function statBars(st){return st?`<div class="stbars">${Object.entries(st).map(([k,v])=>`<div class="stb"><span>${k}</span><i style="--v:${Math.round(v*100)}%"></i></div>`).join('')}</div>`:''}
 function itemList(slot){const cur=profile.look.gear[slot];return `<div class="items">${GEAR[slot].map(g=>{const un=gearUnlocked(slot,g.id),it=SHOP.find(s=>s.id===g.id);
   return `<button class="item" data-slot="${slot}" data-id="${g.id}" aria-pressed="${cur===g.id}"><h4>${g.name}</h4><span class="tagr ${un?'':'lock'}">${un?(cur===g.id?'équipé':'disponible'):('🔒 '+it.ads+' pub'+(it.ads>1?'s':'')+' ou '+fmt(it.price)+' pièces'+(LVL_UNLOCK[g.id]?' ou '+lvlLabel(g.id):''))}</span><p>${g.desc}</p>${statBars(g.st)}</button>`}).join('')}</div>`}
@@ -142,7 +146,9 @@ function swatches(key,list){const cur=profile.look[key];const all=list.concat(ow
 function paintGarage(){$('#garageTabs').innerHTML=GTABS.map(([k,l])=>`<button class="tab" role="tab" data-t="${k}" aria-selected="${gTab===k}">${l}</button>`).join('');
   $$('#garageTabs .tab').forEach(b=>b.onclick=()=>{gTab=b.dataset.t;paintGarage()});
   const L=profile.look;let h='';
-  if(gTab==='corps')h=`<div class="grp"><span class="lbl">Pseudo</span><input class="txt" id="gName" maxlength="16" value="${esc(L.name)}"></div>
+  if(gTab==='skins')h=skinsPanelHtml();
+  else if(gTab==='claw')h='<p class="note">Chargement de la machine…</p>';
+  else if(gTab==='corps')h=`<div class="grp"><span class="lbl">Pseudo</span><input class="txt" id="gName" maxlength="16" value="${esc(L.name)}"></div>
     <div class="grp"><span class="lbl">Peau</span>${swatches('skin',SKINS).replace(/<button class="sw lock[^>]*><\/button>/g,'')}</div>
     <div class="grp"><span class="lbl">Casque</span>${itemList('helmet')}</div>`;
   else if(gTab==='equip')h=`<div class="grp"><span class="lbl">Voilure wingsuit</span>${itemList('wing')}</div><div class="grp"><span class="lbl">Motif</span>${chipRow('pattern',['Uni','Bras / jambes','Dégradé','Rayures'],L.pattern)}</div>`;
@@ -161,7 +167,9 @@ function paintGarage(){$('#garageTabs').innerHTML=GTABS.map(([k,l])=>`<button cl
   $$('#garageBody .swatches').forEach(w=>w.onclick=e=>{const b=e.target.closest('.sw');if(!b)return;if(b.dataset.lock){offerUnlock('neon');return}L[w.dataset.key]=+b.dataset.c;saveProfile();paintGarage()});
   $$('#garageBody .item').forEach(b=>b.onclick=()=>{const {slot,id}=b.dataset;if(!gearUnlocked(slot,id)){offerUnlock(id);return}L.gear[slot]=id;saveProfile();paintGarage()});
   const pr=$('#garageBody [data-row="pattern"]');if(pr)pr.onclick=e=>{const b=e.target.closest('.chip');if(!b)return;L.pattern=+b.dataset.v;saveProfile();paintGarage()};
-  garageObj()}
+  if(gTab==='skins')bindSkinsPanel();
+  if(gTab==='claw'&&CL.st!=='idle'){/* partie en cours : on garde la machine */paintClawPanel();return}
+  garageObj();if(gTab==='claw')paintClawPanel()}
 async function offerUnlock(id){go('shop');setTimeout(()=>{const el=$('#shop [data-shop="'+id+'"]');if(el){el.scrollIntoView({block:'center'});el.style.outline='2px solid var(--gold)';setTimeout(()=>el.style.outline='',1600)}},50)}
 
 /* ---------- boutique : pièces ou pubs ---------- */
