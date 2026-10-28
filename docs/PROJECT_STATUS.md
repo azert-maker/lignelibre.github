@@ -1,10 +1,8 @@
 # État du projet · Ligne Libre
 
-Mis à jour : 28 octobre 2026 (version 0.21.0 : machine à skins de la Boutique, 5 raretés).
+Mis à jour : 28 octobre 2026 (version 0.22.0 : gameplay snowboard et wakeboard, lieux iconiques, snowpark Blender).
 
-Note d'audit du 28 octobre : le brief annonce un skatepark « Venice Beach », des cartes renommées (Lauterbrunnen, Whistler, Venice Beach, Glen Helen, Lake Havasu, Paris Rooftops, Mount Tamalpais) et une correction des montagnes du snowboard. Rien de cela n'est dans le dépôt : ni sur GitHub (dernier commit `54f1f38`), ni en local. Ces changements ont été faits ailleurs et doivent être envoyés pour être intégrés aux modules.
-
-Note d'audit : le « Skatepark BMX v2 » mentionné dans le dernier brief n'existe pas dans le dépôt (aucun commit, aucun code de béton à joints ni de lampadaires). L'environnement du skatepark reste à faire.
+Lieux iconiques : Venice Beach (BMX), Lauterbrunnen (wingsuit) et Whistler (snowboard) ont un décor dédié ; les 4 autres cartes sont renommées seulement.
 
 Légende des statuts (utilisée dans tous les documents) :
 
@@ -22,7 +20,7 @@ Légende des statuts (utilisée dans tous les documents) :
 |---|---|---|
 | Lancement du jeu | `dist/ligne-libre-standalone.html` s'ouvre dans Chromium sans erreur JS ; 7 sports jouables | ✅ |
 | Build | `build.sh` assemble 21 modules JS + HTML en un fichier ; embarque les GLB en base64 ; `node --check` OK | ✅ |
-| Tests | Playwright + Chromium (rendu logiciel) : 61/61 régression, 15/15 modèles Blender, figures BMX, wallrun parkour, clavier, tactile, fuites mémoire | ✅ |
+| Tests | Playwright + Chromium (rendu logiciel) : 62/62 régression, 10/10 ressenti et lieux (`feel.js`), 15/15 modèles Blender, figures BMX, wallrun parkour, clavier, tactile, fuites mémoire | ✅ |
 | Git | dépôt local `v3/` avec historique ; `.gitignore`, `CONTRIBUTING.md`, CI GitHub Actions prêts | ✅ |
 | GitHub | dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC (identifiants de ton poste) | ✅ |
 | Blender sur ton PC | l'outil Blender du PC répond « Cannot connect to Blender at localhost:9876 » (Blender non lancé ou extension MCP inactive) | ⛔ contourné |
@@ -48,7 +46,7 @@ Choisi parce que le rider est entièrement visible (pas de combinaison ni de vue
 | Équipement complet (Blender) | ✅ v1 | `assets/glb/bmx.glb` : cadre, fourche, cintre 2 pièces, 36 rayons par roue, plateau ajouré, chaîne, pegs, pédales à picots |
 | Réceptions qualifiées et chutes physiques | ✅ | `tests/land.js` 12/12 ; compression 6 à 11 cm selon la qualité, rider éjecté à 3-4 m puis au sol, vélo couché, reprise propre |
 | Animations fonctionnelles | ✅ | les os du modèle suivent le rig du jeu (écart mesuré 0,0 cm) ; mains sur les poignées par IK (écart 0,0 cm) ; tailwhip, barspin, pédalage, roues animés sur les pièces Blender |
-| Environnement soigné | 🔵 | skatepark fonctionnel mais visuellement brut (sol uni, immeubles en blocs) : prochaine tâche |
+| Environnement soigné | 🟡 | ambiance Venice Beach (béton à joints, palmiers, plage, océan) ; modules du parc encore procéduraux |
 | Bonnes commandes | 🟡 | clavier et tactile testés automatiquement (manette non testée) ; ressenti à valider par un joueur |
 | Figures et score | ✅ | `tests/bmx3.js` : manual, air, 540, grind validés |
 | Interface cohérente | 🟡 | HUD BMX dédié ; pas encore de passe de design globale |

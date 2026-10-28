@@ -12,7 +12,8 @@ function makeValley(o){
   const yawAt=z=>Math.atan((cx(z-1)-cx(z+1))/2);
   const bumps=o.bumps||0;
   function H(x,z){const c=cx(z),d=Math.abs(x-c),w=vw(z),n=fbm(x*.011+seed,z*.011);let h=z*SL+n*16;
-    if(d>w){const e=(d-w)/30;h+=(Math.pow(e,1.45)*38+n*n*75*Math.min(1,e*.4))*RELIEF}
+    if(d>w){const e=(d-w)/30;h+=(Math.pow(e,1.45)*38+n*n*75*Math.min(1,e*.4))*RELIEF;
+      /* o.cliff : paroi quasi verticale au bord du fond de vallée (Lauterbrunnen) */if(o.cliff){const e2=clamp((d-w)/(DX*1.6),0,1);h+=o.cliff*e2*e2*(3-2*e2)}}
     /* pitons rocheux : jamais sur la piste quand o.clearPiste (snowboard) ; libres en wingsuit (obstacles de proximité) */
     const b=fbm(x*.028+seed*2,z*.028);if(b>.63){let k=1;if(o.clearPiste){const t=clamp((d-w*.85)/(w*.35),0,1);k=t*t*(3-2*t)}h+=(b-.63)*170*RELIEF*(o.towers??1)*k}
     if(bumps){const m=fbm(x*.06+seed,z*.06+3);if(m>.6)h+=(m-.6)*bumps}

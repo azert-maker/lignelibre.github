@@ -1,12 +1,12 @@
 {
   "name": "ligne-libre",
-  "version": "0.21.2",
+  "version": "0.22.0",
   "private": true,
   "description": "Jeu de sports extrêmes arcade 3D (Three.js), un seul fichier HTML.",
   "license": "UNLICENSED",
   "scripts": {
     "build": "LL_COPY_PARENT=0 sh build.sh && node --check dist/bundle.js",
-    "test": "node tests/all.js && node tests/glb.js && node tests/land.js && node tests/claw.js && node tests/shopclaw.js",
+    "test": "node tests/all.js && node tests/glb.js && node tests/land.js && node tests/claw.js && node tests/shopclaw.js && node tests/feel.js",
     "test:bmx": "node tests/bmx3.js",
     "test:input": "node tests/kb.js && node tests/touch.js",
     "test:perf": "node tests/perf.js && node tests/leak.js",

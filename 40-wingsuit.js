@@ -4,13 +4,13 @@
 ===================================================================== */
 MODES.wingsuit=function(cfg,look,ctx){
   const P_=cfg.params||{};const course=cfg.mode==='course';
-  const env={fogNear:140,fogFar:720,hemiGround:0x4a4038,accent:'#8fd3ff',cloudY:140};
+  const env={fogNear:140,fogFar:720,hemiGround:0x4f6a3a,accent:'#8fd3ff',cloudY:180,tint:PLACE_TINT.wingsuit};
   const eco=S().quality==='eco';const seedI=strSeed(cfg.seed);const root=new THREE.Group();scene.add(root);
   const RD=[.35,.75,1][P_.rings??1];
   const RING_R=5,RING_T=.34;const ringGeo=new THREE.TorusGeometry(RING_R,RING_T,8,28);
   let rings=[],finishZ=null;
-  const V=makeValley({seedI,root,SL:.46,W0:[28,40,58][P_.width??1],relief:[.65,1,1.45][P_.relief??1],trees:P_.trees!==false,
-    onChunk(k,chunk,g,R){const CH=160,z0=-k*CH;const wantRing=course?(k>=1&&k<=cfg.len):(k>=1&&R()<RD);
+  const V=makeValley({seedI,root,SL:.46,W0:[28,40,58][P_.width??1],relief:[.65,1,1.45][P_.relief??1],cliff:[110,150,200][P_.relief??1],trees:P_.trees!==false,
+    onChunk(k,chunk,g,R){const CH=160,z0=-k*CH;lauterbrunnenChunk(V,k,g,R,eco);const wantRing=course?(k>=1&&k<=cfg.len):(k>=1&&R()<RD);
       if(wantRing){const z=z0-CH*.5,x=V.cx(z)+(R()*2-1)*12,y=V.groundH(x,z)+10+R()*14;
         const mat=new THREE.MeshBasicMaterial({color:course?0xff9a3c:0xffcf6e,transparent:true,opacity:.95});const mesh=new THREE.Mesh(ringGeo,mat);mesh.userData.ring=true;
         const ry=-V.yawAt(z);mesh.position.set(x,y,z);mesh.rotation.y=ry;g.add(mesh);

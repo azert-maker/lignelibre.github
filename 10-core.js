@@ -98,13 +98,15 @@ let curEnv=null;
 function applyEnv(modeEnv,wid){
   const w=WEATHER[wid]||WEATHER.soleil;curEnv=Object.assign({},w,modeEnv,{wid});
   const top=new THREE.Color(w.top),hor=new THREE.Color(w.horizon),glow=new THREE.Color(w.glow);
+  /* teinte propre au lieu (Venice dorée, Lauterbrunnen alpine...) mélangée à la météo choisie */
+  if(modeEnv.tint){const t=modeEnv.tint,k=t.k??.5;if(t.top!=null)top.lerp(new THREE.Color(t.top),k);if(t.horizon!=null)hor.lerp(new THREE.Color(t.horizon),k);if(t.glow!=null)glow.lerp(new THREE.Color(t.glow),k)}
   sunDir.set(w.sun[0],w.sun[1],w.sun[2]).normalize();
   const p=skyGeo.attributes.position,v=V3(),c=new THREE.Color();
   for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i).normalize();
     if(v.y>=0)c.copy(hor).lerp(top,Math.pow(v.y,.55));else c.copy(hor).multiplyScalar(1-Math.min(.3,-v.y*.6));
     const s=Math.max(0,v.dot(sunDir));c.lerp(glow,Math.pow(s,6)*.6);skyCol[i*3]=c.r;skyCol[i*3+1]=c.g;skyCol[i*3+2]=c.b}
   skyGeo.attributes.color.needsUpdate=true;
-  scene.fog=new THREE.Fog(w.horizon,modeEnv.fogNear*w.fog,modeEnv.fogFar*w.fog);
+  scene.fog=new THREE.Fog(hor.getHex(),modeEnv.fogNear*w.fog,modeEnv.fogFar*w.fog);
   const lk=modeEnv.light||1;hemi.color.setHex(w.hemiSky);hemi.groundColor.setHex(modeEnv.hemiGround);hemi.intensity=w.hemiI*lk;
   sun.color.setHex(w.sunColor);sun.intensity=w.sunI*lk;
   sunSprite.visible=w.size>0;sunSprite.scale.set(w.size,w.size,1);sunSprite.material.color.setHex(wid==='nuit'?0xdfe8ff:0xffffff);

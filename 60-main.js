@@ -333,7 +333,7 @@ function frame(now){requestAnimationFrame(frame);
   else if(state==='menu')cur.attract(dt);else if(state!=='ad'){if(cur.idle)cur.idle(dt);updateGhosts(dt)}
   if(state==='play'||state==='count'||state==='demo'||state==='menu'){camBase.p.copy(camera.position);camBase.q.copy(camera.quaternion);camBase.ok=true}
   if(state==='over')crashFrame(dt);else if(crashFx&&state!=='pause')crashFx=null;
-  applyLook(dt);ringsTick(dt);E.vig.style.opacity=state==='play'?vigT:0;
+  applyLook(dt);ringsTick(dt);if(typeof placesTick==='function')placesTick(dt);E.vig.style.opacity=state==='play'?vigT:0;
   waterUniforms.uTime.value+=dt;musicTick(state);if(state==='play'&&cur)wind(hudKmh/(cur.vScale||100),curCfg.sport==='wingsuit');else wind(0,false);flakes.update(dt,camera.position);
   sky.position.copy(camera.position);sunSprite.position.copy(camera.position).addScaledVector(sunDir,1000);stars.position.copy(camera.position);clouds.update(camera.position);
   renderer.render(scene,camera);if(RP.exp)exportDraw()}

@@ -11,7 +11,8 @@ function buildSnowboard(look){const g=new THREE.Group();
 const SB_HIT=[[0,.03,-.8],[0,.03,.8],[0,1.65,0],[0,1.0,-.3],[0,1.0,.3],[0,.05,-.4],[0,.05,0],[0,.05,.4],[0,.55,0]].map(v3);// spatule, talon, tête, mains, planche (3 pts), genoux
 MODES.snowboard=function(cfg,look,ctx){
   const P_=cfg.params||{};const course=cfg.mode==='course';
-  const env={fogNear:120,fogFar:640,hemiGround:0x55657a,accent:'#2b8cff',cloudY:160,light:.62};
+  if(typeof glbLoad==='function')glbLoad('snowpark');/* modules de snowpark : chargés en tâche de fond, utilisés dès qu'ils sont prêts */
+  const env={fogNear:120,fogFar:640,hemiGround:0x55657a,accent:'#2b8cff',cloudY:160,light:.62,tint:PLACE_TINT.snowboard};
   const eco=S().quality==='eco';const seedI=strSeed(cfg.seed);const root=new THREE.Group();scene.add(root);
   let gates=[],finishZ=null;
   /* ---------- PARK : tremplins (kickers) et rails ----------
@@ -33,6 +34,10 @@ MODES.snowboard=function(cfg,look,ctx){
     return k}
   function buildRail(x,z,yaw,g){const fx=Math.sin(yaw),fz=-Math.cos(yaw),L=10;const x1=x+fx*L,z1=z+fz*L;const y0=V.groundH(x,z)+.32,y1=V.groundH(x1,z1)+.5;
     const r={x0:x,y0,z0:z,dx:x1-x,dy:y1-y0,dz:z1-z,len:Math.hypot(x1-x,y1-y0,z1-z),hl:Math.hypot(x1-x,z1-z),fx,fz,rx:Math.cos(yaw),rz:Math.sin(yaw),yaw};
+    /* rail de snowpark fourni (Blender) s'il est chargé, sinon rail procédural ; même hauteur de glisse */
+    const src=GLB.models.snowpark&&GLB.models.snowpark.scene.getObjectByName('sp_rail');
+    if(src){const o=src.clone(true),u=src.userData||{};o.rotation.order='YXZ';o.rotation.set(Math.atan2(r.dy,r.hl),-yaw,0);o.scale.set(1.2,.37/(u.h||1.005),r.len/(u.len||6.841));
+      o.position.set(x+r.dx/2,y0+r.dy/2-.37,z+r.dz/2);o.traverse(n=>{n.userData.shared=true;if(n.isMesh)n.castShadow=true});g.add(o);return r}
     const bar=new THREE.Mesh(new THREE.BoxGeometry(.14,.1,r.len),rMat);bar.position.set(x+r.dx/2,y0+r.dy/2-.035,z+r.dz/2);bar.lookAt(x1,y1-.035,z1);bar.castShadow=true;g.add(bar);
     for(const t of [.08,.5,.92]){const lx=x+r.dx*t,lz=z+r.dz*t,ly=y0+r.dy*t,gy=V.groundH(lx,lz);const leg=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,ly-gy+.2,6),legMat);leg.position.set(lx,(ly+gy-.2)/2-.05,lz);g.add(leg)}
     return r}
@@ -56,7 +61,7 @@ MODES.snowboard=function(cfg,look,ctx){
   const flagR=new THREE.MeshLambertMaterial({color:0xd23c3c}),flagB=new THREE.MeshLambertMaterial({color:0x2b6cff});flagR.userData.shared=flagB.userData.shared=true;
   const poleGeo=new THREE.CylinderGeometry(.03,.03,1.8,6);poleGeo.translate(0,.9,0);const flagGeo=new THREE.PlaneGeometry(.7,.45);
   const V=makeValley({seedI,root,SL:[.20,.28,.36][P_.slope??1],W0:45,relief:[.7,1,1.35][P_.relief??1],trees:true,treeDensity:[.5,1,1.6][P_.trees??1],treeSpread:40,treeClear:14,palette:'snow',bumps:[0,7,13][P_.bumps??1],towers:.6,clearPiste:true,
-    onChunk(k,chunk,g,R){const CH=160,z0=-k*CH;
+    onChunk(k,chunk,g,R){const CH=160,z0=-k*CH;whistlerChunk(V,k,g,R,eco);
       if(course&&k>=1&&k<=cfg.len){const z=z0-80,c=V.cx(z)+((k%2)?1:-1)*(5+R()*6),ry=-V.yawAt(z),half=4;const gg=new THREE.Group();const m=k%2?flagR:flagB;
         for(const s of [-1,1]){const pole=new THREE.Mesh(poleGeo,m);pole.userData.shared=true;pole.position.x=s*half;gg.add(pole);const f=new THREE.Mesh(flagGeo,m);f.userData.shared=true;f.position.set(s*half+s*.36,1.55,0);gg.add(f)}
         const y=V.groundH(c,z);gg.position.set(c,y,z);gg.rotation.y=ry;g.add(gg);

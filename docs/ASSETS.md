@@ -20,6 +20,7 @@ Conventions : mètres ; dans Blender Z en haut, le personnage regarde +X, son c�
 | Rider (léger, LOD) | `assets/glb/rider_lo.glb` | 9 543 au total ; ≈ 8 700 visibles | idem | 350 Ko | idem | idem | ✅ v1, qualité éco + personnages secondaires |
 | Moto motocross (fournie) | `assets/glb/moto.glb` | 13 642 (carrosserie 6 046, avant 2 548, roues 2 020 + 3 028) | 5 : Body (recolorée), Metal, Black Metal, Rubber, Decale (numéro du joueur) | 560 Ko | pièces rigides sur les groupes de 47-moto.js, pivots en extras glTF | animées par le jeu : roues, fourche, direction, whip | ✅ intégrée et testée |
 | Machine à pinces (fournie) | `assets/glb/claw.glb` | 22 579 (meuble 10 791, mécanisme 1 034, 15 peluches) | textures 512 px WEBP | 777 Ko | nœuds barre > chariot > tête > 3 doigts | animée par le jeu (déplacement, descente, ouverture) | ✅ intégrée et testée |
+| Modules de snowpark (fournis) | `assets/glb/snowpark.glb` | 210 à 2 500 par module (8 modules) | 1 texture « trim » 256×512 | 631 Ko | aucun | statiques | ✅ intégrés (rails du snowboard, décor Whistler) |
 | BMX freestyle | `assets/glb/bmx.glb` | 7 678 (cadre 2 230, avant 1 148, roues 1 868 ×2, pédalier 564) | 7 : frame, chrome, dark, tire, rim, grip, seat | 144 Ko | pièces rigides sur les pivots du jeu (tailwhip, barspin, axes, boîtier) | animées par le jeu : roues, pédalier, tailwhip, barspin, braquage | ✅ v1, testé en jeu |
 
 Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé pour « Carbone » avec une teinte sombre brillante) et `helmet_open` (bol, cheveux visibles).
@@ -41,7 +42,7 @@ Le 28 octobre, Jean a confirmé que ces modèles sont libres d'utilisation (acco
 | Fichier | Contenu vérifié | Décision |
 |---|---|---|
 | `DirtBike.blend` | moto de motocross riggée, 17 778 triangles, sans marque | ✅ intégrée (moto du motocross) |
-| `rails.rar` | 8 modules de snowpark en FBX (rail S, rail droit, press droite, A-frame, A-frame plat, bonk, fat kink, rainbow press), 210 à 2 500 triangles chacun, textures « trim » 4K (base, masque, normales) non reliées | 🟡 bon candidat pour le snowboard (Whistler) : prochaine intégration, textures à réduire à 1K |
+| `rails.rar` | 8 modules de snowpark en FBX (rail S, rail droit, press droite, A-frame, A-frame plat, bonk, fat kink, rainbow press), 210 à 2 500 triangles chacun, textures « trim » 4K (base, masque, normales) non reliées | ✅ intégré (0.22) : `assets/blender/snowpark.py` → `assets/glb/snowpark.glb` (631 Ko, texture réduite à 256×512, chargé à la demande) ; rails du snowboard et modules posés au bord de la piste de Whistler |
 | `3d-model.3ds` (×2) | (a) remontée mécanique complète (pylônes, câble, gares), 4 606 faces ; (b) sapins enneigés et chalets, 178 faces ; unités en millimètres ; textures JPG/PNG référencées mais absentes | 🟡 utilisable pour le décor du snowboard après retexturage maison |
 | `Mountain_Snow.rar` | une montagne sculptée en FBX, 7,99 millions de triangles, 40 × 40 × 8,8 unités, sans matériau | 🟡 trop lourde telle quelle ; à convertir en carte de hauteur pour le fond de Whistler ou Lauterbrunnen |
 | `stadiodentro.rar` | uniquement des textures 4K (sol, métal, rambarde, tribunes, bordure de piste), sans maillage | ⚪ inutilisable sans le modèle ; peut servir de matière pour une arène de supercross |
@@ -50,6 +51,27 @@ Le 28 octobre, Jean a confirmé que ces modèles sont libres d'utilisation (acco
 | `alucardhellsingrigged.rar` | Alucard (Hellsing), personnage riggé | ⛔ non intégré : personnage protégé par le droit d'auteur |
 | `Claw_Machine_Free.blend` | machine à pinces avec peluches, 36 841 triangles, 12 images | ✅ intégrée : machine à pinces du garage pour gagner des skins (`assets/glb/claw.glb`, 22 579 triangles, 777 Ko, chargée à la demande) |
 | `blenderkit-v3.21.3.zip` | archive vide (22 octets) | ⛔ fichier corrompu ou incomplet ; c'est un module complémentaire de Blender, pas un asset |
+
+## Audit 3D du 28 octobre 2026 (0.22)
+
+| Catégorie | Assets | Commentaire |
+|---|---|---|
+| Utilisé et bon | rider, rider_lo, BMX, moto, machine à skins, modules de snowpark | testés en jeu (`tests/glb.js`, `tests/feel.js`) |
+| Branché pendant cet audit | modules de snowpark | rails du snowboard (géométrie Blender à la place du cylindre) + 5 modules décoratifs par tronçon à Whistler |
+| Pauvre ou à améliorer | remontée mécanique et sapins `3d-model.3ds` (pas de textures), `Mountain_Snow` (8 M de triangles), `Realistic man` (345 000 triangles) | retexturer ; convertir la montagne en carte de hauteur ; décimer le personnage |
+| Décor procédural (pas de modèle) | palmiers, poste de sauveteur, façades de Venice ; chalets, église, cascades de Lauterbrunnen ; filets, drapeaux, chalets de Whistler (`36-places.js`) | légers (fusion des sommets, instanciation), à remplacer par des modèles Blender si besoin |
+
+### Assets manquants, par priorité
+
+| # | Asset | Sport | Pourquoi | Contraintes | Remplaçant actuel |
+|---|---|---|---|---|---|
+| 1 | Planches (longboard, snowboard, wakeboard) + corde et palonnier | Downhill, Snowboard, Wakeboard | l'équipement est sous les yeux en permanence | < 3 000 triangles chacune, pivots des pieds, couleur recolorable | boîtes procédurales |
+| 2 | Clips Blender de réception et de chute | tous | rendre la compression et la chute plus organiques | 19 os du rig, 0,3 à 1 s, en place | ressort procédural + corps rigide |
+| 3 | Combinaison wingsuit (voilure entre bras et jambes) | Wingsuit | le rider ressemble à un piéton en vol | même squelette, voilure pondérée sur bras et jambes | rider standard bras écartés |
+| 4 | Kit Venice Beach (bowl, coping, bancs, poubelles, tags sous licence) | BMX | identité du lieu au sol | modules < 2 000 triangles, textures 512 | parc procédural + palmiers |
+| 5 | Kit toits de Paris (zinc, cheminées, lucarnes) | Parkour | carte seulement renommée | modules instanciables | blocs procéduraux |
+| 6 | Bouées, ponton, falaises rouges | Wakeboard (Lake Havasu) | carte seulement renommée | légers, eau existante | décor actuel |
+| 7 | Tribunes et bottes de paille de motocross | Motocross (Glen Helen) | carte seulement renommée | instanciation | décor actuel |
 
 ## À produire (P2)
 
