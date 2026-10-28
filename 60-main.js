@@ -319,7 +319,9 @@ let last=performance.now(),last0=performance.now();
 const AQ={t:0,n:0,warm:0,done:false};
 function autoQuality(raw){if(AQ.done||S().autoQ===false||S().quality==='eco'){return}AQ.warm+=raw;if(AQ.warm<2)return;AQ.t+=raw;AQ.n++;if(AQ.t<3)return;const fps=AQ.n/AQ.t;AQ.t=0;AQ.n=0;
   if(fps<40){AQ.done=true;S().quality='eco';saveProfile();resize();flakes.set(curCfg&&WEATHER[curCfg.weather]&&WEATHER[curCfg.weather].flakes);toast('Qualité Éco activée pour garder la fluidité ('+Math.round(fps)+' i/s)',true);feed('Éco complet à la prochaine partie · Réglages pour revenir')}}
-function frame(now){requestAnimationFrame(frame);const rawDt=(now-last)/1000;const dt=Math.min(.05,rawDt);if(state==='play'&&rawDt<1)autoQuality(rawDt);last=now;pollPad(press);if(state==='play'||state==='menu'||state==='demo')perfTick((now-last0)/1000);last0=now;
+function frame(now){requestAnimationFrame(frame);
+  /* machine à skins ouverte : la scène de fond est cachée, on ne la calcule pas */if(typeof CM!=='undefined'&&CM.open){last=now;return}
+  const rawDt=(now-last)/1000;const dt=Math.min(.05,rawDt);if(state==='play'&&rawDt<1)autoQuality(rawDt);last=now;pollPad(press);if(state==='play'||state==='menu'||state==='demo')perfTick((now-last0)/1000);last0=now;
   if(toastT>0){toastT-=dt;if(toastT<=0)lastToast=''}
   if(state==='garage'){garageFrame(dt);renderer.render(gScene,gCam);return}
   if(!cur)return;
