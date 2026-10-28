@@ -145,8 +145,11 @@ MODES.wakeboard=function(cfg,look,ctx){
           if(vn>11)return ['Réception trop violente','Impact à '+vn.toFixed(1)+' m/s.']}
         St.air=false;St.y=sH;St.vy=0;St.yawRel=Math.round(St.yawRel/Math.PI)*Math.PI;St.flip=0;St.roll=0;
         const latL=(RW.x-B.sx)*B.rx+(RW.z-B.sz)*B.rz,dlL=-((RW.x-B.sx)*B.fx+(RW.z-B.sz)*B.fz),xr=dlL*TAN+1.1;St.w2w=St.wakeJ&&Math.sign(latL)!==St.side0&&Math.abs(latL)>xr-.6;const onRidge=Math.abs(Math.abs(latL)-xr)<.7;
-        const T=airTrick();const lq=off<.2&&vn<5.5&&!onRidge?'perfect':off<.6&&vn<7.5?'clean':'sketchy';
-        if(live){land=clamp(vn/6,.2,1);human.impact(land*.5);camShake(land*.35);sfx.splash(.5+land*.6);for(let i=0;i<(eco?8:24);i++)spray.spawn(RW.x,St.y+.05,RW.z,(Math.random()-.5)*4,.8+Math.random()*2*land,(Math.random()-.5)*4,.9,.95,.98,1);
+        const T=airTrick();
+        /* qualité : axe de la planche d'abord ; un wake jump normal retombe à 6-8 m/s, ce n'est pas une faute.
+           Limite = planche de travers, impact très dur, ou réception dure sur la crête du sillage */
+        const lq=off<.2&&!onRidge&&vn<9.5?'perfect':off<.55&&vn<10.2&&!(onRidge&&vn>8.5)?'clean':'sketchy';
+        if(live){land=clamp(vn/6,.2,1);ctx.land(lq,{k:land*.8,pos:V3t.set(RW.x,St.y,RW.z),human,air:St.airT,trick:St.airT>.45});sfx.splash(.5+land*.6);for(let i=0;i<(eco?8:24);i++)spray.spawn(RW.x,St.y+.05,RW.z,(Math.random()-.5)*4,.8+Math.random()*2*land,(Math.random()-.5)*4,.9,.95,.98,1);
           if(St.airT>.45){stats.airs++;if(St.wakeJ)stats.wakeAirs++;if(St.w2w)stats.w2w++;stats.maxH=Math.max(stats.maxH,St.hmax);stats.flips+=T.flips;
             if(onRidge)feed('Réception sur le sillage');ctx.trick(T.name,T.pts,{land:lq,base:T.name.replace(' · Wake to wake','')});if(lq==='perfect'&&T.flips&&ctx.slowmo)ctx.slowmo(.3,.5);if(T.pts>stats.bestPts){stats.bestPts=T.pts;stats.best=T.name}
             if(wch&&wch[1](T.name)){ctx.bonus(wch[2],'Défi sillage : '+wch[0]);if(!sfx.trick(4))ding(990,.3);wch=WCH[Math.floor(Math.random()*WCH.length)];toast('Nouveau défi : '+wch[0],true)}

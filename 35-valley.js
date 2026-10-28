@@ -13,7 +13,8 @@ function makeValley(o){
   const bumps=o.bumps||0;
   function H(x,z){const c=cx(z),d=Math.abs(x-c),w=vw(z),n=fbm(x*.011+seed,z*.011);let h=z*SL+n*16;
     if(d>w){const e=(d-w)/30;h+=(Math.pow(e,1.45)*38+n*n*75*Math.min(1,e*.4))*RELIEF}
-    const b=fbm(x*.028+seed*2,z*.028);if(b>.63)h+=(b-.63)*170*RELIEF*(o.towers??1);
+    /* pitons rocheux : jamais sur la piste quand o.clearPiste (snowboard) ; libres en wingsuit (obstacles de proximité) */
+    const b=fbm(x*.028+seed*2,z*.028);if(b>.63){let k=1;if(o.clearPiste){const t=clamp((d-w*.85)/(w*.35),0,1);k=t*t*(3-2*t)}h+=(b-.63)*170*RELIEF*(o.towers??1)*k}
     if(bumps){const m=fbm(x*.06+seed,z*.06+3);if(m>.6)h+=(m-.6)*bumps}
     return h}
   const terrMat=detailMaterial(new THREE.MeshLambertMaterial({vertexColors:true}),{snow:o.palette==='snow',amp:o.palette==='snow'?.08:.16});
