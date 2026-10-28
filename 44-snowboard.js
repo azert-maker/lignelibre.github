@@ -55,7 +55,7 @@ MODES.snowboard=function(cfg,look,ctx){
       const f=u/KL*KN,i=Math.min(KN-1,Math.floor(f)),hh=KPROF[i]+(KPROF[i+1]-KPROF[i])*(f-i);if(hh>best)best=hh}return best}
   const flagR=new THREE.MeshLambertMaterial({color:0xd23c3c}),flagB=new THREE.MeshLambertMaterial({color:0x2b6cff});flagR.userData.shared=flagB.userData.shared=true;
   const poleGeo=new THREE.CylinderGeometry(.03,.03,1.8,6);poleGeo.translate(0,.9,0);const flagGeo=new THREE.PlaneGeometry(.7,.45);
-  const V=makeValley({seedI,root,SL:[.20,.28,.36][P_.slope??1],W0:45,relief:[.7,1,1.35][P_.relief??1],trees:true,treeDensity:[.5,1,1.6][P_.trees??1],treeSpread:40,treeClear:14,palette:'snow',bumps:[0,7,13][P_.bumps??1],towers:.6,
+  const V=makeValley({seedI,root,SL:[.20,.28,.36][P_.slope??1],W0:45,relief:[.7,1,1.35][P_.relief??1],trees:true,treeDensity:[.5,1,1.6][P_.trees??1],treeSpread:40,treeClear:14,palette:'snow',bumps:[0,7,13][P_.bumps??1],towers:.6,clearPiste:true,
     onChunk(k,chunk,g,R){const CH=160,z0=-k*CH;
       if(course&&k>=1&&k<=cfg.len){const z=z0-80,c=V.cx(z)+((k%2)?1:-1)*(5+R()*6),ry=-V.yawAt(z),half=4;const gg=new THREE.Group();const m=k%2?flagR:flagB;
         for(const s of [-1,1]){const pole=new THREE.Mesh(poleGeo,m);pole.userData.shared=true;pole.position.x=s*half;gg.add(pole);const f=new THREE.Mesh(flagGeo,m);f.userData.shared=true;f.position.set(s*half+s*.36,1.55,0);gg.add(f)}
@@ -229,6 +229,13 @@ MODES.snowboard=function(cfg,look,ctx){
       /* Physique en sous-pas de 1/60 s max : même comportement à 20 ou 144 images/s */
       const nS=live?Math.max(1,Math.ceil(dt*60)):1,h=dt/nS;let edge=0;
       for(let k=0;k<nS;k++){const r=step(h,I,live);if(r)return crash(r[0],r[1]);edge=Math.max(edge,lastEdge)}
+      /* anti-blocage : arrêté au pied d'un kicker ou dans un creux (moins de 4 km/h pendant 1,2 s au sol),
+         le rider repart tout seul dans la ligne de pente (comme un rider qui sautille pour se relancer) */
+      if(live&&!St.air&&!St.grind){if(St.vel.length()<1.1)St.stuckT=(St.stuckT||0)+dt;else St.stuckT=0;
+        if(St.stuckT>1.2){St.stuckT=0;const e=1.5,gx=groundT(St.pos.x+e,St.pos.z)-groundT(St.pos.x-e,St.pos.z),gz=groundT(St.pos.x,St.pos.z+e)-groundT(St.pos.x,St.pos.z-e);
+          let dx=-gx,dz=-gz;const L_=Math.hypot(dx,dz)||1;dx/=L_;dz/=L_;if(dz>-.3){const tx=cx(St.pos.z-20)-St.pos.x;dx=Math.sign(tx)*.5;dz=-.87}
+          const kb_=groundH(St.pos.x+dx*3,St.pos.z+dz*3)-groundH(St.pos.x,St.pos.z);if(kb_>.5){const tx=cx(St.pos.z-20)-St.pos.x;dx=Math.sign(tx||1)*.8;dz=-.6}
+          St.vel.set(dx*5,0,dz*5);St.yaw=Math.atan2(dx,-dz);toast('Relance',true);if(sfx.pump)sfx.pump(true)}}
       const sp0=St.vel.length();
       rollS+=((St.air?0:-I.x*(I.a?.12:.32)*clamp(sp0/10,0,1))-rollS)*(live?1-Math.exp(-7*dt):1);land=Math.max(0,land-dt*2.2);
       for(const g of gates){if(g.done)continue;const lzP=-(prev.x-g.x)*g.sin+(prev.z-g.z)*g.cos,lz=-(St.pos.x-g.x)*g.sin+(St.pos.z-g.z)*g.cos;
