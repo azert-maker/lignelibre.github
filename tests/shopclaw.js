@@ -28,6 +28,9 @@ const L=require('./lib');const shots=process.argv.includes('--shots');
   chk(!!rv.rar&&/Commun|Peu commun|Rare|Épique|Légendaire/.test(rv.rar),tag+'rareté affichée : '+rv.rar+' · '+rv.txt.slice(rv.rar.length,rv.rar.length+40));
   chk(!rv.close,tag+'Fermer réactivé après la révélation');
   if(shots)await p.screenshot({path:`test-results/shopclaw_reveal${mobile?'_m':''}.png`});
+  /* la machine ne donne que du cosmétique */
+  const pool=await p.evaluate(()=>{const P=rewardPool();return {n:P.length,eq:P.filter(x=>x.shop&&x.shop.kind!=='Cosmétique').length,per:RAR_KEYS.map(k=>P.filter(x=>x.r===k).length).join('/')}});
+  chk(pool.eq===0&&pool.per.split('/').every(n=>+n>0),tag+'récompenses 100 % cosmétiques ('+pool.n+' objets, par rareté '+pool.per+')');
   /* doublon : tout est possédé → remboursement 40 % */
   const dup=await p.evaluate(()=>{for(const x of rewardPool())profile.owned[x.id]=true;const c=profile.coins;const r=grantReward('c');return {dup:r.dup,refund:r.refund,d:profile.coins-c}});
   chk(dup.dup&&dup.refund===60&&dup.d===60,tag+'doublon : +60 pièces (40 % de 150), affiché');

@@ -5,8 +5,9 @@
        Boutique « Machine à skins » : tirage animé automatique (paiement → grappin → capture → révélation),
                                      chances affichées par rareté ;
        Garage « Machine »          : mini-jeu d'adresse, on pilote la pince soi-même.
-   - Récompenses : skins (tenues, casques) + objets non consommables de la boutique (cosmétiques, équipements),
-     en priorité ceux qu'on n'a pas. Doublon : 40 % du prix remboursés, affiché à l'écran.
+   - Récompenses : uniquement du cosmétique (skins de tenue et de casque, cosmétiques de la boutique : casque carbone,
+     couleurs néon, fumigènes), en priorité ceux qu'on n'a pas. Les équipements qui changent la physique ne sortent
+     jamais de la machine : ils s'obtiennent par la boutique ou la progression. Doublon : 40 % du prix remboursés, affiché à l'écran.
    - Tout est enregistré tout de suite dans profile.owned et profile.coins.
 ===================================================================== */
 const RARITY={
@@ -36,10 +37,11 @@ const SKINCAT=[
   {id:'s_aurore',k:'s',r:'l',name:'Aurore boréale',c1:0x00e5ff,c2:0xff3df2,c3:0x0b1020,pat:6,glow:.5,desc:'Tenue animée aux couleurs d\'une aurore.'},
 ];
 const skinById=id=>SKINCAT.find(s=>s.id===id);
-/* objets de la boutique gagnables : rareté selon le prix (consommables exclus) */
+/* objets de la boutique gagnables : cosmétiques seulement (jamais d'équipement qui change la physique) ; rareté selon le prix */
 const shopRarity=it=>it.price>=2000?'l':it.price>=1150?'e':it.price>=650?'r':'u';
 function rewardPool(){return SKINCAT.map(s=>({id:s.id,r:s.r,name:s.name,kind:s.k==='s'?'Tenue':'Casque',desc:s.desc,skin:s}))
-  .concat(SHOP.filter(it=>!it.cons).map(it=>({id:it.id,r:shopRarity(it),name:it.name,kind:it.kind,desc:it.effect,shop:it})))}
+  
+  .concat(SHOP.filter(it=>!it.cons&&it.kind==='Cosmétique'&&!it.phys).map(it=>({id:it.id,r:shopRarity(it),name:it.name,kind:it.kind,desc:it.effect,shop:it})))}
 const isOwned=id=>skinById(id)?!!profile.owned[id]:owns(id);
 function skinState(){if(!profile.owned||typeof profile.owned!=='object')profile.owned={};
   if(!profile.skins||typeof profile.skins!=='object')profile.skins={pity:0,plays:0,wins:0};const S_=profile.skins;
@@ -170,7 +172,7 @@ function clawModalHtml(){return `<div class="cm-box" role="dialog" aria-modal="t
     <div class="cm-coin" id="cmCoin">${CLAW_COST}</div><div class="cm-reveal" id="cmReveal" hidden></div></div>
   <div class="cm-foot"><button class="btn primary" id="cmTry">Tenter · ${CLAW_COST} pièces</button>
     <div class="cm-odds">${RAR_KEYS.map(k=>`<span style="--c:${RARITY[k].col}"><i></i>${RARITY[k].n} ${Math.round(RARITY[k].p*100)} %</span>`).join('')}</div>
-    <p class="note">Pièces du jeu uniquement. Objets non possédés en priorité ; doublon remboursé ${CLAW_REFUND} pièces (40 %). Épique ou Légendaire garanti au plus tard au ${CLAW_PITY}e tirage.</p></div></div>`}
+    <p class="note">Cosmétiques uniquement, pièces du jeu uniquement. Non possédés en priorité ; doublon remboursé ${CLAW_REFUND} pièces (40 %). Épique ou Légendaire garanti au plus tard au ${CLAW_PITY}e tirage.</p></div></div>`}
 function clawModalOpen(){let el=$('#clawModal');if(!el){el=document.createElement('div');el.id='clawModal';document.body.appendChild(el)}
   el.innerHTML=clawModalHtml();el.hidden=false;CM.open=true;CM.busy=false;$('#cmReveal').hidden=true;
   $('#cmClose').onclick=()=>clawModalClose();$('#cmTry').onclick=()=>clawTry();clawModalSync();
@@ -221,7 +223,7 @@ function clawFallbackRun(r){const claw=$('#cmFbClaw'),balls=[...$$('#cmFbBalls b
   setTimeout(()=>{claw.classList.add('closed');ball.classList.add('held')},1450);setTimeout(()=>{claw.classList.remove('closed');ball.classList.add('gone')},2650);a.onfinish=()=>{ball.classList.remove('held');clawReveal()}}
 /* carte de la boutique */
 function clawShopCard(){return `<div class="shopcard cm-card" data-shop="claw"><span class="kind">Machine à skins</span><span></span><h4>Tente ta chance</h4><span class="owned">${CLAW_COST} pièces</span>
-  <p>Une pince attrape un objet au hasard : skin de tenue ou de casque, équipement ou cosmétique de la boutique. Ceux que tu n'as pas sortent en priorité.</p>
+  <p>Une pince attrape un cosmétique au hasard : tenue, casque, couleurs ou style. Ceux que tu n'as pas sortent en priorité. Les équipements qui changent la physique restent à la boutique et à la progression.</p>
   <div class="cm-odds" style="grid-column:1/-1">${RAR_KEYS.map(k=>`<span style="--c:${RARITY[k].col}"><i></i>${RARITY[k].n} ${Math.round(RARITY[k].p*100)} %</span>`).join('')}</div>
   <div class="row" style="grid-column:1/-1"><button class="btn small primary" id="openClaw">${profile.coins>=CLAW_COST?'Ouvrir la machine':'Ouvrir · il faut '+CLAW_COST+' pièces'}</button></div></div>`}
 
