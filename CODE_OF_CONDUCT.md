@@ -1,15 +1,41 @@
-# Charte de la communauté Ligne Libre
+# Security Policy
 
-Ligne Libre est un projet ouvert à tous les âges et à tous les niveaux. Pour que ça reste agréable :
+Ligne Libre takes security seriously and encourages responsible disclosure of vulnerabilities.
 
-1. **Respect.** Pas de harcèlement, d'insulte, de moquerie, de propos discriminants ou sexuels, ni de pression sur une personne. On critique des idées, jamais des gens.
-2. **Idées constructives.** « C'est nul » n'aide personne ; « le saut du BMX est trop court parce que… » aide tout le monde.
-3. **Prudence avec les exploits.** Une faille qui casse l'économie, la sauvegarde ou le multijoueur se signale en privé (`SECURITY.md`), pas en public, le temps qu'elle soit corrigée.
-4. **Pas de secrets ni de données personnelles.** Pas de mot de passe, PIN, jeton, adresse, numéro de téléphone, photo de quelqu'un sans son accord, ni pour toi ni pour les autres.
-5. **Contenus que tu as le droit de partager.** Pas de modèle, son ou image pris ailleurs sans licence.
-6. **Pas de spam ni de publicité.**
+## Supported versions
 
-## Ce qui se passe en cas de problème
+The project is currently supported in its latest main branch.
 
-Le propriétaire du dépôt peut masquer ou supprimer un message, verrouiller une discussion, refuser une contribution ou bloquer un compte qui ne respecte pas cette charte.
-Pour signaler un comportement : utilise le bouton « Report » de GitHub sur le message concerné, ou un signalement privé (voir `SECURITY.md`).
+## Reporting a vulnerability
+
+If you believe you have found a security issue, please report it privately and responsibly.
+
+Please use one of the following options:
+
+- Open a private security advisory through GitHub
+- Contact the repository owner directly through a private channel
+- Reach out via GitHub issues only if the issue is not sensitive and does not expose private data
+
+Please include:
+
+- a summary of the issue
+- the affected component or module
+- the impact and risk level
+- steps to reproduce
+- any suggested mitigation
+
+## Response expectations
+
+We will do our best to respond as quickly as possible. Security reports are reviewed on a case-by-case basis.
+
+## Responsible disclosure
+
+We ask that you do not disclose a vulnerability publicly until it has been reviewed and a fix is ready.
+
+## Scope
+
+This policy applies to the project code, the build process, and related tooling.
+
+## Important note
+
+We do not accept exploitation or abuse of the game economy, progression systems, or game balance as a valid security issue unless it is a real system-level vulnerability affecting integrity or safety.

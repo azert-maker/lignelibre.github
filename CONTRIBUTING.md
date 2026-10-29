@@ -1,63 +1,174 @@
-# Contribuer à Ligne Libre
+# Ligne Libre
 
-Merci de vouloir aider ! Le projet est petit et tenu par une seule personne : les contributions guidées passent beaucoup mieux que les grosses surprises.
+<p align="center">
+  <img src="docs/images/pieces-7-sports.jpg" alt="Ligne Libre" width="1000" />
+</p>
 
-## Proposer une idée
+<p align="center">
+  <a href="https://azert-maker.github.io/lignelibre.github/">
+    <img alt="Play now" src="https://img.shields.io/badge/PLAY%20NOW-4F46E5?style=for-the-badge&logo=github" />
+  </a>
+  <img alt="Version" src="https://img.shields.io/badge/version-0.23.1-2563eb?style=for-the-badge" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-16a34a?style=for-the-badge" />
+  <img alt="Stack" src="https://img.shields.io/badge/Three.js-WebGL-f59e0b?style=for-the-badge" />
+  <img alt="Status" src="https://img.shields.io/badge/status-active-22c55e?style=for-the-badge" />
+</p>
 
-1. Regarde la feuille de route publique du `README.md` (ce qui est prévu, ce qui n'est pas promis).
-2. Cherche dans les issues si l'idée existe déjà ; si oui, ajoute ton avis ou un 👍 dessus.
-3. Sinon, ouvre une issue **Idée** (formulaire guidé) : résumé, sport ou système, intérêt pour le joueur, référence visuelle si tu en as.
+<p align="center">
+  <strong>Browser-based 3D extreme sports arcade</strong> · 7 sports · 7 locations · one-file web build
+</p>
 
-Une idée acceptée reçoit le label `accepté`. Une idée refusée reçoit `pas prévu`, avec une explication.
+Ligne Libre is a browser-based 3D arcade sports game built around fast action, expressive movement, and strong replayability. It combines multiple extreme sports disciplines into a single playable experience designed to feel immediate, accessible, and fun from the first run.
 
-## Signaler un bug
+## Play now
 
-Ouvre une issue **Bug** : navigateur et appareil, sport concerné, étapes pour reproduire, résultat attendu, résultat obtenu. Une capture ou une vidéo courte aide beaucoup.
-Vérifie d'abord `docs/KNOWN_ISSUES.md`.
+- Live demo: https://azert-maker.github.io/lignelibre.github/
+- Works in modern browsers
+- Desktop and mobile friendly
+- Internet connection required on first load to fetch assets
 
-**Faille de sécurité ou exploit grave** (pièces infinies, triche en multijoueur, contournement de sauvegarde) : pas d'issue publique, suis `SECURITY.md`.
+## Why it stands out
 
-## Contribuer du code
+- 7 sports with distinct mechanics and rhythm
+- 7 handcrafted locations with their own identity
+- coins, progression, upgrade loop, and cosmetic rewards
+- physics-based landings, reactions, and crash moments
+- replay system, ghost tracking, and score-based runs
+- a compact, portable project architecture that is easy to run and expand
 
-1. Pour un changement important, ouvre d'abord une issue pour en parler.
-2. Forke le dépôt, crée une branche `fix/<sujet>`, `feat/<sujet>` ou `asset/<sujet>`.
-3. Prérequis : Node 18+ ; pour les tests, `npm install` puis `npx playwright install chromium`.
-4. Construis et teste :
-   ```
-   npm run build
-   npm test
-   ```
-5. Ouvre une pull request (le modèle te guide). La CI rejoue la construction et les tests.
+## Featured sports
 
-Les sources sont des modules numérotés à la racine (`10-core.js`, `46-bmx.js`…), assemblés par `build.sh` en un seul fichier HTML. Le tableau des modules est dans le `README.md`.
+| Sport | Setting | Hook |
+|---|---|---|
+| Wingsuit | Alpine valley | glide lines, close-to-ground flying, ring runs |
+| Downhill longboard | Coastal mountain road | speed, slides, edge control |
+| Snowboard | Mountain resort | jumps, rails, rotations |
+| BMX | Urban park | balance, tricks, grinds |
+| Motocross | Off-road terrain | boosts, landings, whip control |
+| Wakeboard | Lake course | traction, pop, wake-to-wake flow |
+| Parkour | Rooftop city | chaining moves and wall runs |
 
-### Règles du code
+## Quick start
 
-- Le jeu doit rester **jouable sans serveur**, en un seul fichier.
-- Pas de nouvelle dépendance externe sans discussion (Three.js r128 seulement, figé avec empreinte SRI).
-- Garder les sports différents : on ne « uniformise » pas la physique.
-- Un changement visible en jeu = une ligne dans `CHANGELOG.md`.
+### Run the game online
 
-### Messages de commit
+```text
+https://azert-maker.github.io/lignelibre.github/
+```
 
-Court, en français, à l'impératif : `type(portée): résumé`.
-Types : `feat`, `fix`, `asset`, `perf`, `test`, `docs`, `build`, `refactor`.
-Exemples : `fix(wake): vitesse NaN à dt=0`, `asset(bmx): roues à 36 rayons`.
+### Build locally
 
-## Contribuer des assets (3D, sons, textures)
+```bash
+npm install
+npm run build
+npx serve dist/site
+```
 
-- Uniquement ce que **tu as le droit de partager**, avec la source et la licence notées dans `docs/ASSETS.md`.
-- Licences acceptées : création personnelle, CC0, CC-BY (crédit noté), ou accord écrit du créateur.
-- Refusé : personnages, logos et marques protégés (même modifiés), contenus « trouvés sur internet » sans licence.
-- Budget : un modèle de décor < 5 000 triangles, textures 512 ou 1024 px.
-- Les assets restent hors de la licence MIT du code (voir `LICENSE-ASSETS.md`).
+Then open:
 
-## Sécurité et vie privée
+```text
+http://localhost:3000
+```
 
-- Jamais de jeton, mot de passe, clé d'API ou identifiant dans le dépôt, dans une issue ou une pull request.
-- Jamais de donnée personnelle de joueur (le profil reste dans le navigateur du joueur).
-- Aucune fonction de paiement réel ni de concours à dotation payante.
+### Run tests
 
-## Charte
+```bash
+npm test
+```
 
-En participant, tu acceptes la charte `CODE_OF_CONDUCT.md`.
+## Project structure
+
+```text
+.
+├── .github/                # workflows, issue templates, repo automation
+├── assets/                 # 3D assets, textures, third-party content
+├── archive/                # archived builds and legacy output
+├── docs/                   # roadmap, publication docs, issue notes
+├── server/                 # local multiplayer server
+├── tests/                  # automated test suite
+├── 01-head.html            # base markup and styles
+├── 02-body.html            # HUD and interface elements
+├── 10-core.js              # core simulation, rendering, inputs, profile
+├── 15-fx.js                # effects, particles, ambience
+├── 16-sfx-data.js          # audio and sound data
+├── 18-glb.js               # bundled GLB assets
+├── 20-gear.js              # gear, upgrades, character logic
+├── 30-ads-net.js           # demo ads and local network layer
+├── 35-valley.js            # valley and terrain logic
+├── 36-places.js            # location-specific world logic
+├── 37-coins.js             # coin systems and reward flow
+├── 40-wingsuit.js          # wingsuit mode
+├── 41-downhill.js          # downhill mode
+├── 44-snowboard.js         # snowboard mode
+├── 45-park.js              # shared park logic
+├── 46-bmx.js               # BMX mode
+├── 47-moto.js              # motocross mode
+├── 48-wake.js              # wakeboard mode
+├── 49-parkour.js           # parkour mode
+├── 50-ui.js                # menus and UI systems
+├── 52-claw.js              # claw machine system
+├── 55-engage.js            # onboarding and engagement systems
+├── 57-progress.js          # progression systems
+├── 58-replay.js            # replay and ghost systems
+├── 60-main.js              # main game loop and flow
+├── build.sh                # build pipeline
+├── CHANGELOG.md            # project history
+├── CODE_OF_CONDUCT.md      # community standards
+├── CONTRIBUTING.md         # contribution guide
+├── LICENSE                 # MIT license
+├── LICENSE-ASSETS.md       # asset restrictions
+├── README.md               # repository landing page
+├── SECURITY.md             # security reporting policy
+├── package.json            # scripts and dependencies
+├── .gitignore              # ignore rules
+└── .github/                # GitHub automation
+```
+
+## Roadmap
+
+| Phase | Status | Focus |
+|---|---|---|
+| Current | Active | player feedback, economy balancing, mobile optimization |
+| Next | Planned | more detailed boards and wingsuit handling, landing animations |
+| Later | Planned | online multiplayer, weekly challenges, new cosmetic sets |
+| Not a priority | Deferred | new sports, native app, real monetization |
+
+## Documentation
+
+- [CHANGELOG.md](CHANGELOG.md)
+- [docs/ROADMAP.md](docs/ROADMAP.md)
+- [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)
+- [docs/PUBLICATION.md](docs/PUBLICATION.md)
+- [SECURITY.md](SECURITY.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Contributing
+
+Contributions are welcome. If you want to help shape the game, improve systems, or report issues:
+
+- open an issue with the `Idea` or `Bug` label
+- review [CONTRIBUTING.md](CONTRIBUTING.md)
+- follow the project code of conduct in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+## License
+
+- Code: [MIT](LICENSE)
+- Assets: see [LICENSE-ASSETS.md](LICENSE-ASSETS.md)
+
+## Why this repo feels like a real project
+
+Ligne Libre has a strong core identity:
+- it is easy to understand
+- it is quick to try
+- it has a clear visual identity
+- it has a clearly defined progression
+- it has a public roadmap and structure
+- it feels like a playable product, not just a code dump
+
+That combination is what makes a repository feel premium on GitHub: clarity, personality, and momentum.
+
+---
+
+<p align="center">
+  <sub>Built with curiosity, arcade energy, and a lot of coffee.</sub>
+</p>

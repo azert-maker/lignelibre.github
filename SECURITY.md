@@ -1,26 +1,63 @@
-# Sécurité
+# Contributing to Ligne Libre
 
-## Signaler une faille ou un exploit grave
+Thanks for your interest in contributing to Ligne Libre.
 
-**Pas d'issue publique.** Utilise le signalement privé de GitHub :
-onglet **Security** du dépôt > **Report a vulnerability**
-(https://github.com/azert-maker/lignelibre.github/security/advisories/new).
+This project is a small but ambitious browser game built around arcade gameplay, physics, procedural environments, and fast replay loops. We welcome contributions that improve gameplay, usability, performance, tooling, or documentation.
 
-Exemples à signaler en privé : exécution de code via un profil importé ou un message réseau, contournement du PIN local, pièces ou objets infinis, triche en multijoueur, fuite de données.
-Réponse visée : sous 7 jours. Merci de laisser le temps de corriger avant d'en parler publiquement.
+## Ways to contribute
 
-## Ce que le jeu stocke
+- Report bugs
+- Suggest new ideas
+- Improve gameplay systems
+- Help with documentation
+- Improve performance and optimization
+- Add art or asset-related work
+- Improve build flow and tooling
 
-- Tout reste **dans le navigateur du joueur** (`localStorage`) : pseudo, progression, pièces, réglages. Aucun compte en ligne, aucun serveur du projet.
-- Le PIN de profil local est haché (SHA-256 salé). Ce n'est **pas** une vraie authentification : il sépare des profils sur un ordinateur partagé, rien de plus.
-- La version en ligne (GitHub Pages) ne contient aucun secret, aucune clé d'API et n'envoie aucune donnée à un serveur du projet. Elle charge Three.js depuis cdnjs et jsDelivr (empreintes SRI vérifiées) et les polices depuis Google Fonts.
-- Publicités : mode démonstration seulement (fausse pub de 5 s, aucune régie réelle branchée).
+## Before contributing
 
-## Multijoueur local (`server/server.js`)
+Please read the following before opening a pull request:
 
-Serveur WebSocket prévu pour un **réseau local** (même Wi-Fi). Il n'a ni authentification ni chiffrement : ne l'expose pas sur internet. Pour un usage en ligne, il faudrait un serveur `wss://` derrière un proxy TLS, avec limites de débit (non fourni).
+- [README.md](README.md)
+- [SECURITY.md](SECURITY.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
-## Pour les contributeurs
+## How to contribute
 
-- Jamais de secret dans le code, les issues ou les pull requests. Les secrets de CI passent par **Settings > Secrets** du dépôt (aucun n'est nécessaire aujourd'hui).
-- Un secret publié par erreur doit être **révoqué immédiatement** chez le service concerné, puis signalé : le retirer d'un commit ne suffit pas, l'historique Git est public.
+1. Open an issue first for non-trivial changes.
+2. Describe the problem, the idea, or the improvement clearly.
+3. Keep the scope focused and avoid unrelated changes.
+4. Ensure your changes are consistent with the project direction.
+5. Make sure the code works locally before submitting a pull request.
+
+## Pull request guidelines
+
+- Keep pull requests small and focused.
+- Include a clear description of the goal and the expected behavior.
+- Mention the affected game systems or modules when relevant.
+- Add tests if the change affects gameplay or logic.
+- Make sure the build still passes.
+- Describe any limitations or risks clearly.
+
+## Code style
+
+- Prefer readable, maintainable JavaScript.
+- Keep functions small and focused where possible.
+- Use descriptive names.
+- Avoid unnecessary complexity.
+- Keep comments concise and useful.
+
+## Project-specific notes
+
+- The project is organized by numbered modules (for example `10-core.js`, `20-gear.js`, `60-main.js`).
+- Changes to core gameplay loops should be validated carefully.
+- Asset and model changes should be reviewed with the project’s licensing constraints in mind.
+- The project is intentionally lightweight and browser-first.
+
+## Issues and feature ideas
+
+If you want to propose a new feature or improvement, open an issue with the `Idea` or `Bug` label.
+
+## Thanks
+
+Thank you for helping make Ligne Libre better.

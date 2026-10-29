@@ -1,56 +1,44 @@
-# Ligne Libre
+# Contributor Covenant Code of Conduct
 
-<p align="center">
-  <img src="docs/images/pieces-7-sports.jpg" alt="Ligne Libre" width="1000" />
-</p>
+## Our Pledge
 
-<p align="center">
-  <a href="https://azert-maker.github.io/lignelibre.github/">
-    <img alt="Play now" src="https://img.shields.io/badge/PLAY%20NOW-4F46E5?style=for-the-badge&logo=github" />
-  </a>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.23.1-2563eb?style=for-the-badge" />
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-16a34a?style=for-the-badge" />
-  <img alt="Stack" src="https://img.shields.io/badge/Three.js-WebGL-f59e0b?style=for-the-badge" />
-  <img alt="Status" src="https://img.shields.io/badge/status-active-22c55e?style=for-the-badge" />
-</p>
+We as members, contributors, and maintainers pledge to make participation in this project a safe, healthy, and respectful environment for everyone.
 
-<p align="center">
-  <strong>Browser-based 3D extreme sports arcade</strong> · 7 sports · 7 locations · one-file web build
-</p>
+We are committed to ensuring that collaboration is not discriminatory, hostile, or abusive.
 
-Ligne Libre is a browser-based 3D arcade sports game built around fast action, expressive movement, and a strong sense of replayability. It brings together multiple extreme sports disciplines in a single playable experience, designed to feel immediate, accessible, and fun from the very first run.
+## Our Standards
 
-## Play now
+We believe in the following standards:
 
-- Live demo: https://azert-maker.github.io/lignelibre.github/
-- Works in modern browsers
-- Desktop and mobile friendly
-- Internet required on first load to fetch assets
+- Be respectful and professional.
+- Be considerate and kind to others.
+- Be patient and understanding.
+- Be honest and transparent.
+- Be polite and constructive in public and private discussions.
+- Avoid offensive, abusive, or discriminatory language.
+- Avoid spreading misinformation.
+- Avoid harming the project or its contributors.
 
-## Why it stands out
+## Our Responsibilities
 
-- 7 sports with distinct mechanics and rhythm
-- 7 handcrafted locations with their own identity
-- coins, progression, upgrade loop, and cosmetic rewards
-- physics-based landings, reactions, and crash moments
-- replay system, ghost tracking, and score-based runs
-- a compact, portable project architecture that is easy to run and expand
+We are responsible for maintaining the standards above and will take action when necessary.
 
-## Featured sports
+We may remove, delete, or modify comments, discussions, or contributions that are not aligned with these standards.
 
-| Sport | Setting | Hook |
-|---|---|---|
-| Wingsuit | Alpine valley | glide lines, close-to-ground flying, ring runs |
-| Downhill longboard | Coastal mountain road | speed, slides, edge control |
-| Snowboard | Mountain resort | jumps, rails, rotations |
-| BMX | Urban park | balance, tricks, grinds |
-| Motocross | Off-road terrain | boosts, landings, whip control |
-| Wakeboard | Lake course | traction, pop, wake-to-wake flow |
-| Parkour | Rooftop city | chaining moves and wall runs |
+## Scope
 
-## Quick start
+This Code of Conduct applies to all project spaces, including GitHub discussions, issues, and pull requests.
 
-### Run the game online
+## Enforcement
 
-```text
-https://azert-maker.github.io/lignelibre.github/
+Project maintainers are expected to act fairly and consistently when enforcing this Code of Conduct.
+
+## Reporting
+
+If you believe someone is violating this Code of Conduct, please report it to the repository owner or use a private report channel.
+
+We ask that all reports be handled with confidentiality and professionalism.
+
+## Final note
+
+We are committed to building a community where everyone can contribute respectfully and productively.
