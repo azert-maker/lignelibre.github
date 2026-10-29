@@ -1,5 +1,22 @@
 # Journal des versions · Ligne Libre
 
+## 0.23.2 · 29 octobre 2026 · Départ immédiat, pièces toutes dorées
+
+Lancement d'une partie
+- Accueil : choix du sport, choix du mode et gros bouton **Jouer** visibles sans défiler (PC et mobile). Une partie démarre en 1 clic (dernier sport et dernier mode), 2 clics pour changer de sport.
+- Sport et mode mémorisés : retour au menu, « Encore une » et « Personnaliser » les reprennent.
+- Le mode n'est plus redemandé dans l'écran de réglages (il reste proposé seulement pour créer un salon multijoueur).
+- Réglages (longueur, météo, vent, monde, bonus) facultatifs derrière « Personnaliser ».
+- « Découvrir les sports », « Jouer le défi » et « Courir » le parcours du jour lancent directement la partie.
+- Premier lancement : Downhill en monde libre par défaut ; carte « Première glisse » et ligne « Série 0 jour » retirées.
+- Plus de fausse publicité de 5 s toutes les 4 parties tant qu'aucune régie réelle n'est branchée.
+
+Pièces
+- Les pièces bonus (2 pièces) étaient cyan sans explication et le brouillard teintait de bleu les pièces lointaines. Toutes les pièces sont maintenant dorées ; la pièce bonus est plus grosse et entourée d'un anneau lumineux, expliqué une fois en jeu (« Pièce avec un anneau = 2 pièces »).
+
+Tests
+- `tests/ux.js` (34 contrôles : parcours de lancement bureau et mobile, mémorisation, retour arrière, parties successives, couleur des pièces).
+
 ## 0.23.1 · 29 octobre 2026 · Prêt pour le dépôt public
 
 - Audit de sécurité de tout l'historique : aucun secret (détail dans `docs/PUBLICATION.md`).
@@ -18,7 +35,7 @@
 - Quitter depuis la pause crédite enfin les pièces acquises, une seule fois.
 
 Pièces à ramasser dans les 7 sports (`37-coins.js`)
-- Dorées (1) sur la ligne, cyan (2) à l'écart : couloirs et rase-mottes (wingsuit), corde des virages (downhill), sauts, rails et hors-piste (snowboard), modules et rails (BMX), tables et whoops (motocross), sillage, kickers et sliders (wakeboard), toits, écarts et wallruns (parkour).
+- Dorées (1) sur la ligne, bonus (2, cyan jusqu'en 0.23.1) à l'écart : couloirs et rase-mottes (wingsuit), corde des virages (downhill), sauts, rails et hors-piste (snowboard), modules et rails (BMX), tables et whoops (motocross), sillage, kickers et sliders (wakeboard), toits, écarts et wallruns (parkour).
 - Son, envol, aimant léger pour les dorées, compteur au HUD (PC et mobile), détail des gains en fin de partie.
 
 Gameplay

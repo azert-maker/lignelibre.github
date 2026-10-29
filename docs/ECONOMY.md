@@ -7,7 +7,7 @@ Aucune monnaie réelle. Les pièces ne servent qu'à la Boutique et à la machin
 | Source | Valeur | Règle |
 |---|---|---|
 | Pièce dorée ramassée | 1 | sur la ligne principale, aimant léger (facile, lisible sur mobile) |
-| Pièce cyan ramassée | 2 | à l'écart : en l'air au-dessus d'un saut, sur un rail, corde serrée, rase-mottes, wake to wake, écart entre deux toits |
+| Pièce bonus (dorée, avec un anneau) ramassée | 2 | à l'écart : en l'air au-dessus d'un saut, sur un rail, corde serrée, rase-mottes, wake to wake, écart entre deux toits |
 | Plafond par partie | 40 | au-delà, plus aucune pièce n'apparaît (« 40 max » au HUD) |
 | Bonus de performance | 0 à 10 | score ramené au « par » du sport (`SCORE_PAR`) : 10 = deux fois le par ; seulement si la partie dure ≥ 15 s ou est finie |
 | Arrivée (parcours) | 5 | |

@@ -30,3 +30,6 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 24 | 🟡 | Économie 0.23 calibrée avec le pilote automatique (qui ignore les pièces) : gains d'un vrai joueur non mesurés | suivre `run.pay` sur les premières sessions, ajuster `ECO` et `COIN_CAP` |
 | 25 | ⚪ | Wingsuit : le pilote automatique vole souvent trop haut pour les couloirs de pièces (1 ramassée en 60 s) | sans impact joueur ; à revoir si on veut une démo qui ramasse |
 | 26 | ⚪ | Profils existants : les pièces gagnées avec l'ancienne économie (bien plus généreuse) sont conservées | décision volontaire : rien n'est retiré au joueur |
+| 27 | ⚪ | Accueil : sur un écran très bas (moins de 390 px de haut), les boutons secondaires (Multijoueur, Garage…) demandent de faire défiler ; Jouer reste visible | mise en page dédiée si besoin |
+| 28 | ⚪ | Les choix de l'écran « Personnaliser » (météo, vent, longueur, monde) sont mémorisés par sport et repris par Jouer : penser à les remettre si on veut revenir aux réglages par défaut | bouton « par défaut » à ajouter si les joueurs s'y perdent |
+
