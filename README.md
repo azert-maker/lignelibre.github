@@ -16,7 +16,7 @@
 
 Ligne Libre is a browser-based 3D arcade sports game. It combines multiple extreme sports into a single playable experience and is built around fast movement, score-chasing, replayability, and progression.
 
-The project is currently in active development and is already playable in the browser. It is not a mockup or a concept-only repository: it contains working gameplay systems, multiple sports, and a public roadmap for further development.
+The project is currently in active development and is already playable in the browser. It is not a mockup or a concept-only repository: it contains working gameplay systems, multiple sports, and actual progression systems.
 
 ## Play
 
@@ -49,7 +49,7 @@ Ligne Libre includes:
 
 The project is actively being developed by a single creator.
 
-It is not a finished commercial game, and it does not pretend to be one. Some systems are already functional, while others are still being refined, balanced, or expanded. The project remains open to iteration based on playtesting and feedback.
+It is not a finished commercial game, and it does not pretend to be one. Some systems are already functional, while others are still being refined, balanced, or expanded. The project remains open and evolving.
 
 ## Current limitations
 
@@ -116,20 +116,6 @@ This project is intentionally transparent about what is still incomplete or expe
 
 ```text
 https://azert-maker.github.io/lignelibre.github/
-```
-
-### Build locally
-
-```bash
-npm install
-npm run build
-npx serve dist/site
-```
-
-Then open:
-
-```text
-http://localhost:3000
 ```
 
 ### Run tests

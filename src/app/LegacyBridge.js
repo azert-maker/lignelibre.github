@@ -1,0 +1,71 @@
+import { Engine } from '../core/Engine.js';
+import { GameState } from '../core/GameState.js';
+import { InputManager } from '../core/InputManager.js';
+import { SceneManager } from '../core/SceneManager.js';
+import { SaveSystem } from '../systems/SaveSystem.js';
+import { ProgressionSystem } from '../systems/ProgressionSystem.js';
+import { ReplaySystem } from '../systems/ReplaySystem.js';
+import { BmxSport } from '../game/sports/bmx/BmxSport.js';
+import { HUD } from '../ui/HUD.js';
+import { Onboarding } from '../ui/Onboarding.js';
+
+export function installLegacyGlobals() {
+  const api = {
+    Engine,
+    GameState,
+    InputManager,
+    SceneManager,
+    SaveSystem,
+    ProgressionSystem,
+    ReplaySystem,
+    BmxSport,
+    HUD,
+    Onboarding,
+  };
+
+  if (typeof window !== 'undefined') {
+    window.LigneLibre = { ...window.LigneLibre, ...api };
+  }
+
+  return api;
+}
+
+export function createLegacyBootstrap(rootElement = document.body) {
+  const state = new GameState();
+  const input = new InputManager();
+  const scene = new SceneManager();
+  const saveSystem = new SaveSystem();
+  const progression = new ProgressionSystem({ saveSystem });
+  const replay = new ReplaySystem();
+  const sport = new BmxSport();
+  const hud = new HUD(rootElement);
+  const onboarding = new Onboarding(rootElement);
+
+  const engine = new Engine({
+    scene,
+    renderer: {
+      render: () => {},
+      camera: null,
+    },
+    input,
+    state,
+  });
+
+  engine.registerSystem('sport', sport);
+  engine.registerSystem('progression', progression);
+  engine.registerSystem('replay', replay);
+
+  hud.mount();
+  onboarding.show();
+
+  return {
+    engine,
+    state,
+    input,
+    hud,
+    onboarding,
+    progression,
+    replay,
+    sport,
+  };
+}

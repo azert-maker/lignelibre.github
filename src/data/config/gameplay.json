@@ -1,0 +1,18 @@
+{
+  "gameplay": {
+    "baseSpeed": 1,
+    "airControl": 0.9,
+    "landingSpring": 0.75,
+    "comboDecay": 0.2
+  },
+  "economy": {
+    "coinReward": 10,
+    "comboReward": 3,
+    "rarityTuning": 0.15
+  },
+  "polish": {
+    "tutorialEnabled": true,
+    "faceAnimationEnabled": false,
+    "cameraSmoothing": 0.12
+  }
+}
