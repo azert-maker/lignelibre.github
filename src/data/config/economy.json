@@ -1,0 +1,10 @@
+{
+  "baseCoinGain": 10,
+  "comboCoinBonus": 3,
+  "skinPrice": 150,
+  "rewardCurve": {
+    "easy": 1,
+    "medium": 1.5,
+    "hard": 2.2
+  }
+}
