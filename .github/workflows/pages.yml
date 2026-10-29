@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Construire le site (fichier unique + modèles embarqués)
         run: LL_COPY_PARENT=0 sh build.sh && node --check dist/bundle.js && test -s dist/site/index.html
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/site
