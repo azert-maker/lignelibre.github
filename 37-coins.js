@@ -1,31 +1,35 @@
 /* =====================================================================
    PIÈCES À RAMASSER · les 7 sports
-   - pièce dorée = 1 pièce (sur la ligne, facile) ; pièce cyan = 2 pièces (à l'écart : saut, rail,
-     rase-mottes, corde de virage, wake to wake, écart entre deux toits)
+   - pièce dorée = 1 pièce (sur la ligne, facile) ; pièce bonus = 2 pièces : dorée elle aussi, plus grosse et
+     entourée d'un anneau lumineux (à l'écart : saut, rail, rase-mottes, corde de virage, wake to wake, écart entre deux toits).
+     Toutes les pièces sont dorées : avant 0.23.2 les bonus étaient cyan (aucune légende) et le brouillard bleuissait les pièces lointaines.
    - plafond COIN_CAP pièces par partie ; crédit UNE fois, à la fin de partie (finalizeRun)
    - rien ne se ramasse hors de state==='play' (compte à rebours, chute, pause, replay, menu)
    - chaque sport fournit cur.coins = {r, cy, scale, every, life, spawn(api,p,dir)} :
      r = rayon de ramassage, cy = hauteur du centre du rider au-dessus de sa position,
      spawn place des motifs devant le rider (positions monde) ; le module gère le reste
-   - un seul InstancedMesh (48 pièces max à l'écran), géométrie et matériau partagés
+   - deux InstancedMesh (pièces + anneaux des bonus, 48 max à l'écran), géométries et matériaux partagés, hors brouillard
 ===================================================================== */
 const COIN_CAP=40,COIN_MAX=48;
-const COIN={on:false,list:[],inst:null,val:0,got:0,riskGot:0,spawned:0,spawnedV:0,plan:null,t:0,time:0,prev:new THREE.Vector3(),pos:new THREE.Vector3(),has:false,dir:new THREE.Vector3(0,0,-1),chain:0,chainT:0};
-let _coG=null,_coMat=null;const _coM4=new THREE.Matrix4(),_coQ=new THREE.Quaternion(),_coV=new THREE.Vector3(),_coS=new THREE.Vector3(),_coY=new THREE.Vector3(0,1,0),_coC=new THREE.Color();
-const COIN_GOLD=new THREE.Color(0xffc533),COIN_RISK=new THREE.Color(0x4ff0ff);
+const COIN={on:false,list:[],inst:null,ring:null,val:0,got:0,riskGot:0,spawned:0,spawnedV:0,plan:null,t:0,time:0,prev:new THREE.Vector3(),pos:new THREE.Vector3(),has:false,dir:new THREE.Vector3(0,0,-1),chain:0,chainT:0};
+let _coG=null,_coMat=null,_coRG=null,_coRMat=null;const _coM4=new THREE.Matrix4(),_coQ=new THREE.Quaternion(),_coV=new THREE.Vector3(),_coS=new THREE.Vector3(),_coY=new THREE.Vector3(0,1,0),_coC=new THREE.Color();
+const COIN_GOLD=new THREE.Color(0xffc533),COIN_RISK=new THREE.Color(0xffd95a);/* bonus : même or, un peu plus clair */
 function coinAssets(){if(_coG)return;
   /* pièce : disque épais à tranche, face verticale (tourne autour de y) */
   _coG=new THREE.CylinderGeometry(.36,.36,.08,18,1);_coG.rotateX(Math.PI/2);
   /* matériau non éclairé (toujours lisible, même à contre-jour) ; l'ombrage est cuit dans les sommets : faces claires, tranche plus sombre */
   {const n=_coG.attributes.normal,P=_coG.attributes.position,col=new Float32Array(n.count*3);for(let i=0;i<n.count;i++){const face=Math.abs(n.getZ(i))>.5,r=Math.hypot(P.getX(i),P.getY(i));const k=face?(r<.05?1.12:1):.62;col[i*3]=col[i*3+1]=col[i*3+2]=k}
    _coG.setAttribute('color',new THREE.BufferAttribute(col,3))}
-  _coMat=new THREE.MeshBasicMaterial({color:0xffffff,vertexColors:true});_coMat.userData.shared=true}
-function coinsStop(){if(COIN.inst){scene.remove(COIN.inst);if(COIN.inst.dispose)COIN.inst.dispose()}COIN.inst=null;COIN.on=false;COIN.list.length=0;COIN.plan=null;
+  /* fog:false : sans ça le brouillard teinte les pièces lointaines de la couleur du ciel (bleu) */
+  _coMat=new THREE.MeshBasicMaterial({color:0xffffff,vertexColors:true,fog:false});_coMat.userData.shared=true;
+  _coRG=new THREE.TorusGeometry(.56,.045,6,28);_coRMat=new THREE.MeshBasicMaterial({color:0xfff3c4,transparent:true,opacity:.9,fog:false,depthWrite:false});_coRMat.userData.shared=true}
+function coinsStop(){for(const k of ['inst','ring'])if(COIN[k]){scene.remove(COIN[k]);if(COIN[k].dispose)COIN[k].dispose();COIN[k]=null}COIN.on=false;COIN.list.length=0;COIN.plan=null;
   const h=document.getElementById('hCoins');if(h)h.hidden=true}
-function coinsStart(){coinsStop();COIN.val=COIN.got=COIN.riskGot=COIN.spawned=COIN.spawnedV=0;COIN.chain=0;COIN.chainT=0;COIN.has=false;COIN.time=0;COIN.t=0;
+function coinsStart(){coinsStop();COIN.val=COIN.got=COIN.riskGot=COIN.spawned=COIN.spawnedV=0;COIN.chain=0;COIN.chainT=0;COIN.has=false;COIN.told=false;COIN.time=0;COIN.t=0;
   if(!cur||!cur.coins)return;coinAssets();
   const im=new THREE.InstancedMesh(_coG,_coMat,COIN_MAX);im.frustumCulled=false;im.userData.shared=true;
-  /* setColorAt crée le tampon à la taille de im.count : on le remplit AVANT de mettre count à 0 */for(let i=0;i<COIN_MAX;i++)im.setColorAt(i,COIN_GOLD);im.count=0;scene.add(im);COIN.inst=im;COIN.plan=cur.coins;COIN.on=true;coinsHud(false)}
+  /* setColorAt crée le tampon à la taille de im.count : on le remplit AVANT de mettre count à 0 */for(let i=0;i<COIN_MAX;i++)im.setColorAt(i,COIN_GOLD);im.count=0;scene.add(im);COIN.inst=im;
+  const rg=new THREE.InstancedMesh(_coRG,_coRMat,COIN_MAX);rg.frustumCulled=false;rg.userData.shared=true;rg.count=0;scene.add(rg);COIN.ring=rg;COIN.plan=cur.coins;COIN.on=true;coinsHud(false)}
 const coinApi={
   /* ajoute une pièce ; refusée si l'écran est plein ou si le plafond de la partie est atteint */
   add(x,y,z,risk){if(COIN.list.length>=COIN_MAX||COIN.val>=COIN_CAP)return null;if(!Number.isFinite(x+y+z))return null;
@@ -47,27 +51,31 @@ function coinsTick(dt){if(!COIN.on||!cur||!COIN.inst)return;const P=COIN.plan,li
     let sweep=COIN.has;if(COIN.has){const dx=COIN.pos.x-COIN.prev.x,dy=COIN.pos.y-COIN.prev.y,dz=COIN.pos.z-COIN.prev.z,d=Math.hypot(dx,dz);
       if(d>40*Math.max(dt,1/60)+15)sweep=false;/* téléportation (reprise après chute) : pas de balayage */else if(d>1e-3)COIN.dir.set(dx/d,0,dz/d)}
     const a=sweep?COIN.prev:COIN.pos,R=P.r||1.2;
-    /* aimant léger : une pièce dorée frôlée vient au rider (lisible sur mobile) ; les cyan demandent d'être sur la bonne trajectoire */
+    /* aimant léger : une pièce dorée frôlée vient au rider (lisible sur mobile) ; les bonus demandent d'être sur la bonne trajectoire */
     const M=R*2.6,kM=1-Math.exp(-10*dt);
     for(const c of COIN.list){if(c.pick>=0)continue;const rr=R*(c.risk?1.1:1.5);if(_coinSeg(c.x,c.y,c.z,a,COIN.pos)<rr*rr){coinCollect(c);continue}
       if(!c.risk){const dx=COIN.pos.x-c.x,dy=COIN.pos.y-c.y,dz=COIN.pos.z-c.z;if(dx*dx+dy*dy+dz*dz<M*M){c.x+=dx*kM;c.y+=dy*kM;c.z+=dz*kM}}}
     COIN.prev.copy(COIN.pos);COIN.has=true;
-    COIN.t-=dt;if(COIN.t<=0){COIN.t=P.every||.35;if(COIN.val<COIN_CAP){try{P.spawn(coinApi,COIN.pos,COIN.dir)}catch(e){if(!COIN.err){COIN.err=e.message;console.warn('coins',e)}}}}
+    COIN.t-=dt;if(COIN.t<=0){COIN.t=P.every||.35;if(COIN.val<COIN_CAP){try{P.spawn(coinApi,COIN.pos,COIN.dir)}catch(e){if(!COIN.err){COIN.err=e.message;console.warn('coins',e)}}}
+      if(!COIN.told&&COIN.list.some(c=>c.risk&&c.pick<0&&Math.hypot(c.x-COIN.pos.x,c.z-COIN.pos.z)<60)){COIN.told=true;profile.tips=profile.tips||{};if(!profile.tips.coin2){profile.tips.coin2=1;saveProfile();toast('Pièce avec un anneau = 2 pièces',true)}}}
     /* pièces dépassées ou trop vieilles : retirées */
     const back=P.behind??30;for(const c of COIN.list){if(c.pick>=0)continue;c.t+=dt;const dx=c.x-COIN.pos.x,dz=c.z-COIN.pos.z;
       if(c.t>c.life||(back>0&&dx*COIN.dir.x+dz*COIN.dir.z<-back)||dx*dx+dz*dz>(P.cull||400)*(P.cull||400))c.pick=9}
     if(COIN.chainT>0)COIN.chainT-=dt}
   /* affichage : rotation, flottement, envol au ramassage */
-  const im=COIN.inst,sc=P.scale||1,tn=performance.now()/1000;let n=0;
+  const im=COIN.inst,rg=COIN.ring,sc=P.scale||1,tn=performance.now()/1000;let n=0,nr=0;
   for(let i=COIN.list.length-1;i>=0;i--){const c=COIN.list[i];if(c.pick>=0){if(c.pick>=.3){COIN.list.splice(i,1);continue}if(live)c.pick+=dt}}
   for(const c of COIN.list){const k=c.pick>=0?c.pick/.3:0;const s=sc*(c.risk?1.3:1)*(1+k*.9)*(k>0?1-k*k:1);
     _coQ.setFromAxisAngle(_coY,tn*(c.risk?4.2:3)+c.ph);_coV.set(c.x,c.y+Math.sin(tn*2.2+c.ph)*.1*sc+k*1.4*sc,c.z);_coS.set(s,s,s);_coM4.compose(_coV,_coQ,_coS);im.setMatrixAt(n,_coM4);
-    im.setColorAt(n,c.risk?COIN_RISK:COIN_GOLD);n++}
-  im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;im.visible=state!=='replay'}
+    im.setColorAt(n,c.risk?COIN_RISK:COIN_GOLD);n++;
+    /* anneau du bonus : tourne avec la pièce et respire (repère « vaut 2 ») */
+    if(c.risk&&rg&&k===0){const p=1+.08*Math.sin(tn*6+c.ph);_coS.set(s*p,s*p,s*p);_coM4.compose(_coV,_coQ,_coS);rg.setMatrixAt(nr++,_coM4)}}
+  im.count=n;im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;im.visible=state!=='replay';
+  if(rg){rg.count=nr;rg.instanceMatrix.needsUpdate=true;rg.visible=state!=='replay'}}
 
 /* ---------- planificateur commun des sports « à modules » (BMX, motocross) ----------
    Toutes les o.every secondes : choisit un module ou un rail DEVANT le rider (7 à 40 m, dans l'axe),
-   pose 3 pièces d'approche au sol (faciles) puis le motif du module (pièces cyan : en l'air au-dessus
+   pose 3 pièces d'approche au sol (faciles) puis le motif du module (pièces bonus à anneau : en l'air au-dessus
    du saut, sur le rail, au-dessus du coping, sur les crêtes de whoops). */
 function coinParkPlan(park,o){o=o||{};const st={next:1.5,last:null};const J=o.jump||[[2,1],[4.5,1.6],[7,1.3]],cy=o.cy??.9;
   return {r:o.r||1.25,cy,scale:o.scale||1,every:.3,life:o.life||13,behind:0,cull:120,

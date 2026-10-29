@@ -170,7 +170,7 @@ MODES.wakeboard=function(cfg,look,ctx){
     if(St.air){const t=St.airT;return {x:apTrick===1&&t<.55?apDir:0,y:apTrick===2&&t<.6?-1:apTrick===4&&t<.6?1:0,a:false,g:apTrick===3&&t>.15}}
     const xr=(Math.sqrt(LR*LR-St.X*St.X)-1.6)*TAN+1.1;apT+=1/60;if(St.X*apDir>xr+3.5||apT>6){apDir=-Math.sign(St.X)||1;apT=0;apTrick=Math.floor(Math.random()*5)}
     const d=Math.abs(St.X-(-apDir*0))-xr,near=(St.X*apDir<-xr+1.6&&St.X*apDir>-xr-1)&&Math.abs(St.U)>4;return {x:apDir,y:0,a:St.X*apDir<-xr-.2&&St.X*apDir>-xr-2.8,g:false}}
-  /* pièces : couloir hors du sillage (facile), arc cyan au-dessus du sillage (wake to wake), au-dessus d'un kicker ou le long d'un slider */
+  /* pièces : couloir hors du sillage (facile), arc bonus au-dessus du sillage (wake to wake), au-dessus d'un kicker ou le long d'un slider */
   const coinPlan=(()=>{let sc=null,k=0;return {r:1.4,cy:.8,scale:1.3,every:.25,life:24,behind:20,cull:170,
     spawn(api){const sr=B.s-LR;if(sc===null)sc=sr+35;if(sc>sr+70)return;const xr=LR*TAN+1.1,pat=k++%3;const P=s=>pathAt(s,{});const W=(s,lat,h,risk)=>{const p=P(s);api.add(p.x+Math.cos(p.h)*lat,h,p.z+Math.sin(p.h)*lat,risk)};
       let done=false;

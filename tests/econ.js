@@ -12,8 +12,8 @@ const L=require('./lib');const SECS=+process.env.ECON_SECS||60;
     for(const sp of __ll.SPORT_IDS){out[sp]={free:play(sp,'free',SECS,'E1'),course:play(sp,'course',240,'E2')}}
     /* chute rapide : 6 s puis crash */
     P.runs=50;__ll.startRun({sport:'bmx',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'E3'},{});__ll.forcePlay();{const c=__ll.cur;for(let i=0;i<360;i++){c.update(1/60,c.auto());__ll.coinsTick(1/60)}}
-    __ll.crashNow();const c0=P.coins;__ll.finalizeRun(true);const quick=__ll.run.coins;__ll.finalizeRun(true);const dbl=P.coins-c0;
-    /* plafond : on force 60 pièces cyan sur le rider */
+    __ll.crashNow();__ll.finalizeRun(true);const quick=__ll.run.coins;/* un passage de niveau peut créditer en plus : on mesure seulement le second appel */const c1=P.coins;__ll.finalizeRun(true);const dbl=P.coins-c1;
+    /* plafond : on force 60 pièces bonus sur le rider */
     __ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'E4'},{});__ll.forcePlay();const C=__ll.COIN;
     for(let k=0;k<4;k++){const q=__ll.cur.netState().p;for(let i=0;i<12;i++)C.list.push({x:q[0],y:q[1]+.95,z:q[2],v:2,risk:true,t:0,life:9,pick:-1,ph:0});__ll.coinsTick(1/60)}
     const cap=C.val;
@@ -28,7 +28,7 @@ const L=require('./lib');const SECS=+process.env.ECON_SECS||60;
   const all=Object.values(T).flatMap(x=>[x.free,x.course]);
   chk(all.every(r=>r.maxV<=40),'plafond de 40 pièces respecté en jeu');chk(res.cap===40,'plafond forcé : '+res.cap+' / 40');
   chk(all.every(r=>r.coins<=40+10+5+12+3),'aucune partie au-delà de 70 pièces (max théorique)');
-  chk(res.quick<=8,'chute rapide (6 s) : '+res.quick+' pièces (cible 0 à 8)');chk(res.dbl===res.quick,'pas de double crédit (finalize ×2) : +'+res.dbl);
+  chk(res.quick<=8,'chute rapide (6 s) : '+res.quick+' pièces (cible 0 à 8)');chk(res.dbl===0,'pas de double crédit (second finalize : +'+res.dbl+')');
   chk(over===0,'aucun ramassage pendant l\'écran de chute');
   const mean=all.filter(r=>r.t>=20).reduce((a,r)=>a+r.coins,0)/all.filter(r=>r.t>=20).length;console.log('moyenne par partie (pilote auto, ≥ 20 s) : '+mean.toFixed(1)+' → 1 machine toutes les '+(150/mean).toFixed(1)+' parties');
   chk(errs.length===0,'aucune erreur JS '+errs.slice(0,3).join(' | '));

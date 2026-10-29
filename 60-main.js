@@ -37,7 +37,7 @@ async function startRun(cfg,opt={}){
   if(!cfg||!MODES[cfg.sport]){toast('Sport indisponible',true);return}
   opt=opt||{};if(run&&!run.finalized&&state!=='menu')finalizeRun(true);
   touchStreakOnLaunch();profile.runs++;saveProfile();
-  if(ADS_CONFIG.interstitialEvery&&!opt.multi&&profile.runs>1&&profile.runs%ADS_CONFIG.interstitialEvery===0&&Ads.available()){state='ad';await Ads.interstitial('Entre deux parties')}
+  /* pub entre deux parties : seulement avec une vraie régie (la démo n'était qu'une attente de 5 s) */if(ADS_CONFIG.interstitialEvery&&ADS_CONFIG.provider!=='demo'&&!opt.multi&&profile.runs>1&&profile.runs%ADS_CONFIG.interstitialEvery===0&&Ads.available()){state='ad';await Ads.interstitial('Entre deux parties')}
   initAudio();hideMenus();$('#over').hidden=true;$('#pause').hidden=true;camera.clearViewOffset();
   ghostStop();if(cur)cur.dispose();ghostsClear();previewId=null;demo=null;quiet=false;$('#demoTag').hidden=true;
   curCfg=cfg;run={cfg,use:opt.use||{},multi:!!opt.multi,pen:0,continues:0,snaps:[],snapT:0,finished:false,dnf:false,cp:0,final:0,finalized:false,coins:0,netT:0,doubled:false,engageBits:[]};run.goal=pickSessionGoal(cfg);
@@ -354,7 +354,7 @@ function frame(now){requestAnimationFrame(frame);
   renderer.render(scene,camera);if(RP.exp)exportDraw()}
 
 /* ---------- démarrage ---------- */
-resize();setCam(S().cam|0);previewSport(profile.last.sport||'wingsuit');go('home',false);requestAnimationFrame(frame);
+resize();setCam(S().cam|0);previewSport(homeSport());go('home',false);requestAnimationFrame(frame);
 /* modèles Blender prêts : on reconstruit la scène de démo et le garage pour les afficher (le jeu démarre sans les attendre) */
 GLB_P.then(()=>{if(!GLB.models.rider&&!GLB.models.rider_lo)return;if(!run&&previewId&&(state==='demo'||state==='menu'||state==='garage'))previewSport(previewId,previewW,true);if(state==='garage'&&typeof garageObj==='function')garageObj()});
 window.__ll={COIN,coinsTick,runPayout,ECO,GLB,SPORT_IDS,SPORTS,MODES,crashNow(){onCrash('Test','Chute de test')},forcePlay(){if(state==='count'||state==='over'){state='play';E.count.hidden=true;$('#over').hidden=true;if(run){run.dnf=false}}},get combo(){return combo},get FLOW(){return FLOW},get acc(){return ACC},exportProfileJson,importProfileText,finalizeRun,dailyChallenge,dayKey,ren:renderer,get state(){return state},get cur(){return cur},get run(){return run},startRun,profile,Net,Ads};

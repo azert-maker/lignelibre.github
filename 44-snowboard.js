@@ -212,7 +212,7 @@ MODES.snowboard=function(cfg,look,ctx){
     if(live){if(hw[2].y<groundH(hw[2].x,hw[2].z)+.05)return ['Chute','La tête a touché la pente.'];
       if(V.treeHit(hw,.12,St.pos))return ['Collision','Sapin ou pylône de télésiège percuté.']}
     return null}
-  /* pièces : ligne de pente (dans ta trajectoire), arc cyan au-dessus d'un tremplin ou le long d'un rail, ligne cyan hors-piste au bord des sapins */
+  /* pièces : ligne de pente (dans ta trajectoire), arc bonus au-dessus d'un tremplin ou le long d'un rail, ligne bonus hors-piste au bord des sapins */
   const coinPlan=(()=>{let zc=null,k=0;return {r:1.3,cy:.8,scale:1.3,every:.25,life:22,behind:25,cull:260,
     spawn(api,p){if(zc===null)zc=p.z-45;if(zc<p.z-115)return;const pat=k++%3,off=clamp(p.x-V.cx(p.z),-V.vw(p.z)*.7,V.vw(p.z)*.7)*.7;let done=false;
       if(pat===1){const kk=kickers.find(q=>q.z<zc+25&&q.z>zc-80&&q.z<p.z-35);

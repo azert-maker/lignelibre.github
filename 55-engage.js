@@ -67,15 +67,16 @@ function engageOverHtml(){if(!run)return '';const bits=run.engageBits||[];
 /* ---------- accueil ---------- */
 function dailySport(){return SPORT_IDS[strSeed('sport-'+dayKey())%SPORT_IDS.length]}
 function paintHomeEngage(){const el=$('#homeEngage');if(!el)return;const dc=dailyChallenge();const sp=dc.sport==='*'?null:SPORTS[dc.sport];
-  let h=`<div class="he-row"><span class="he-k">Série</span><b>${profile.streak||0} jour${profile.streak>1?'s':''}</b><small>record ${profile.bestStreak||0}${profile.lastPlayDay===dayKey()?' · joué aujourd\'hui':profile.streak?' · joue aujourd\'hui pour la garder':''}</small></div>
-    <div class="he-row"><span class="he-k">Défi du jour</span><b>${esc(dc.label)}</b><small>${dc.done?'<span class="he-done">✓ fait</span>':'+'+dc.reward+' pièces'}</small>${dc.done?'':'<button class="btn small" id="heDaily">Jouer le défi</button>'}</div>`;
+  /* série affichée seulement quand elle existe (une ligne « 0 jour » n'apporte rien au premier lancement) */
+  let h=profile.streak?`<div class="he-row"><span class="he-k">Série</span><b>${profile.streak||0} jour${profile.streak>1?'s':''}</b><small>record ${profile.bestStreak||0}${profile.lastPlayDay===dayKey()?' · joué aujourd\'hui':profile.streak?' · joue aujourd\'hui pour la garder':''}</small></div>`:'';
+  h+=`<div class="he-row"><span class="he-k">Défi du jour</span><b>${esc(dc.label)}</b><small>${dc.done?'<span class="he-done">✓ fait</span>':'+'+dc.reward+' pièces'}</small>${dc.done?'':'<button class="btn small" id="heDaily">Jouer le défi</button>'}</div>`;
   const ds=dailySport(),drec=profile.records['daily|'+dayKey()+'|'+ds];
   h+=`<div class="he-row"><span class="he-k">Parcours du jour · même monde pour tous</span><b>${esc(SPORTS[ds].name)} · ${esc(SPORTS[ds].modes.course)}</b><small>${drec?'ton record '+fmtT2(drec):'pas encore couru'}</small><button class="btn small" id="heCourse">Courir</button></div>`;
-  if(!profile.runs)h+=`<div class="he-row first"><span class="he-k">Première glisse</span><b>Commence par le Downhill en libre : deux flèches et c'est parti.</b><button class="btn small primary" id="heFirst">Go</button></div>`;
+  /* (« Première glisse » retirée : le bouton Jouer propose déjà Downhill en monde libre au premier lancement) */
   el.innerHTML=h;
-  const b=$('#heDaily');if(b)b.onclick=()=>{if(!sp){go('play');return}setup=loadSetup(dc.sport);setup.mode=dc.mode;if(dc.mode==='free')setup.use={boost:false,x15:false};go('setup')};
-  const hc=$('#heCourse');if(hc)hc.onclick=()=>{setup=loadSetup(dailySport());setup.mode='course';setup.seedMode='daily';go('setup')};
-  const f=$('#heFirst');if(f)f.onclick=()=>{setup=loadSetup('longboard');setup.mode='free';setup.params.slope=0;go('setup')}}
+  /* ces boutons lancent directement : le défi fixe déjà le sport et le mode */
+  const b=$('#heDaily');if(b)b.onclick=()=>{if(!sp){const s=homeSport();quickLaunch(s,dc.mode||homeMode(s));return}quickLaunch(dc.sport,dc.mode)};
+  const hc=$('#heCourse');if(hc)hc.onclick=()=>quickLaunch(dailySport(),'course',{seedMode:'daily'});}
 
 /* ---------- tutoriel léger (3 conseils max sur la vie du profil) ---------- */
 /* tutoriel pratique par sport : 3 conseils pendant les 2 premières parties de chaque sport, non bloquants

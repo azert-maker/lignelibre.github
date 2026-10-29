@@ -160,7 +160,7 @@ MODES.parkour=function(cfg,look,ctx){
     const want=Math.atan2(tx-St.pos.x,-(tz-St.pos.z));const dY=wrapA(want-St.h);const ahead=V3t.set(St.pos.x+Math.sin(St.h)*1.4,0,St.pos.z-Math.cos(St.h)*1.4);
     const gA=groundTop(ahead.x,ahead.z,St.pos.y+.3);const edge=St.mode==='run'&&gA<St.pos.y-.6&&St.sp>4;let bar=false;for(const b of near(ahead.x,ahead.z,.6,_N)){if(b.t==='bar'&&Math.abs(b.y0-St.pos.y-1.15)<.3&&ahead.x>b.x0-.5&&ahead.x<b.x1+.5&&ahead.z>b.z0-.8&&ahead.z<b.z1+.8)bar=true}
     return {x:clamp(dY*2,-1,1),y:bar?-1:1,a:edge,g:false}}
-  /* pièces : 3 pièces sur ton toit vers le bord, 2 cyan au-dessus de l'écart, 1 à la réception ; ou 3 cyan le long d'un panneau de wallrun */
+  /* pièces : 3 pièces sur ton toit vers le bord, 2 bonus au-dessus de l'écart, 1 à la réception ; ou 3 bonus le long d'un panneau de wallrun */
   const coinPlan=(()=>{const st={next:1.2,last:null};const inProp=(x,y,z)=>near(x,z,.5,_N2).some(b=>b.t!=='roof'&&x>b.x0-.3&&x<b.x1+.3&&z>b.z0-.3&&z<b.z1+.3&&y>b.y0-.2&&y<b.y1+.9);
     return {r:1.2,cy:.95,scale:1.2,every:.3,life:15,behind:0,cull:120,
     spawn(api,p,dir){if(api.time<st.next||api.live>3)return;st.next=api.time+4.5;const y0=p.y-.95;

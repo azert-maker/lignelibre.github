@@ -111,7 +111,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
   const sevName=t=>isPin(t)?'Épingle '+(t.dir>0?'droite':'gauche'):(t.dir>0?'Droite ':'Gauche ')+(t.R<38?1:t.R<52?2:t.R<72?3:t.R<95?4:5);
   const ARROWS={turn:'<path d="M12 36 V20 Q12 10 22 10 H30"/><path d="M26 4 L33 10 L26 16"/>',pin:'<path d="M12 36 V16 Q12 6 21 6 Q30 6 30 16 V24"/><path d="M24 20 L30 27 L36 20"/>',flag:'<path d="M10 36 V6"/><path d="M10 6 H30 L26 12 L30 18 H10"/>'};
   const crash=(t,x)=>{ding(90,.7);buzz([40,30,60]);ctx.crash(t,x)};
-  /* pièces : dans un virage, 5 pièces sur la corde (intérieur, +dir = droite) dont la sortie serrée en cyan ; en ligne droite, ligne centrale ou 3 pièces cyan au bord */
+  /* pièces : dans un virage, 5 pièces sur la corde (intérieur, +dir = droite) dont la sortie serrée en bonus ; en ligne droite, ligne centrale ou 3 pièces bonus au bord */
   const coinPlan=(()=>{let sc=null,k=0;return {r:1.25,cy:.75,scale:1.25,every:.25,life:20,behind:25,cull:220,
     spawn(api){if(sc===null)sc=L.s+45;if(sc>L.s+95)return;const t=nextTurn(sc);const inT=t&&t.i0*STEP<sc+35&&t.th>.45;
       if(inT){const s0=Math.max(sc,t.i0*STEP),len=Math.max(20,(t.i1-t.i0)*STEP);for(let i=0;i<5;i++){const s=s0+len*(.15+i*.17),deep=i>=2&&i<=3,a=at(s,t.dir*HW*(deep?.78:.5));api.add(a[0],a[1]+.75,a[2],deep)}sc=s0+len+40}

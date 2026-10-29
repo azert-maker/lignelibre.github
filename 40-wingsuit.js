@@ -52,7 +52,7 @@ MODES.wingsuit=function(cfg,look,ctx){
   flocks.forEach(f=>spawnFlock(f,true));wisps.forEach(w=>spawnWisp(w,true));
   const crash=(t,x)=>{ding(90,.7);buzz([40,30,60]);ctx.crash(t,x)};
   const totalDist=(cfg.len+1)*CH;
-  /* pièces : couloir de 5 pièces à l'altitude où tu voles (décalé vers ta ligne), puis 3 pièces cyan en rase-mottes (7 m du sol) */
+  /* pièces : couloir de 5 pièces à l'altitude où tu voles (décalé vers ta ligne), puis 3 pièces bonus en rase-mottes (7 m du sol) */
   const coinPlan=(()=>{let zc=null,k=0;return {r:3,cy:0,scale:2.4,every:.25,life:22,behind:40,cull:700,
     spawn(api,p){if(zc===null)zc=p.z-170;if(zc<p.z-330)return;const ag=clamp(agl*.85,10,28),off=clamp(p.x-cx(p.z),-V.vw(p.z)*.6,V.vw(p.z)*.6)*.6;
       if(k++%2===0){for(let i=0;i<5;i++){const z=zc-i*16,x=cx(z)+off;api.add(x,groundH(x,z)+ag-i*.5,z,false)}}

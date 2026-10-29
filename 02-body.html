@@ -7,12 +7,17 @@
 <section class="screen" id="home">
   <div class="home-top">
     <h1 class="logo">Ligne<br><span>Libre</span></h1>
-    <p class="tag">Wingsuit, downhill, snowboard, BMX, motocross, wakeboard et parkour. Sports extrêmes arcade, mondes générés, combos, parcours chronométrés et multijoueur.</p>
-    <div class="sport-strip" id="sportStrip" aria-label="Les sept sports"></div>
+    <p class="tag">Sept sports extrêmes arcade. Choisis, joue.</p>
+    <!-- départ rapide : sport (mémorisé) + mode (mémorisé) + JOUER ; le reste est facultatif -->
+    <div class="quick" id="quick">
+      <div class="sport-strip" id="sportStrip" role="radiogroup" aria-label="Sport"></div>
+      <div class="qmode" id="qMode" role="radiogroup" aria-label="Mode"></div>
+      <div class="qrow"><button class="btn primary qgo" id="qGo"><b>Jouer</b><small id="qGoSub"></small></button>
+        <button class="qlink" id="qCustom">Personnaliser</button><button class="qlink" data-go="play">Découvrir les sports</button></div>
+    </div>
     <div id="homeEngage"></div>
   </div>
   <nav class="home-nav" aria-label="Menu principal">
-    <button class="navbtn primary" data-go="play"><b>Jouer</b><small>parcours ou monde libre</small></button>
     <button class="navbtn" data-go="multi"><b>Multijoueur</b><small id="netState">courses en direct entre amis</small></button>
     <button class="navbtn" data-go="garage"><b>Garage</b><small>perso, ailes, planches, vélos, motos</small></button>
     <button class="navbtn" data-go="shop"><b>Boutique</b><small>objets à débloquer</small></button>

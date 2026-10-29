@@ -35,25 +35,41 @@ function go(id,push=true){if(push&&screen!==id)navStack.push(screen);screen=id;S
   ({home:paintHome,play:paintPlay,setup:paintSetup,garage:paintGarage,shop:paintShop,ranking:paintRanking,prog:paintProg,settings:paintSettings,multi:paintMulti,lobby:paintLobby})[id]();
   state=id==='garage'?'garage':(demo?'demo':'menu');showDemoTag();
   if(id!=='garage')camera.clearViewOffset();
-  const f=$('#'+id+' .back, #'+id+' .navbtn');if(f&&!isTouch)f.focus({preventScroll:true})}
+  const f=id==='home'?$('#qGo'):$('#'+id+' .back, #'+id+' .navbtn');if(f&&!isTouch)f.focus({preventScroll:true})}
 function back(){const p=navStack.pop()||'home';go(p,false)}
 $$('[data-back]').forEach(b=>b.onclick=back);
 $$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 function hideMenus(){SCREENS.forEach(s=>$('#'+s).hidden=true)}
 
 /* ---------- accueil ---------- */
-function paintHome(){paintHomeEngage();paintSportStrip();const L=profile.look;$('#profileChip').innerHTML=`<span class="av" style="background:${hexCss(L.accent)}"></span><span><b>${esc(L.name)}</b><small>${fmt(profile.coins)} pièces · ${medalCount()} médailles</small></span>`;
+function paintHome(){paintHomeEngage();paintSportStrip();if(previewId!==homeSport()&&!run)previewSport(homeSport());const L=profile.look;$('#profileChip').innerHTML=`<span class="av" style="background:${hexCss(L.accent)}"></span><span><b>${esc(L.name)}</b><small>${fmt(profile.coins)} pièces · ${medalCount()} médailles</small></span>`;
   Net.onReady(k=>{$('#netState').textContent=k==='claude'?'salons en direct disponibles':k==='ws'?'serveur connecté':'nécessite Claude ou un serveur'})}
-/* bandeau des 7 sports sur l'accueil : accès direct aux réglages de partie */
-function paintSportStrip(){const el=$('#sportStrip');if(!el)return;el.innerHTML=SPORT_IDS.map(id=>{const s=SPORTS[id],lv=lvlOf((profile.xp||{})[id]||0).l;return `<button class="sstrip" data-s="${id}" style="--c:${s.c}"><i></i><b>${s.name}</b><small>niv. ${lv}</small></button>`}).join('');
-  $$('#sportStrip .sstrip').forEach(b=>b.onclick=()=>{setup=loadSetup(b.dataset.s);go('setup')})}
+/* ---------- départ rapide (accueil) ----------
+   Le sport et le mode choisis sont mémorisés (profile.last) et repris partout : accueil, « Encore une », « Personnaliser ».
+   Premier lancement : Downhill en monde libre (le plus simple : deux flèches). */
+function homeSport(){const s=profile.last&&profile.last.sport;return SPORTS[s]?s:'longboard'}
+function homeMode(sp){const m=((profile.last||{})[sp]||{}).mode;return m==='course'||m==='free'?m:'free'}
+function setHomeMode(sp,m){profile.last[sp]=Object.assign({},profile.last[sp]||{},{mode:m});saveProfile()}
+const modeLabel=(sp,m)=>SPORTS[sp].modes[m];
+/* lance une partie sans écran intermédiaire : réglages mémorisés du sport + mode donné (+ surcharges éventuelles) */
+function quickLaunch(sport,mode,o){const st=loadSetup(sport);st.mode=mode;if(o){if(o.params)Object.assign(st.params,o.params);for(const k in o)if(k!=='params')st[k]=o[k]}hostMode=false;launchSetup(st)}
+function paintQuick(){const sp=homeSport(),m=homeMode(sp),q=$('#qMode');if(!q)return;
+  q.innerHTML=[['free','sans fin, pour découvrir'],['course','chrono et médailles']].map(([k,sub])=>`<button role="radio" data-m="${k}" aria-checked="${k===m}">${esc(modeLabel(sp,k))}<small>${sub}</small></button>`).join('');
+  $$('#qMode button').forEach(b=>b.onclick=()=>{setHomeMode(sp,b.dataset.m);paintQuick()});
+  $('#qGoSub').textContent=SPORTS[sp].name+' · '+modeLabel(sp,m)}
+/* bandeau des 7 sports : choisir = sélectionner (aperçu en direct derrière), pas un nouvel écran */
+function paintSportStrip(){const el=$('#sportStrip');if(!el)return;const cur_=homeSport();el.innerHTML=SPORT_IDS.map(id=>{const s=SPORTS[id],lv=lvlOf((profile.xp||{})[id]||0).l;return `<button class="sstrip" role="radio" aria-checked="${id===cur_}" data-s="${id}" style="--c:${s.c}"><i></i><b>${s.name}</b><small>niv. ${lv}</small></button>`}).join('');
+  $$('#sportStrip .sstrip').forEach(b=>b.onclick=()=>{const id=b.dataset.s;if(id!==homeSport()){profile.last.sport=id;saveProfile();previewSport(id)}paintSportStrip();paintQuick()});
+  paintQuick()}
+$('#qGo').onclick=()=>{const sp=homeSport();quickLaunch(sp,homeMode(sp))};
+$('#qCustom').onclick=()=>{const sp=homeSport();setup=loadSetup(sp);setup.mode=homeMode(sp);hostMode=false;go('setup')};
 function medalCount(){let n=0;for(const s in profile.medals){const m=profile.medals[s];n+=(m.g||0)+(m.s||0)+(m.b||0)}return n}
 
 /* ---------- choix du sport ---------- */
 let hostMode=false;
 let playSel=null,playHover=null;
 function paintPlay(){hostMode=false;playSel=playSel||profile.last.sport||'wingsuit';
-  $('#playBody').innerHTML=`<p class="note">Choisis un sport : l'aperçu en direct joue derrière (pilote automatique, vrai moteur du jeu).</p><div class="sport-cards">${SPORT_IDS.map(id=>{const s=SPORTS[id],b=profile.records[id+'|free'],sel=id===playSel;
+  $('#playBody').innerHTML=`<p class="note">Choisis un sport, puis un mode : la partie démarre tout de suite. L'aperçu en direct joue derrière.</p><div class="sport-cards">${SPORT_IDS.map(id=>{const s=SPORTS[id],b=profile.records[id+'|free'],sel=id===playSel;
   const lv=lvlOf((profile.xp||{})[id]||0),pct=Math.round(lv.x/lv.need*100);
   return `<div class="scard" role="button" tabindex="0" data-sport="${id}" style="--c:${s.c};${sel?'border-color:var(--c)':''}" aria-pressed="${sel}"><span class="place">${s.place}</span><h3>${s.name}</h3><p>${s.desc}</p><span class="best">${s.facts.join(' · ')}${b?' · record '+fmt(b):''}</span>
     <span class="slv"><b>Niv. ${lv.l}</b><i><em style="width:${pct}%"></em></i></span>
@@ -61,24 +77,25 @@ function paintPlay(){hostMode=false;playSel=playSel||profile.last.sport||'wingsu
   <p class="note">Astuce : le « parcours du jour » est le même pour tout le monde. Compare tes temps avec tes amis.</p>`;
   previewSport(playSel);showDemoTag();
   $$('#playBody .scard').forEach(c=>{const id=c.dataset.sport;
-    c.onclick=e=>{if(e.target.closest('a'))return;const pk=e.target.closest('[data-pick]');if(pk){setup=loadSetup(id);if(pk.dataset.mode)setup.mode=pk.dataset.mode;go('setup');return}if(playSel===id&&isTouch){return}playSel=id;paintPlay()};
-    c.onkeydown=e=>{if(e.key==='Enter'){setup=loadSetup(id);go('setup')}};
+    c.onclick=e=>{if(e.target.closest('a'))return;const pk=e.target.closest('[data-pick]');if(pk){quickLaunch(id,pk.dataset.mode||homeMode(id));return}if(playSel===id&&isTouch){return}playSel=id;paintPlay()};
+    c.onkeydown=e=>{if(e.key==='Enter'&&!e.target.closest('button,a'))quickLaunch(id,homeMode(id))};
     c.onmouseenter=()=>{if(isTouch)return;clearTimeout(playHover);playHover=setTimeout(()=>{if(screen==='play'&&playSel!==id){playSel=id;paintPlay()}},260)}})}
 function showDemoTag(){const t=$('#demoTag');const id=previewId;t.hidden=!(screen==='play'&&id);if(id)t.innerHTML='<i></i>Aperçu en direct · '+SPORTS[id].name}
 
 /* ---------- réglages de partie ---------- */
 let setup=null;
 function loadSetup(sport){const sp=SPORTS[sport],last=profile.last[sport]||{};const params={};sp.params.forEach(p=>params[p.k]=last.params&&last.params[p.k]!=null?last.params[p.k]:p.def);
-  return {sport,mode:last.mode||'course',lenIdx:last.lenIdx??sp.len.def,weather:last.weather||'soleil',wind:last.wind??0,params,seedMode:last.seedMode||'daily',seedTxt:last.seedTxt||'',smoke:!!last.smoke,use:{boost:false,x15:false}}}
+  return {sport,mode:last.mode==='course'?'course':'free',lenIdx:last.lenIdx??sp.len.def,weather:last.weather||'soleil',wind:last.wind??0,params,seedMode:last.seedMode||'daily',seedTxt:last.seedTxt||'',smoke:!!last.smoke,use:{boost:false,x15:false}}}
 function cfgFromSetup(st){const sp=SPORTS[st.sport];const params={};sp.params.forEach(p=>params[p.k]=p.bool?st.params[p.k]===1:st.params[p.k]);
   const seed=st.seedMode==='daily'?dailySeed()+st.sport:st.seedMode==='custom'&&st.seedTxt.trim()?st.seedTxt.trim().slice(0,24):'R'+randCode(6);
   return {sport:st.sport,mode:st.mode,len:sp.len.opts[st.lenIdx],weather:st.weather,wind:st.wind,params,seed,smoke:st.smoke}}
 function chipRow(name,opts,cur,dis){return `<div class="chips" data-row="${name}">${opts.map((o,i)=>`<button class="chip" data-v="${i}" aria-pressed="${i===cur}" ${dis&&dis(i)?'disabled':''}>${o}</button>`).join('')}</div>`}
 function paintSetup(){const st=setup,sp=SPORTS[st.sport];if(st.weather==='neige'&&sp.noSnow)st.weather='soleil';previewSport(st.sport,st.weather);
-  $('#setupTitle').textContent=(hostMode?'Salon · ':'')+sp.name;
+  $('#setupTitle').textContent=hostMode?'Salon · '+sp.name:sp.name+' · '+sp.modes[st.mode];
   const wk=Object.keys(WEATHER);
   const h=[];
-  h.push(`<div class="grp"><span class="lbl">Mode</span>${chipRow('mode',[sp.modes.course,sp.modes.free],st.mode==='course'?0:1)}</div>`);
+  if(hostMode)h.push(`<div class="grp"><span class="lbl">Mode</span>${chipRow('mode',[sp.modes.course,sp.modes.free],st.mode==='course'?0:1)}</div>`);
+  else h.push(`<p class="note">Tout est déjà réglé : change seulement ce que tu veux, ou lance directement.</p>`);
   if(st.mode==='course')h.push(`<div class="grp"><span class="lbl">Longueur <b>${sp.len.opts[st.lenIdx]} ${sp.len.unit}</b></span>${chipRow('len',sp.len.opts.map(v=>v+' '+sp.len.unit),st.lenIdx)}</div>`);
   h.push(`<div class="grp"><span class="lbl">Météo <b>jamais de pluie</b></span>${chipRow('weather',wk.map(k=>WEATHER[k].label),wk.indexOf(st.weather),i=>wk[i]==='neige'&&!!sp.noSnow)}</div>`);
   h.push(`<div class="grp"><span class="lbl">Vent <b>${WIND[st.wind].v} m/s</b></span>${chipRow('wind',WIND.map(w=>w.label),st.wind)}</div>`);
@@ -100,10 +117,11 @@ function paintSetup(){const st=setup,sp=SPORTS[st.sport];if(st.weather==='neige'
   $$('#setupBody [data-use]').forEach(b=>b.onclick=()=>{st.use[b.dataset.use]=!st.use[b.dataset.use];paintSetup()});
   const tb=$('#toShop');if(tb)tb.onclick=()=>go('shop');
   const si=$('#seedTxt');if(si)si.oninput=()=>{st.seedTxt=si.value}}
-$('#btnLaunch').onclick=()=>{const st=setup;profile.last[st.sport]={mode:st.mode,lenIdx:st.lenIdx,weather:st.weather,wind:st.wind,params:st.params,seedMode:st.seedMode,seedTxt:st.seedTxt,smoke:st.smoke};profile.last.sport=st.sport;saveProfile();
+$('#btnLaunch').onclick=()=>launchSetup(setup);
+function launchSetup(st){profile.last[st.sport]={mode:st.mode,lenIdx:st.lenIdx,weather:st.weather,wind:st.wind,params:st.params,seedMode:st.seedMode,seedTxt:st.seedTxt,smoke:st.smoke};profile.last.sport=st.sport;saveProfile();
   const cfg=cfgFromSetup(st);if(hostMode){createRoom(cfg);return}
   const use={boost:st.use.boost&&profile.cons.boost>0,x15:st.use.x15&&profile.cons.x15>0&&st.mode==='free'};if(use.boost)profile.cons.boost--;if(use.x15)profile.cons.x15--;st.use={boost:false,x15:false};saveProfile();
-  startRun(cfg,{use})};
+  startRun(cfg,{use})}
 
 /* ---------- garage (aperçu 3D) ---------- */
 const gScene=new THREE.Scene();gScene.background=new THREE.Color(0x0d141b);gScene.fog=new THREE.Fog(0x0d141b,8,22);
@@ -169,7 +187,7 @@ async function offerUnlock(id){go('shop');setTimeout(()=>{const el=$('#shop [dat
 
 /* ---------- boutique : pièces ou pubs ---------- */
 function paintShop(){const groups=['Équipement','Consommable','Cosmétique'];
-  $('#shopBody').innerHTML=`<div class="row" style="justify-content:space-between"><span class="lbl">Tes pièces <b>${fmt(profile.coins)}</b></span><span class="note">Ramasse des pièces pendant tes parties (cyan = 2 pièces), bonus en fin de partie.</span></div>`+
+  $('#shopBody').innerHTML=`<div class="row" style="justify-content:space-between"><span class="lbl">Tes pièces <b>${fmt(profile.coins)}</b></span><span class="note">Ramasse des pièces pendant tes parties (pièce à anneau = 2 pièces), bonus en fin de partie.</span></div>`+
   (typeof clawShopCard==='function'?clawShopCard():'')+
   groups.map(gk=>`<div class="grp"><span class="lbl">${gk}s</span><div class="items">${SHOP.filter(s=>s.kind===gk).map(it=>{const got=!it.cons&&owns(it.id),p=profile.adp[it.id]||0;
     return `<div class="shopcard" data-shop="${it.id}"><span class="kind">${it.kind}${it.cons?' · '+(profile.cons[it.id]||0)+' en stock':''}</span><span></span><h4>${it.name}</h4>${got?'<span class="owned">débloqué</span>':'<span></span>'}<p>${it.effect}${!got&&LVL_UNLOCK[it.id]?'<br><small class="note">Gratuit au '+lvlLabel(it.id)+'</small>':''}</p>

@@ -244,6 +244,20 @@ body.touch .hud-tr{bottom:calc(270px + env(safe-area-inset-bottom,0px))}
 /* ---------- ENGAGEMENT ---------- */
 #homeEngage{margin-top:14px;display:flex;flex-direction:column;gap:6px;max-width:560px}
 #homeEngage:empty{display:none}
+.quick{margin-top:14px;display:flex;flex-direction:column;gap:10px;max-width:640px}
+.quick .sport-strip{margin-top:0}
+.sstrip[aria-checked="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,rgba(10,14,20,.7));box-shadow:0 0 0 1px var(--c) inset}
+.qmode{display:flex;gap:6px;flex-wrap:wrap}
+.qmode button{all:unset;cursor:pointer;padding:7px 12px;border-radius:4px;background:var(--glass);border:1px solid var(--line);font-size:13px;font-weight:600}
+.qmode button small{display:block;font-family:var(--mono);font-size:10.5px;font-weight:400;color:var(--muted)}
+.qmode button[aria-checked="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.qrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.qgo{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 26px;min-width:220px}
+.qgo b{font-family:var(--display);font-weight:800;font-size:28px;line-height:1}
+.qgo small{font-family:var(--mono);font-size:11px;opacity:.85}
+.qlink{all:unset;cursor:pointer;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.qlink:hover,.qlink:focus-visible{color:var(--fg)}
+@media (max-height:460px){.logo{font-size:44px}.tag{display:none}.quick{margin-top:8px;gap:7px}.qgo{padding:7px 20px}.qgo b{font-size:22px}#homeEngage{margin-top:8px}}
 .he-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;background:var(--glass);border:1px solid var(--line);border-radius:4px;padding:8px 12px}
 .he-row b{font-family:var(--display);font-weight:800;font-size:15px;flex:1;min-width:0}
 .he-row small{font-family:var(--mono);font-size:11px;color:var(--muted)}
