@@ -11,7 +11,9 @@
     "test:input": "node tests/kb.js && node tests/touch.js",
     "test:perf": "node tests/perf.js && node tests/leak.js",
     "assets": "python3 assets/blender/rider.py --render && python3 assets/blender/rider.py --lo && python3 assets/blender/bmx.py --render",
-    "lan": "node server/server.js"
+    "lan": "node server/server.js",
+    "validate:arch": "node scripts/validate-architecture.js",
+    "build:arch": "npm run validate:arch"
   },
   "devDependencies": {
     "playwright": "1.63.0"
