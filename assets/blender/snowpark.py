@@ -1,4 +1,4 @@
-"""Modules de snowpark fournis par Jean (assets/third_party/snowpark/*.fbx) → assets/glb/snowpark.glb.
+"""Modules de snowpark fournis par le propriétaire du projet (assets/third_party/snowpark/*.fbx) → assets/glb/snowpark.glb.
 
 Chaque module devient un nœud sp_<nom>, origine au centre de sa base, axe long le long de -Z Three.js,
 matériau unique sur la texture « trim » réduite (256×512 : métal brossé, blanc, rouge).

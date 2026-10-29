@@ -9,8 +9,8 @@ Principe : une priorité à la fois. On ne passe à la production en série (7 s
 | Build reproductible un fichier | `npm run build` produit `dist/` sans erreur, `node --check` OK | ✅ |
 | Suite de tests automatisés | `npm test` : 61/61 + 15/15 | ✅ |
 | Dépôt Git local propre | `.gitignore` (aucun secret, pas de sorties de build), historique lisible | ✅ |
-| CI GitHub Actions | workflow `ci.yml` vert sur `main` | 🟡 écrit, jamais exécuté (pas de dépôt distant) |
-| Dépôt GitHub privé | dépôt créé, `main` protégée, CI verte | ⛔ attend ton accord + un accès valide |
+| CI GitHub Actions | workflow `ci.yml` vert sur `main` | 🟡 écrit, état à vérifier dans l'onglet Actions |
+| Dépôt GitHub | dépôt créé (privé), prêt pour le public, Pages préparé | ✅ créé · 🟡 public et Pages : actions du propriétaire (`docs/PUBLICATION.md`) |
 | Sauvegardes | archive datée avant chaque refonte (déjà pratiqué) | ✅ |
 
 ## P1 · Vertical slice BMX (sport de référence)

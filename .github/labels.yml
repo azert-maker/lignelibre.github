@@ -1,0 +1,37 @@
+# Labels du dépôt (créés une fois : voir docs/PUBLICATION.md, section « Labels »)
+- name: bug
+  color: d73a4a
+  description: Quelque chose ne marche pas
+- name: idée
+  color: a2eeef
+  description: Proposition de joueur ou de contributeur
+- name: question
+  color: d876e3
+  description: Demande d'information
+- name: gameplay
+  color: 1d76db
+  description: Physique, commandes, figures, ressenti
+- name: 3d
+  color: 5319e7
+  description: Modèles, animations, Blender
+- name: ui
+  color: fbca04
+  description: Menus, HUD, mobile
+- name: économie
+  color: 0e8a16
+  description: Pièces, boutique, machine à skins
+- name: lieux
+  color: c2e0c6
+  description: Décors et ambiance des cartes
+- name: docs
+  color: 0075ca
+  description: Documentation
+- name: good first issue
+  color: 7057ff
+  description: Bonne première contribution
+- name: accepté
+  color: 2ea44f
+  description: Validé, prêt à être fait
+- name: pas prévu
+  color: e4e669
+  description: Lu et réfléchi, mais pas pour ce projet

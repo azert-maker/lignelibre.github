@@ -1,4 +1,4 @@
-"""Machine à pinces (modèle fourni par Jean, assets/third_party/claw_machine/Claw_Machine_Free.blend) → assets/glb/claw.glb.
+"""Machine à pinces (modèle fourni par le propriétaire du projet, assets/third_party/claw_machine/Claw_Machine_Free.blend) → assets/glb/claw.glb.
 
 Nœuds exportés (repère Three.js : machine centrée, sol à 0, façade vers +Z) :
   claw_machine            meuble, vitres, logo, lampes, bouton, levier, roulettes, trappe à lots (statique)
