@@ -97,6 +97,8 @@ const Net=(()=>{
     peers(){if(room)return norm(room.peers());if(kind==='ws')return wsPeers;return []},
     /* connexion manuelle à un serveur local : cb(true|false, message) */
     connect(url,cb){url=String(url||'').trim();if(!/^wss?:\/\/[^\s]+$/i.test(url)){lastErr='Adresse invalide : elle doit commencer par ws:// (ex. ws://192.168.1.23:8080).';cb&&cb(false,lastErr);return}
+      /* page servie en https (GitHub Pages) : le navigateur bloque ws:// (contenu mixte) ; on l'explique au lieu d'échouer en silence */
+      if(location.protocol==='https:'&&/^ws:/i.test(url)){lastErr='La version en ligne (https) ne peut pas joindre un serveur ws:// local. Télécharge le jeu et ouvre le fichier sur ton PC, ou utilise un serveur wss://.';cb&&cb(false,lastErr);return}
       if(room){room.leave().catch(()=>{});room=null}code=null;openWs(url,ok=>{cb&&cb(ok,lastErr)})}};
   function norm(list){return list.filter(p=>p.kind!=='agent').map(p=>({id:p.peer,me:!!p.sameTab,st:p.presence||{},at:p.updatedAt}))}
   let done=false;function ready(k){kind=k;done=true;readyCbs.forEach(f=>f(k));readyCbs=[]}

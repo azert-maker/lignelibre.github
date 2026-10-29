@@ -1,9 +1,9 @@
 {
   "name": "ligne-libre",
-  "version": "0.23.0",
+  "version": "0.23.1",
   "private": true,
   "description": "Jeu de sports extrêmes arcade 3D (Three.js), un seul fichier HTML.",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "LL_COPY_PARENT=0 sh build.sh && node --check dist/bundle.js",
     "test": "node tests/all.js && node tests/glb.js && node tests/land.js && node tests/claw.js && node tests/shopclaw.js && node tests/feel.js && node tests/econ.js && node tests/v023.js",
@@ -15,5 +15,10 @@
   },
   "devDependencies": {
     "playwright": "1.63.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/azert-maker/lignelibre.github"
+  },
+  "homepage": "https://azert-maker.github.io/lignelibre.github/"
 }

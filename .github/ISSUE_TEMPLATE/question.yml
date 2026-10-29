@@ -1,0 +1,16 @@
+name: Question
+description: Une question sur le jeu, les commandes, le code ou la contribution
+title: "[Question] "
+labels: ["question"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Ta question
+    validations:
+      required: true
+  - type: input
+    id: contexte
+    attributes:
+      label: Contexte (facultatif)
+      placeholder: "ex. je veux contribuer un modèle 3D, je joue sur tablette…"

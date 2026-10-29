@@ -37,7 +37,7 @@ Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé 
 
 ## Assets reçus le 28 octobre 2026 : inventaire et décision
 
-Le 28 octobre, Jean a confirmé que ces modèles sont libres d'utilisation (accord des créateurs). Deux exceptions restent exclues pour une raison qui ne dépend pas des créateurs du fichier : un personnage protégé (Alucard) et des marques déposées (Troy Lee Designs, 6D).
+Le 28 octobre, le propriétaire du projet a confirmé que ces modèles sont libres d'utilisation (accord des créateurs). Deux exceptions restent exclues pour une raison qui ne dépend pas des créateurs du fichier : un personnage protégé (Alucard) et des marques déposées (Troy Lee Designs, 6D).
 
 | Fichier | Contenu vérifié | Décision |
 |---|---|---|

@@ -1,5 +1,14 @@
 # Journal des versions · Ligne Libre
 
+## 0.23.1 · 29 octobre 2026 · Prêt pour le dépôt public
+
+- Audit de sécurité de tout l'historique : aucun secret (détail dans `docs/PUBLICATION.md`).
+- Licence : code MIT, assets réservés (`LICENSE`, `LICENSE-ASSETS.md`).
+- GitHub Pages : workflow de publication, site en un fichier (`dist/site/`), page 404, métadonnées de partage.
+- Three.js et ses modules figés avec empreintes SRI.
+- La version en ligne (https) explique pourquoi le multijoueur local `ws://` n'y fonctionne pas.
+- Communauté : README public, `CONTRIBUTING.md`, charte, `SECURITY.md`, formulaires d'issues (bug, idée, question), modèle de pull request, labels.
+
 ## 0.23.0 · 28 octobre 2026 · Économie, pièces à ramasser, 7 lieux
 
 Économie (détail : `docs/ECONOMY.md`)
@@ -78,7 +87,7 @@ Tests
 
 Ajouts
 - 15 skins cosmétiques (7 tenues, 8 casques) en 4 raretés : commun, rare, épique, légendaire. Motifs calculés dans le shader (bandes, camouflage, damier, dégradé, chevrons, aurore animée) et finitions (brillant, mat, chrome, or, néon, carbone).
-- Machine à pinces jouable au garage (modèle fourni par Jean) : pince pilotable au clavier ou aux boutons tactiles, descente, prise selon le centrage et la rareté, transport jusqu'à la trappe, gain d'un skin.
+- Machine à pinces jouable au garage (modèle fourni par le propriétaire du projet) : pince pilotable au clavier ou aux boutons tactiles, descente, prise selon le centrage et la rareté, transport jusqu'à la trappe, gain d'un skin.
 - Uniquement des pièces gagnées en jouant (120 pièces la partie), aucune monnaie réelle. Composition de la machine et taux de prise affichés ; garantie d'une peluche épique au plus tard toutes les 10 parties ; doublons remboursés en pièces.
 - Onglets du garage « Skins » (collection, équiper, retirer) et « Machine ».
 - Skins transmis en multijoueur (identifiants validés).
@@ -91,7 +100,7 @@ Tests
 
 Ajouts
 - Réceptions qualifiées en motocross (assiette, whip, impact) et en parkour (roulade, grosse chute, précision) via le système commun.
-- Moto de motocross fournie par Jean : nettoyée par script (`assets/blender/moto.py`), intégrée sur les groupes animés du jeu (carrosserie recolorée, fourche et direction sur le vrai pivot, roues, plaque au numéro du joueur).
+- Moto de motocross fournie par le propriétaire du projet : nettoyée par script (`assets/blender/moto.py`), intégrée sur les groupes animés du jeu (carrosserie recolorée, fourche et direction sur le vrai pivot, roues, plaque au numéro du joueur).
 - Mains sur les poignées en motocross (IK) et position d'attaque revue.
 - Inventaire et statut de licence de tous les assets reçus (`docs/ASSETS.md`).
 

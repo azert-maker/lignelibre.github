@@ -1,0 +1,83 @@
+name: Bug
+description: Quelque chose ne marche pas comme prévu dans le jeu
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci ! Un bug bien décrit est corrigé beaucoup plus vite.
+        Vérifie d'abord qu'il n'est pas déjà signalé (barre de recherche des issues) ou listé dans `docs/KNOWN_ISSUES.md`.
+        **Faille de sécurité ou exploit grave (pièces infinies, triche en multijoueur…) : ne l'écris pas ici**, suis `SECURITY.md`.
+  - type: dropdown
+    id: sport
+    attributes:
+      label: Sport ou écran concerné
+      options:
+        - Wingsuit (Lauterbrunnen)
+        - Downhill (Mount Tamalpais)
+        - Snowboard (Whistler)
+        - BMX (Venice Beach)
+        - Motocross (Glen Helen)
+        - Wakeboard (Lake Havasu)
+        - Parkour (Paris Rooftops)
+        - Menu / garage / boutique / machine à skins
+        - Multijoueur
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: navigateur
+    attributes:
+      label: Navigateur et appareil
+      placeholder: "ex. Chrome 130 sur Windows 11, Safari sur iPhone 13, Firefox sur Android"
+    validations:
+      required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Où joues-tu ?
+      options:
+        - Version en ligne (GitHub Pages)
+        - Fichier HTML téléchargé
+        - Construit moi-même depuis le dépôt
+    validations:
+      required: true
+  - type: textarea
+    id: etapes
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Lancer le BMX en monde libre
+        2. Sauter sur le quarter de gauche
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Résultat attendu
+    validations:
+      required: true
+  - type: textarea
+    id: obtenu
+    attributes:
+      label: Résultat obtenu
+      description: Une capture ou une courte vidéo aide beaucoup. Messages d'erreur de la console (F12) bienvenus.
+    validations:
+      required: true
+  - type: dropdown
+    id: frequence
+    attributes:
+      label: Fréquence
+      options:
+        - À chaque fois
+        - Souvent
+        - Une seule fois
+  - type: checkboxes
+    id: prive
+    attributes:
+      label: Vérification
+      options:
+        - label: Mon message ne contient ni mot de passe, ni PIN, ni donnée personnelle (adresse, téléphone…).
+          required: true

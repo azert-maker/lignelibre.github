@@ -18,3 +18,22 @@ test-results/
 secrets/
 # captures écrites par les tests à la racine
 /*.png
+# fichiers système et éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+# archives et paquets de transfert (téléchargements bruts, sauvegardes)
+*.bundle
+*.zip
+*.rar
+*.7z
+# secrets (compléments)
+*.p12
+*.pfx
+*.keystore
+credentials*.json
+service-account*.json
+.npmrc

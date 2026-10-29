@@ -1,4 +1,4 @@
-"""Moto de motocross : import du modèle fourni par Jean (assets/third_party/dirtbike/DirtBike.blend), nettoyage, export GLB.
+"""Moto de motocross : import du modèle fourni par le propriétaire du projet (assets/third_party/dirtbike/DirtBike.blend), nettoyage, export GLB.
 
 Le modèle d'origine est riggé (armature 14 os, pièces attachées aux os). Pour le jeu on « cuit » chaque pièce
 dans l'espace monde, on retourne la moto (avant vers -Z Three.js), on la met à l'échelle du gabarit du jeu

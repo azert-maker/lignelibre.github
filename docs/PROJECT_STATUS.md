@@ -22,7 +22,7 @@ Légende des statuts (utilisée dans tous les documents) :
 | Build | `build.sh` assemble 21 modules JS + HTML en un fichier ; embarque les GLB en base64 ; `node --check` OK | ✅ |
 | Tests | Playwright + Chromium (rendu logiciel) : 62/62 régression, 10/10 ressenti et lieux (`feel.js`), 21/21 économie (`econ.js`), 11/11 version 0.23 (`v023.js`), 15/15 modèles Blender, figures BMX, wallrun parkour, clavier, tactile, fuites mémoire | ✅ |
 | Git | dépôt local `v3/` avec historique ; `.gitignore`, `CONTRIBUTING.md`, CI GitHub Actions prêts | ✅ |
-| GitHub | dépôt privé `azert-maker/lignelibre.github`, poussé depuis le PC (identifiants de ton poste) | ✅ |
+| GitHub | dépôt `azert-maker/lignelibre.github` (privé, prêt pour le public : licence, README, formulaires, Pages) | ✅ |
 | Blender sur ton PC | l'outil Blender du PC répond « Cannot connect to Blender at localhost:9876 » (Blender non lancé ou extension MCP inactive) | ⛔ contourné |
 | Blender dans l'environnement cloud | Blender 5.1.2 installé comme module Python (`bpy`) : modélisation, rig, pondération, animation, export GLB et rendus Cycles fonctionnent | ✅ |
 | Discord | aucun accès (pas de connecteur, pas de jeton bot) ; configuration complète préparée dans `docs/DISCORD_SETUP.md` | ⛔ (préparé, non créé) |
@@ -67,6 +67,7 @@ Lecture honnête : le rendu logiciel fait le skinning sur le processeur, il exag
 
 ## 5. Ce qui attend une décision ou une action de ta part
 
-1. **GitHub** : créer le dépôt **privé** `ligne-libre` (je ne l'ai pas fait : ta validation est requise et le jeton disponible est invalide). Deux options : tu me fournis un accès valide via le connecteur GitHub, ou tu crées le dépôt vide et je te donne les 3 commandes de push (le dépôt local est prêt et commité).
-2. **Blender sur ton PC** (facultatif) : lancer Blender avec l'extension MCP active si tu veux que je travaille directement dans ta scène. Sinon je continue avec Blender dans l'environnement cloud (résultats identiques, fichiers `.blend` fournis).
-3. **Discord** : créer le serveur à partir de `docs/DISCORD_SETUP.md`, ou me donner un accès (bot avec permissions d'administration sur un serveur vide).
+Passage en public et GitHub Pages : tout est prêt dans le dépôt ; les actions restantes (visibilité, Pages, labels, accord de redistribution des modèles tiers) sont listées dans `docs/PUBLICATION.md`.
+
+1. **Blender sur ton PC** (facultatif) : lancer Blender avec l'extension MCP active pour travailler directement dans ta scène.
+2. **Discord** : créer le serveur à partir de `docs/DISCORD_SETUP.md`, ou donner un accès (bot sur un serveur vide).

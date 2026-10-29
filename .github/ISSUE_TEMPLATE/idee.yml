@@ -1,0 +1,56 @@
+name: Idée
+description: Proposer une idée de gameplay, de lieu, de skin, d'interface…
+title: "[Idée] "
+labels: ["idée"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Les idées sont lues, mais toutes ne seront pas faites : la feuille de route publique (README) dit ce qui est prévu et ce qui n'est pas promis.
+        Une idée par issue, c'est plus facile à discuter.
+  - type: textarea
+    id: resume
+    attributes:
+      label: Résumé
+      description: L'idée en une ou deux phrases.
+    validations:
+      required: true
+  - type: dropdown
+    id: systeme
+    attributes:
+      label: Sport ou système concerné
+      multiple: true
+      options:
+        - Wingsuit
+        - Downhill
+        - Snowboard
+        - BMX
+        - Motocross
+        - Wakeboard
+        - Parkour
+        - Nouveau sport
+        - Lieux / décors
+        - Personnage / skins / 3D
+        - Économie / boutique / machine à skins
+        - Interface / commandes
+        - Multijoueur
+        - Autre
+    validations:
+      required: true
+  - type: textarea
+    id: interet
+    attributes:
+      label: Pourquoi c'est mieux pour le joueur ?
+      description: Qu'est-ce que ça apporte au plaisir de jeu, à la lisibilité, à la progression ?
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Détails (facultatif)
+      description: Comment ça marcherait, commandes, cas particuliers.
+  - type: textarea
+    id: reference
+    attributes:
+      label: Référence visuelle (facultatif)
+      description: Croquis, capture, lien vers une vidéo. Pas d'image dont tu n'as pas les droits si elle doit finir dans le jeu.
