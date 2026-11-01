@@ -48,7 +48,7 @@ Principe : une priorité à la fois. On ne passe à la production en série (7 s
 | Boutique cosmétique sans paiement réel | monnaie du jeu uniquement | 🟡 existe (pièces) |
 | Paiement réel | **interdit sans ton autorisation écrite** | ⚪ |
 | Multijoueur en ligne | serveur hébergé (dépense : ton accord requis), solo jouable si le serveur tombe | 🟡 LAN seulement |
-| Classements | partagés dans l'artifact Claude ; serveur dédié plus tard | 🟡 |
+| Classements | locaux ; partagés seulement sur une plateforme hôte compatible ; serveur dédié plus tard | 🟡 |
 
 ## P4 · Communauté et lancement
 

@@ -3,7 +3,7 @@
 ## 1. État des lieux de départ (audit)
 
 - Projet : 16 modules JS + 2 fichiers HTML assemblés en un seul HTML (Three.js r128 via cdnjs). Serveur `server.js` (WebSocket) pour le LAN.
-- Opérationnel avant la refonte : 7 sports (wingsuit, downhill, street luge, snowboard, parapente, foil downwind, surf foil), parcours / libre, combo ×4 + jauge Flow, rider articulé, garage, boutique (pièces ou pubs de démo), XP / niveaux / défis de figures, série + défi du jour + parcours du jour, comptes locaux PIN, export / import, multijoueur (Claude ou WebSocket local), replay + clip 9:16, fantôme, qualité Éco / Normal / Élevé + qualité auto.
+- Opérationnel avant la refonte : 7 sports (wingsuit, downhill, street luge, snowboard, parapente, foil downwind, surf foil), parcours / libre, combo ×4 + jauge Flow, rider articulé, garage, boutique (pièces ou pubs de démo), XP / niveaux / défis de figures, série + défi du jour + parcours du jour, comptes locaux PIN, export / import, multijoueur (plateforme hôte ou WebSocket local), replay + clip 9:16, fantôme, qualité Éco / Normal / Élevé + qualité auto.
 - Faiblesses relevées : la jauge Flow pouvait porter le multiplicateur à ×6 (au-delà du ×4 annoncé) ; pas de bonus de variété ; pas d'option de secousses ni de volumes séparés ; `V3()` ignorait ses arguments (bug latent) ; pas de bouton tactile pour les figures.
 
 Point de restauration : archive `backup-pre-extreme-*.tgz` + dépôt git local dans `v3/` (un commit par lot).
@@ -81,7 +81,7 @@ Moyen : Chromium headless (rendu logiciel SwiftShader) piloté par Playwright, s
 - Ressenti de jeu par un humain : réglages de vitesses, tolérances et points à confirmer en jouant.
 
 ### Bloqué par l'environnement
-- Multijoueur dans Claude (salons partagés) et classement en ligne : nécessitent l'artifact ouvert dans Claude par plusieurs comptes.
+- Multijoueur en salons partagés et classement en ligne : nécessitent une plateforme hôte compatible ouverte par plusieurs comptes.
 - Clip vidéo : enregistré en mp4/VP9 dans Chromium headless ; le format réel dépend du navigateur (MediaRecorder).
 
 ### Mesures (Chromium headless, rendu logiciel, 1280×720)

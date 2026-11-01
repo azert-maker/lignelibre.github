@@ -43,7 +43,7 @@ function hideMenus(){SCREENS.forEach(s=>$('#'+s).hidden=true)}
 
 /* ---------- accueil ---------- */
 function paintHome(){paintHomeEngage();paintSportStrip();if(previewId!==homeSport()&&!run)previewSport(homeSport());const L=profile.look;$('#profileChip').innerHTML=`<span class="av" style="background:${hexCss(L.accent)}"></span><span><b>${esc(L.name)}</b><small>${fmt(profile.coins)} pièces · ${medalCount()} médailles</small></span>`;
-  Net.onReady(k=>{$('#netState').textContent=k==='claude'?'salons en direct disponibles':k==='ws'?'serveur connecté':'nécessite Claude ou un serveur'})}
+  Net.onReady(k=>{$('#netState').textContent=k==='host'?'salons en direct disponibles':k==='ws'?'serveur connecté':'serveur local requis'})}
 /* ---------- départ rapide (accueil) ----------
    Le sport et le mode choisis sont mémorisés (profile.last) et repris partout : accueil, « Encore une », « Personnaliser ».
    Premier lancement : Downhill en monde libre (le plus simple : deux flèches). */
@@ -219,7 +219,7 @@ const Board=(()=>{let db=null,uid=null,tried=false;
   return {async submit(sport,score){await init();if(!db||!uid)return;try{const ref=db.doc('scores/'+uid);const s=await ref.get();const cur=s.exists?s.data():{};
       if((cur[sport]||0)>=score&&cur.n===profile.look.name)return;await ref.set(Object.assign({},cur,{n:profile.look.name,[sport]:Math.max(score,cur[sport]||0),at:Date.now()}))}catch(e){}},
     async render(sport,el){await init();if(!el)return;if(!db){const loc=profile.history.filter(h=>h.sport===sport&&h.mode==='free').sort((a,b)=>b.score-a.score).slice(0,10);
-        el.innerHTML='<p class="note">Classement partagé disponible quand le jeu est ouvert dans Claude. Voici ton top local sur cet appareil.</p>'+(loc.length?`<table class="rtable"><thead><tr><th>#</th><th>Monde</th><th>Score</th></tr></thead><tbody>${loc.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.seed.slice(0,14))}</td><td>${fmt(r.score)}</td></tr>`).join('')}</tbody></table>`:'');return}
+        el.innerHTML='<p class="note">Pas de classement en ligne ici. Voici ton top local sur cet appareil.</p>'+(loc.length?`<table class="rtable"><thead><tr><th>#</th><th>Monde</th><th>Score</th></tr></thead><tbody>${loc.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.seed.slice(0,14))}</td><td>${fmt(r.score)}</td></tr>`).join('')}</tbody></table>`:'');return}
       try{const q=await db.collection('scores').orderBy(sport,'desc').limit(20).get();const rows=q.docs.map(d=>({id:d.id,...d.data()})).filter(r=>r[sport]>0);
         el.innerHTML=rows.length?`<table class="rtable"><thead><tr><th>#</th><th>Joueur</th><th>Meilleur score</th></tr></thead><tbody>${rows.map((r,i)=>`<tr class="${r.id===uid?'me':''}"><td>${i+1}</td><td>${esc(String(r.n||'Rider').slice(0,16))}</td><td>${fmt(r[sport])}</td></tr>`).join('')}</tbody></table>`:'<p class="note">Personne encore. Sois le premier.</p>'}
       catch(e){el.innerHTML='<p class="note">Classement indisponible pour le moment.</p>'}}}})();
@@ -273,7 +273,7 @@ function paintMulti(){const k=Net.kind;
   ${k?`<div class="grp"><span class="lbl">Créer</span><p class="note">Choisis le sport, le parcours et la météo : tout le salon jouera le même monde.</p><div class="row"><button class="btn primary" id="mCreate">Créer un salon</button></div></div>
   <div class="grp"><span class="lbl">Rejoindre avec un code</span><div class="row"><input class="txt" id="mCode" maxlength="5" placeholder="ex. k7m2p" style="max-width:160px;text-transform:lowercase"><button class="btn" id="mJoin">Rejoindre</button></div></div>
   <div class="grp"><span class="lbl">Salons ouverts</span><div class="glist" id="mGames"></div></div>`:
-  `<p class="note">Le multijoueur en direct fonctionne quand le jeu est ouvert dans Claude et partagé avec tes amis (ils doivent pouvoir ouvrir l'artifact), ou avec ton propre serveur WebSocket (fichier <code>server.js</code>, renseigne <code>NET_CONFIG.wsUrl</code>).</p>
+  `<p class="note">Le multijoueur en direct fonctionne avec ton propre serveur WebSocket sur le même réseau (fichier <code>server.js</code>, renseigne <code>NET_CONFIG.wsUrl</code>).</p>
    <p class="note">État : ${Net.kind===null?'aucune connexion détectée':'connexion…'}</p>`}`;
   const n=$('#mName');n.oninput=()=>{profile.look.name=n.value.replace(/[\u0000-\u001f]/g,'').slice(0,16)||'Rider';saveProfile()};
   $('#mWsGo').onclick=()=>{const u=$('#mWs').value.trim();const m=$('#mWsMsg');m.textContent='Connexion…';S().wsUrl=u;saveProfile();save('ll3_ws',u);

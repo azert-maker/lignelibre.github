@@ -1,6 +1,6 @@
 #!/bin/sh
 # Assemble Ligne Libre en un seul fichier HTML.
-#   dist/ligne-libre.html             fragment pour l'artifact claude.ai (l'outil ajoute doctype/head/body)
+#   dist/ligne-libre.html             fragment HTML à intégrer dans une page hôte (sans doctype/head/body)
 #   dist/ligne-libre-standalone.html  document HTML complet (à ouvrir dans un navigateur)
 #   dist/test.html                    copie du standalone pour les tests Playwright
 #   dist/bundle.js                    JS seul (vérification de syntaxe : node --check)

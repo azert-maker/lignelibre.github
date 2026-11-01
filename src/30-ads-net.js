@@ -62,12 +62,12 @@ const Ads=(()=>{
 
 /* =====================================================================
    RÉSEAU · multijoueur en direct
-   - Dans Claude : capacité « room » (salons nommés, présence ~30 Hz)
+   - Sur une plateforme hôte compatible : capacité « room » (salons nommés, présence ~30 Hz)
    - Ailleurs : serveur WebSocket autonome (server.js), NET_CONFIG.wsUrl
    Chaque joueur publie son état (position, score…) ; les autres sont
    affichés en fantômes (pas de collision entre joueurs).
 ===================================================================== */
-/* --- MULTI LOCAL ÉCOLE (même Wi-Fi, 2 à 4 joueurs, sans Claude) -----------------
+/* --- MULTI LOCAL ÉCOLE (même Wi-Fi, 2 à 4 joueurs, sans plateforme hôte) ---------
    Serveur : fichier server.js à côté du jeu (Node 18+).
      1. Sur le PC « serveur » :  npm install ws   puis   node server.js
      2. Il affiche son adresse, ex. ws://192.168.1.23:8080 (IP du PC sur le Wi-Fi).
@@ -81,7 +81,7 @@ const Ads=(()=>{
    de chaque joueur du salon 15 fois/s (peers) et la liste des salons (lobby).
    Pas de chat : seuls pseudo, couleurs, position et score circulent.
    Échec fréquent : pare-feu Windows du PC serveur (autoriser Node sur réseau
-   privé), Wi-Fi d'école qui isole les appareils, ou page ouverte dans Claude.
+   privé), Wi-Fi d'école qui isole les appareils, ou page servie en https.
 --------------------------------------------------------------------------------- */
 const NET_CONFIG={wsUrl:new URLSearchParams(location.search).get('ws')||load('ll3_ws','')||(profile.settings&&profile.settings.wsUrl)||''};
 const Net=(()=>{
@@ -89,8 +89,8 @@ const Net=(()=>{
   const api={get kind(){return kind},get code(){return code},get inRoom(){return !!code},get error(){return lastErr},
     onReady(cb){if(done)cb(kind);else readyCbs.push(cb)},
     onLobby(cb){lobbyPeersCb=cb},onRoom(cb){roomPeersCb=cb},
-    lobbyPresence(o){if(kind==='claude'&&lobby)lobby.presence(o).catch(()=>{})},
-    async join(c){code=c;if(kind==='claude'){room=await lobby.join('ll-'+c);room.onPeers(ch=>{roomPeersCb&&roomPeersCb(norm(ch.peers))});return true}
+    lobbyPresence(o){if(kind==='host'&&lobby)lobby.presence(o).catch(()=>{})},
+    async join(c){code=c;if(kind==='host'){room=await lobby.join('ll-'+c);room.onPeers(ch=>{roomPeersCb&&roomPeersCb(norm(ch.peers))});return true}
       if(kind==='ws'){wsSend({t:'join',room:c,id:myId});return true}return false},
     async leave(){if(room){try{await room.leave()}catch(e){}room=null}if(kind==='ws'&&code)wsSend({t:'leave'});code=null;roomPeersCb&&roomPeersCb([])},
     state(o){if(!code)return;if(room)room.presence(o).catch(()=>{});else if(kind==='ws')wsSend({t:'state',s:o})},
@@ -105,7 +105,7 @@ const Net=(()=>{
   function wsSend(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
   function openWs(url,cb){let opened=false,settled=false;const fin=ok=>{if(settled)return;settled=true;cb&&cb(ok)};
     try{if(ws){ws.onclose=null;ws.close()}}catch(e){}
-    try{ws=new WebSocket(url)}catch(e){lastErr='Connexion refusée par le navigateur (page ouverte dans Claude ou adresse bloquée).';return fin(false)}
+    try{ws=new WebSocket(url)}catch(e){lastErr='Connexion refusée par le navigateur (page en https ou adresse bloquée).';return fin(false)}
     const to=setTimeout(()=>{if(!opened){lastErr='Pas de réponse du serveur. Vérifie que server.js tourne et que le pare-feu (souvent celui du Wi-Fi d\'école) laisse passer le port.';try{ws.close()}catch(e){}fin(false)}},5000);
     ws.onopen=()=>{opened=true;clearTimeout(to);lastErr='';kind='ws';done=true;readyCbs.forEach(f=>f('ws'));readyCbs=[];fin(true)};
     ws.onerror=()=>{if(!opened){clearTimeout(to);lastErr='Impossible de joindre '+url+'. Serveur éteint, mauvaise adresse IP ou réseau filtré (pare-feu de l\'école).';fin(false)}};
@@ -116,7 +116,7 @@ const Net=(()=>{
     ws.onclose=()=>{if(kind==='ws'&&opened){kind=null;lastErr='Connexion au serveur perdue.'}}}
   (async()=>{
     try{if(window.claude&&typeof claude.use==='function'){const r=await claude.use('room');
-      if(r){lobby=r;lobby.onPeers(ch=>{lobbyPeersCb&&lobbyPeersCb(norm(ch.peers))});return ready('claude')}}}catch(e){}
+      if(r){lobby=r;lobby.onPeers(ch=>{lobbyPeersCb&&lobbyPeersCb(norm(ch.peers))});return ready('host')}}}catch(e){}
     if(NET_CONFIG.wsUrl){openWs(NET_CONFIG.wsUrl,ok=>{if(!ok)ready(null)});return}
     ready(null)})();
   return api})();

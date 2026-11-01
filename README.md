@@ -123,7 +123,7 @@ python3 -m http.server 8000 --directory dist/site
 |---|---|
 | `dist/site/` | the GitHub Pages site: `index.html` (with Content-Security-Policy), `404.html`, `.nojekyll` |
 | `dist/ligne-libre-standalone.html` | complete document to open from disk |
-| `dist/ligne-libre.html` | fragment for embedding as a claude.ai artifact |
+| `dist/ligne-libre.html` | HTML fragment (no doctype/head/body) for embedding in a host page |
 | `dist/test.html`, `dist/bundle.js` | used by tests and lint |
 
 ### Configuration
