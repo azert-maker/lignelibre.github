@@ -254,5 +254,5 @@ MODES.motocross=function(cfg,look,ctx){
     netState(){return {p:[+St.pos.x.toFixed(2),+St.pos.y.toFixed(2),+St.pos.z.toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
     ghost(lk){const o=buildMoto(lk);o.human.pose({crouch:.65,lean:.85,back:.9,spread:.18,stance:0});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.8;o.add(tag);root.add(o);return o},
     overStats(){return [['Figures',stats.tricks||0],['Meilleure figure',stats.best||'—'],['Plus haut / plus loin',stats.maxH.toFixed(1)+' m / '+Math.round(stats.maxDist)+' m'],['Big airs',stats.bigAir],['Vitesse max',Math.round(stats.vmax)+' km/h']]},
-    _h:groundH,_root:root,_rig:rig,_st:()=>St,_park:()=>park,_lines:()=>lines,_C:()=>C,_world(){},
+    _h:groundH,_root:root,_rig:rig,_dust:dust,_st:()=>St,_park:()=>park,_lines:()=>lines,_C:()=>C,_world(){},
     dispose(){if(ENG){try{ENG.g.gain.value=0;ENG.o1.stop();ENG.o2.stop();ENG.g.disconnect()}catch(e){}}scene.remove(root);disposeTree(root)}}};

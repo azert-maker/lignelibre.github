@@ -221,5 +221,5 @@ MODES.parkour=function(cfg,look,ctx){
     netState(){return {p:[+St.pos.x.toFixed(2),+St.pos.y.toFixed(2),+St.pos.z.toFixed(2)],q:human.quaternion.toArray().map(v=>+v.toFixed(3))}},
     ghost(lk){const o=buildHuman(lk);o.snapPose({crouch:.2,lean:.3,stance:0});const tag=textSprite(lk.name,lk.accent,3);tag.position.y=2.3;o.add(tag);root.add(o);return o},
     overStats(){return [['Mouvements',stats.moves],['Meilleur',stats.best||'—'],['Sauts de toit (max)',stats.gaps+' ('+stats.maxGap.toFixed(1)+' m)'],['Vaults / wallruns',stats.vaults+' / '+stats.wallruns],['Flow continu max',stats.flowMax.toFixed(1)+' s']]},
-    _h:(x,z)=>groundTop(x,z,1e9),_root:root,_rig:rig,_st:()=>St,_boxes:()=>boxes,_world(){},
+    _h:(x,z)=>groundTop(x,z,1e9),_root:root,_rig:rig,_dust:dust,_st:()=>St,_boxes:()=>boxes,_world(){},
     dispose(){scene.remove(root);disposeTree(root)}}};
