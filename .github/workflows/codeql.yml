@@ -1,0 +1,35 @@
+# Static security analysis of the JavaScript sources (game, LAN server, tests).
+# Free on public repositories; on a private repository it needs GitHub Advanced Security.
+name: CodeQL
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * 1"
+permissions:
+  contents: read
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          build-mode: none
+          queries: security-extended
+          config: |
+            paths-ignore:
+              - archive
+              - dist
+              - node_modules
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:javascript-typescript
