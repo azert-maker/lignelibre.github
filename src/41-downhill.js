@@ -211,7 +211,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
     netState(){const a=at(L.s,L.o);return {p:[+a[0].toFixed(2),+a[1].toFixed(2),+a[2].toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
     ghost(lk){const o=buildLongboard(lk);if(!luge)o.human.pose({crouch:.6,lean:.7,twist:.8,back:.5});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.4;o.add(tag);root.add(o);return o},
     overStats(){return [['Distance',(stats.dist/1000).toFixed(2)+' km'],['Vitesse max',Math.round(stats.vmax)+' km/h'],['Virages propres',stats.turnsClean],['Slides',stats.slides],['Temps',fmtT(stats.time)]]},
-    _rig:rig,_L:()=>L,_recX:()=>L.s,_world:(f,all)=>{updateChunks(f.e,!!all);peaks.position.set(f.p.x,f.p.y-160,f.p.z)},dispose(){scene.remove(root);disposeTree(root)}
+    _rig:rig,_dust:dust,_L:()=>L,_recX:()=>L.s,_world:(f,all)=>{updateChunks(f.e,!!all);peaks.position.set(f.p.x,f.p.y-160,f.p.z)},dispose(){scene.remove(root);disposeTree(root)}
   };
 }};
 MODES.longboard=makeRoadMode('board');

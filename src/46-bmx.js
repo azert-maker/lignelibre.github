@@ -260,5 +260,5 @@ MODES.bmx=function(cfg,look,ctx){
     netState(){return {p:[+St.pos.x.toFixed(2),+St.pos.y.toFixed(2),+St.pos.z.toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
     ghost(lk){const o=buildBmx(lk);o.human.pose({crouch:.8,lean:1,back:.85,spread:.12,stance:0});const tag=textSprite(lk.name,lk.accent,3);tag.position.y=2.4;o.add(tag);root.add(o);return o},
     overStats(){return [['Figures',stats.tricks||0],['Meilleure figure',stats.best||'—'],['Plus haut',stats.maxH.toFixed(1)+' m'],['Grinds / manual max',stats.grinds+' / '+stats.maxManual.toFixed(1)+' s'],['Combo max','×'+String(stats.comboMax||1).replace('.',',')]]},
-    _h:groundH,_root:root,_rig:rig,_st:()=>St,_park:()=>park,_lines:()=>lines,_world(){},
+    _h:groundH,_root:root,_rig:rig,_dust:dust,_st:()=>St,_park:()=>park,_lines:()=>lines,_world(){},
     dispose(){scene.remove(root);disposeTree(root)}}};

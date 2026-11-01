@@ -110,7 +110,7 @@ function crashSimStep(S_,dt){
     const gy=S_.ground(S_.C.x,S_.C.z);
     if(S_.C.y<gy+reach){S_.C.y=gy+reach;
       if(S_.V.y<-1.2){S_.bounces++;S_.V.y*=-.32;S_.V.x*=.62;S_.V.z*=.62;S_.W.multiplyScalar(.55);if(state==='over'){sfx.thud(Math.min(1,.25+Math.abs(S_.V.y)*.12));camShake(.18)}
-        if(typeof dust!=='undefined'&&dust&&dust.spawn)for(let k=0;k<6;k++)dust.spawn(S_.C.x,gy+.05,S_.C.z,(Math.random()-.5)*2,.5+Math.random(),(Math.random()-.5)*2,.7,.8,.78,.72)}
+        /* poussière à chaque rebond : particules du sport en cours (avant 0.23.3 la variable globale visée n'existait pas) */const dust=cur&&cur._dust;if(dust&&dust.spawn)for(let k=0;k<6;k++)dust.spawn(S_.C.x,gy+.05,S_.C.z,(Math.random()-.5)*2,.5+Math.random(),(Math.random()-.5)*2,.7,.8,.78,.72)}
       else{S_.V.y=Math.max(0,S_.V.y);const f=Math.exp(-4.5*h);S_.V.x*=f;S_.V.z*=f;S_.W.multiplyScalar(Math.exp(-8*h));
         /* une fois posé, le corps bascule à plat (dos ou ventre) */
         S_.onG=true}}
