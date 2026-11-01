@@ -21,23 +21,33 @@ const { WebSocketServer } = require('ws');
 const PORT = +process.env.PORT || 8080;
 const MAX_STATE = 4096;           // octets max par état de joueur
 const MAX_PER_ROOM = 4;            // 2 à 4 joueurs (mode école)
+const MAX_CLIENTS = 64;            // connexions simultanées (réseau local)
+const MAX_ROOMS = 32;
+const MAX_MSG_PER_SEC = 40;        // le jeu envoie ~15 états/s ; au-delà : message ignoré
+const MAX_PAYLOAD = MAX_STATE + 512;
 const rooms = new Map();          // code -> Map(id -> {ws, s})
-const wss = new WebSocketServer({ port: PORT });
+// maxPayload : ws refuse (et ferme) un message plus gros AVANT de le garder en mémoire (défaut de ws : 100 Mio)
+const wss = new WebSocketServer({ port: PORT, maxPayload: MAX_PAYLOAD });
 
 const clean = v => String(v || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 12);
 
 wss.on('connection', ws => {
-  ws.room = null; ws.pid = null;
-  ws.on('message', buf => {
-    if (buf.length > MAX_STATE + 200) return;
+  if (wss.clients.size > MAX_CLIENTS) { ws.close(1013, 'serveur plein'); return; }
+  ws.room = null; ws.pid = null; ws.win = 0; ws.n = 0;
+  ws.on('error', () => {});
+  ws.on('message', (buf, isBinary) => {
+    if (isBinary || buf.length > MAX_STATE + 200) return;
+    const now = Date.now(); if (now - ws.win > 1000) { ws.win = now; ws.n = 0; } if (++ws.n > MAX_MSG_PER_SEC) return;
     let m; try { m = JSON.parse(buf); } catch { return; }
+    if (!m || typeof m !== 'object') return;
     if (m.t === 'join') {
       leave(ws);
       const code = clean(m.room), id = clean(m.id) || Math.random().toString(36).slice(2, 10);
       if (!code) return;
-      if (!rooms.has(code)) rooms.set(code, new Map());
+      if (!rooms.has(code)) { if (rooms.size >= MAX_ROOMS) return ws.send(JSON.stringify({ t: 'full' })); rooms.set(code, new Map()); }
       const r = rooms.get(code);
       if (r.size >= MAX_PER_ROOM) return ws.send(JSON.stringify({ t: 'full' }));
+      if (r.has(id)) return ws.send(JSON.stringify({ t: 'full' })); // identifiant déjà pris : pas d'usurpation d'un autre joueur
       ws.room = code; ws.pid = id; r.set(id, { ws, s: {} });
     } else if (m.t === 'state' && ws.room) {
       const r = rooms.get(ws.room); const me = r && r.get(ws.pid);
