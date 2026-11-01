@@ -7,6 +7,7 @@ function buildSnowboard(look){const g=new THREE.Group();
   const board=new THREE.Mesh(new THREE.BoxGeometry(.29,.03,1.56),new THREE.MeshLambertMaterial({color:look.deck}));board.position.y=.015;g.add(board);
   for(const z of [-.78,.78]){const tip=new THREE.Mesh(new THREE.BoxGeometry(.27,.03,.14),board.material);tip.position.set(0,.05,z+(z>0?.05:-.05));tip.rotation.x=z>0?-.45:.45;g.add(tip)}
   const bm=new THREE.MeshLambertMaterial({color:0x15191e});for(const z of [-.24,.24]){const b=new THREE.Mesh(new THREE.BoxGeometry(.24,.06,.12),bm);b.position.set(0,.06,z);g.add(b)}
+  if(!look.proc&&typeof dressSnowboard==='function'&&GLB.ready){try{dressSnowboard(g,look)}catch(e){GLB.err='dressSnowboard: '+e.message}}
   const human=buildHuman(look);human.position.y=.03;g.add(human);g.human=human;return g}
 const SB_HIT=[[0,.03,-.8],[0,.03,.8],[0,1.65,0],[0,1.0,-.3],[0,1.0,.3],[0,.05,-.4],[0,.05,0],[0,.05,.4],[0,.55,0]].map(v3);// spatule, talon, tête, mains, planche (3 pts), genoux
 MODES.snowboard=function(cfg,look,ctx){

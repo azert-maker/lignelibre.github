@@ -122,3 +122,48 @@ function dressMoto(g,L,numTex){
   const ud=N('moto_front').userData;/* les extras donnent le pivot des leviers ; la main se pose ~9 cm plus à l'extérieur, sur la poignée */
   m.grips=[ud.gripL,ud.gripR].map(a=>a?new THREE.Vector3(a[0]+Math.sign(a[0])*.09,a[1]-.015,a[2]).sub(pF):null);
   g.glbMoto=true;return true}
+
+/* Équipement de glisse et voilure (assets/blender/gear.py) : chaque pièce a son origine là où le jeu la pose ;
+   les planches de longueur variable (longboard, wakeboard) sont modélisées sur 1 m et étirées en z.
+   Les maillages procéduraux restent dans le groupe, masqués : en cas d'échec, rien ne change. */
+function gearMats(map){const cache=new Map();
+  return src=>{if(cache.has(src))return cache.get(src);const nm=src.name||'',d=map[nm],col=d&&d.vc?0xffffff:d&&d.c!=null?d.c:(src.color?src.color.getHex():0xffffff);
+    const m=d&&d.phong?new THREE.MeshPhongMaterial({color:col,shininess:d.phong,specular:d.spec??0x555555,side:THREE.DoubleSide}):new THREE.MeshLambertMaterial({color:col,side:THREE.DoubleSide,vertexColors:!!(d&&d.vc)});
+    cache.set(src,m);return m}}
+function gearPut(name,parent,mats,x,y,z,ry){const gl=GLB.models.gear,src=gl&&gl.scene.getObjectByName(name);if(!src)return null;
+  const o=src.clone(true);o.position.set(x||0,y||0,z||0);o.quaternion.identity();o.rotation.set(0,ry||0,0);o.scale.set(1,1,1);
+  o.traverse(m=>{if(m.isMesh){m.material=Array.isArray(m.material)?m.material.map(mats):mats(m.material);m.castShadow=true}});parent.add(o);return o}
+function gearHide(g,keep){for(const c of g.children)if(c.isMesh&&!keep.includes(c))c.visible=false}
+function gearHas(...n){const gl=GLB.models.gear;return !!gl&&n.every(k=>gl.scene.getObjectByName(k))}
+const darker=(c,k)=>new THREE.Color(c).multiplyScalar(k).getHex();
+
+function dressLongboard(g,L,deckY){
+  if(!gearHas('lb_deck','lb_truck','lb_wheel'))return false;const len=g.len;
+  const mats=gearMats({deck:{c:L.deck,phong:50},grip:{c:0x1f2023},ply:{c:0xc9a06a},metal:{c:0xb4bac2,phong:90,spec:0x999999},bushing:{c:L.accent},wheel:{c:L.wheel,phong:20,spec:0x222222},core:{c:0xe8e6e0}});
+  gearHide(g,[]);const d=gearPut('lb_deck',g,mats,0,deckY+.012,0);d.scale.z=len;
+  for(const s of [-1,1]){const z=s*(len/2-.15);gearPut('lb_truck',g,mats,0,.035,z,s>0?Math.PI:0);
+    for(const x of [-.13,.13])gearPut('lb_wheel',g,mats,x,.035,z,x<0?Math.PI:0)}
+  g.glbGear=true;return true}
+function dressSnowboard(g,L){
+  if(!gearHas('sb_board','sb_binding'))return false;
+  const mats=gearMats({top:{c:L.deck,phong:60},base:{c:darker(L.deck,.35),phong:40},edge:{c:0xa8aeb5,phong:100,spec:0xaaaaaa},binding:{c:0x16191d},metal:{c:0xb4bac2,phong:90},strap:{c:L.accent}});
+  /* la planche affleure la neige comme l'ancienne (dessus à ~3 cm) */
+  gearHide(g,[]);gearPut('sb_board',g,mats,0,.015,0);
+  for(const z of [-.24,.24])gearPut('sb_binding',g,mats,0,.034,z);g.glbGear=true;return true}
+function dressWake(g,L){
+  if(!gearHas('wk_board','wk_binding','wk_handle'))return false;const len=g.len;
+  const mats=gearMats({board:{c:L.boardCol??0xf3f1ea,phong:60},boardbase:{c:0x2a2f36},lace:{c:L.accent},fin:{c:0x101215},boot:{c:0x1e2229},grip_h:{c:0x14161a},rope:{c:0xfff1a8}});
+  gearHide(g,[]);const b=gearPut('wk_board',g,mats,0,.012,0);b.scale.z=len;
+  for(const z of [-.27,.27])gearPut('wk_binding',g,mats,0,.036,z);
+  /* palonnier : le modèle a la barre en z et la patte d'oie vers +x ; une fois tourné, son +z vise la corde (lookAt) */
+  const h=new THREE.Group();g.add(h);gearPut('wk_handle',h,mats,0,0,0,-Math.PI/2);h.userData.aim=true;
+  if(g.handle)g.handle.visible=false;g.handle=h;g.glbGear=true;return true}
+function dressFlyer(g,L,colAt){
+  if(!gearHas('ws_arms','ws_legs')||!g.wing)return false;
+  const mats=gearMats({wing:{vc:true},rib:{c:0x2a2d33},inlet:{c:0x0e1013}});
+  const w=new THREE.Group();
+  for(const [n,leg] of [['ws_arms',0],['ws_legs',1]]){const o=gearPut(n,w,mats,0,0,0);if(!o)return false;
+    o.traverse(m=>{if(!m.isMesh)return;const p=m.geometry.attributes.position,c=new Float32Array(p.count*3),v=new THREE.Vector3();
+      m.geometry=m.geometry.clone();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);const cc=colAt(v,leg);c[i*3]=cc.r;c[i*3+1]=cc.g;c[i*3+2]=cc.b}
+      m.geometry.setAttribute('color',new THREE.BufferAttribute(c,3))})}
+  g.wing.visible=false;g.add(w);g.wing=w;g.glbGear=true;return true}

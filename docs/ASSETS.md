@@ -7,8 +7,8 @@
 3. **Export** : GLB dans `assets/glb/` (Y en haut, sans textures, normales lissées, animations en actions séparées).
 4. **Build** : `build.sh` embarque chaque GLB en base64 dans `17-assets.js` (fichier généré, non versionné). Le jeu reste un fichier HTML unique.
 5. **Chargement** : `18-glb.js` décode les GLB au démarrage (≈ 60 ms) ; le jeu démarre sans les attendre puis reconstruit la scène de démo.
-6. **Intégration** : `dressHuman` (personnage) et `dressBmx` (vélo) habillent les rigs du jeu ; repli procédural automatique si un modèle manque.
-7. **Vérification** : `node tests/glb.js` (15 contrôles : chargement, 7 sports, squelette unique, synchronisation des os, IK, LOD, clips, repli).
+6. **Intégration** : `dressHuman` (personnage), `dressBmx` (vélo), `dressMoto` et les fonctions d'équipement (`dressLongboard`, `dressSnowboard`, `dressWake`, `dressFlyer`) habillent les rigs du jeu ; repli procédural automatique si un modèle manque.
+7. **Vérification** : `node tests/glb.js` (24 contrôles : chargement, 7 sports, squelette unique, synchronisation des os, IK, LOD, clips, équipement, repli).
 
 Conventions : mètres ; dans Blender Z en haut, le personnage regarde +X, son côté « 0 » est en +Y ; matériaux nommés pour être recolorés par le profil du joueur (`skin`, `accent`, `suit`, `helmet`, `shoe`, `frame`, `rim`, `grip`).
 
@@ -21,13 +21,14 @@ Conventions : mètres ; dans Blender Z en haut, le personnage regarde +X, son c�
 | Moto motocross (fournie) | `assets/glb/moto.glb` | 13 642 (carrosserie 6 046, avant 2 548, roues 2 020 + 3 028) | 5 : Body (recolorée), Metal, Black Metal, Rubber, Decale (numéro du joueur) | 560 Ko | pièces rigides sur les groupes de 47-moto.js, pivots en extras glTF | animées par le jeu : roues, fourche, direction, whip | ✅ intégrée et testée |
 | Machine à pinces (fournie) | `assets/glb/claw.glb` | 22 579 (meuble 10 791, mécanisme 1 034, 15 peluches) | textures 512 px WEBP | 777 Ko | nœuds barre > chariot > tête > 3 doigts | animée par le jeu (déplacement, descente, ouverture) | ✅ intégrée et testée |
 | Modules de snowpark (fournis) | `assets/glb/snowpark.glb` | 210 à 2 500 par module (8 modules) | 1 texture « trim » 256×512 | 631 Ko | aucun | statiques | ✅ intégrés (rails du snowboard, décor Whistler) |
+| Équipement de glisse et voilure | `assets/glb/gear.glb` | 13 960 au total : plateau 2 152, truck 708, roue 440, snowboard 2 336, fixation 1 436, wakeboard 2 936, chausson 948, palonnier 420, voilure bras 1 840 + jambes 744 (soit ≈ 5 300 par sport de glisse) | 21 nommés et recolorés : deck, grip, ply, bushing, wheel, top, base, edge, strap, board, lace, wing (couleurs par sommet selon le motif)… | 296 Ko | pièces rigides posées sur le rig (`dressLongboard`, `dressSnowboard`, `dressWake`, `dressFlyer`) ; plateau et wakeboard modélisés sur 1 m et étirés à la longueur de la planche | aucune ; battement de la voilure et orientation du palonnier faits par le jeu | ✅ 0.24, testé en jeu |
 | BMX freestyle | `assets/glb/bmx.glb` | 7 678 (cadre 2 230, avant 1 148, roues 1 868 ×2, pédalier 564) | 7 : frame, chrome, dark, tire, rim, grip, seat | 144 Ko | pièces rigides sur les pivots du jeu (tailwhip, barspin, axes, boîtier) | animées par le jeu : roues, pédalier, tailwhip, barspin, braquage | ✅ v1, testé en jeu |
 
 Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé pour « Carbone » avec une teinte sombre brillante) et `helmet_open` (bol, cheveux visibles).
 
 ## Rendus de contrôle
 
-`assets/renders/` : `helmet_front.jpg` et `helmet_34.jpg` (casque intégral v2), `rider_34.jpg` (trois-quarts), `rider_face.jpg` (visage sans casque), `rider_celebrate.jpg` (clip), `bmx_side.jpg`, `bmx_34.jpg`.
+`assets/renders/` : `helmet_front.jpg` et `helmet_34.jpg` (casque intégral v2), `rider_34.jpg` (trois-quarts), `rider_face.jpg` (visage sans casque), `rider_celebrate.jpg` (clip), `bmx_side.jpg`, `bmx_34.jpg`, `gear_34.jpg` (longboard, snowboard, wakeboard et palonnier, voilure).
 
 ## Licences
 
@@ -66,9 +67,9 @@ Le 28 octobre, le propriétaire du projet a confirmé que ces modèles sont libr
 
 | # | Asset | Sport | Pourquoi | Contraintes | Remplaçant actuel |
 |---|---|---|---|---|---|
-| 1 | Planches (longboard, snowboard, wakeboard) + corde et palonnier | Downhill, Snowboard, Wakeboard | l'équipement est sous les yeux en permanence | < 3 000 triangles chacune, pivots des pieds, couleur recolorable | boîtes procédurales |
+| 1 | ~~Planches (longboard, snowboard, wakeboard) + palonnier~~ | Downhill, Snowboard, Wakeboard | fait en 0.24 (`gear.glb`) | | |
 | 2 | Clips Blender de réception et de chute | tous | rendre la compression et la chute plus organiques | 19 os du rig, 0,3 à 1 s, en place | ressort procédural + corps rigide |
-| 3 | Combinaison wingsuit (voilure entre bras et jambes) | Wingsuit | le rider ressemble à un piéton en vol | même squelette, voilure pondérée sur bras et jambes | rider standard bras écartés |
+| 3 | Combinaison wingsuit skinnée (voilure pondérée sur bras et jambes) | Wingsuit | la voilure rigide de 0.24 ne se plie pas avec les bras en virage | même squelette, voilure pondérée sur bras et jambes | voilure rigide `ws_arms` / `ws_legs` (0.24) |
 | 4 | Kit Venice Beach (bowl, coping, bancs, poubelles, tags sous licence) | BMX | identité du lieu au sol | modules < 2 000 triangles, textures 512 | parc procédural + palmiers |
 | 5 | Kit toits de Paris (lucarnes, mansardes, cheminées à mitrons) | Parkour | silhouette Eiffel et couleurs en place, toits encore plats | modules instanciables | blocs procéduraux recolorés |
 | 6 | Bouées, ponton, phare | Wakeboard (Lake Havasu) | montagnes rouges, palmiers et pont en place | légers, eau existante | décor 0.23 |
@@ -79,7 +80,7 @@ Le 28 octobre, le propriétaire du projet a confirmé que ces modèles sont libr
 | Asset | Priorité | Statut |
 |---|---|---|
 | Moto MX (cadre, fourche télescopique, bras oscillant, moteur) | haute | ⚪ |
-| Longboard, snowboard, wakeboard (+ corde et palonnier) | haute | ⚪ |
+| Longboard, snowboard, wakeboard (+ palonnier) | haute | ✅ 0.24 |
 | Combinaison wingsuit skinnée | moyenne | ⚪ |
 | Tenues et protections par sport | moyenne | ⚪ |
 | Décors modulaires du skatepark (coping, bancs, rampes, graffitis sous licence) | haute (P1) | ⚪ |

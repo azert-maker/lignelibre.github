@@ -193,10 +193,11 @@ function buildHuman(look){
   g.snapPose({});return g}
 
 /* ---------- wingsuit (repère : avant = −z, dos = +y) ---------- */
-const FLY={sh:[[-.2,0,-.5],[.2,0,-.5]],el:[[-.55,0,-.42],[.55,0,-.42]],wr:[[-.86,0,-.32],[.86,0,-.32]],hp:[[-.11,0,.08],[.11,0,.08]],kn:[[-.24,0,.52],[.24,0,.52]],an:[[-.34,0,.96],[.34,0,.96]]};
+const FLY={sh:[[-.22,0,-.6],[.22,0,-.6]],el:[[-.52,0,-.58],[.52,0,-.58]],wr:[[-.8,0,-.56],[.8,0,-.56]],hp:[[-.11,0,.08],[.11,0,.08]],kn:[[-.24,0,.52],[.24,0,.52]],an:[[-.34,0,.96],[.34,0,.96]]};
 const v3=a=>new THREE.Vector3(a[0],a[1],a[2]);
 /* points de contact : casque, pieds, poignets, coudes, genoux, ventre (sphères de 10 cm) */
-const FLY_HIT=[[0,.04,-.82],FLY.an[0],FLY.an[1],FLY.wr[0],FLY.wr[1],FLY.el[0],FLY.el[1],FLY.kn[0],FLY.kn[1],[0,-.1,-.2]].map(v3);
+/* points de contact inchangés depuis 0.22 (les points FLY de la voilure suivent maintenant les os du rig) */
+const FLY_HIT=[[0,.04,-.82],FLY.an[0],FLY.an[1],[-.86,0,-.32],[.86,0,-.32],[-.55,0,-.42],[.55,0,-.42],FLY.kn[0],FLY.kn[1],[0,-.1,-.2]].map(v3);
 function limb(a,b,w,h,mat){const len=a.distanceTo(b);const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,len),mat);m.position.copy(a).add(b).multiplyScalar(.5);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),b.clone().sub(a).normalize());return m}
 function buildFlyer(look){
@@ -219,6 +220,7 @@ function buildFlyer(look){
   const cr=new THREE.Vector3(0,0,.2);tri(cr,P.kn[0],P.an[0],1);tri(cr,P.an[0],P.an[1],1);tri(cr,P.an[1],P.kn[1],1);tri(cr,P.hp[0],P.kn[0],1);tri(cr,P.kn[1],P.hp[1],1);
   const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));wg.setAttribute('color',new THREE.Float32BufferAttribute(col,3));wg.computeVertexNormals();
   const wmesh=new THREE.Mesh(wg,mWing);g.add(wmesh);g.wing=wmesh;
+  if(!L.proc&&typeof dressFlyer==='function'&&GLB.ready){try{dressFlyer(g,L,colAt)}catch(e){GLB.err='dressFlyer: '+e.message}}
   return g}
 
 /* ---------- longboard + rider ---------- */
@@ -229,7 +231,8 @@ function buildLongboard(look){
   const tm=new THREE.MeshLambertMaterial({color:0x9aa0a6}),wm=new THREE.MeshLambertMaterial({color:L.wheel});
   for(const z of [-(len/2-.15),len/2-.15]){const tr=new THREE.Mesh(new THREE.BoxGeometry(.22,.05,.06),tm);tr.position.set(0,.075,z);g.add(tr);
     for(const x of [-.13,.13]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.05,10),wm);w.rotation.z=Math.PI/2;w.position.set(x,.035,z);g.add(w)}}
-  const human=buildHuman(L);human.position.y=deck.position.y+.02;g.add(human);g.human=human;g.len=len;return g}
+  g.len=len;if(!L.proc&&typeof dressLongboard==='function'&&GLB.ready){try{dressLongboard(g,L,deck.position.y)}catch(e){GLB.err='dressLongboard: '+e.message}}
+  const human=buildHuman(L);human.position.y=deck.position.y+.02;g.add(human);g.human=human;return g}
 
 /* look compact pour le réseau (≤ 300 octets) */
 function packLook(L){return {n:String(L.name||'Rider').slice(0,16),s:L.skin,u:L.suit,a:L.accent,h:L.helmet,w1:L.wing1,w2:L.wing2,pt:L.pattern,d:L.deck,wh:L.wheel,b:L.boardCol,bx:L.bmxCol,mc:L.motoCol,g:L.gear,k:L.sk&&{s:L.sk.s||'',h:L.sk.h||''}}}

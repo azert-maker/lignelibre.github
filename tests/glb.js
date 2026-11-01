@@ -6,7 +6,7 @@ const L=require('./lib');
   const g=await p.evaluate(()=>({ready:__ll.GLB.ready,err:__ll.GLB.err,models:Object.keys(__ll.GLB.models).sort(),parse:__ll.GLB.stats.parseMs}));
   chk(g.ready&&!g.err,'GLB décodés sans erreur ('+g.models.join(', ')+', '+g.parse+' ms)');
   chk(['bmx','rider','rider_lo'].every(k=>g.models.includes(k)),'modèles rider, rider_lo, bmx présents');
-  for(const s of ['wingsuit','downhill','snowboard','bmx','motocross','wakeboard','parkour']){
+  for(const s of ['wingsuit','longboard','snowboard','bmx','motocross','wakeboard','parkour']){
     const r=await p.evaluate(s=>{__ll.profile.settings.quality='normal';__ll.startRun({sport:s,mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
       const c=__ll.cur;for(let i=0;i<90;i++)c.update(1/60,c.auto?c.auto():{x:0,y:1,a:false,g:false});
       const hs=[];__ll.cur._rig.traverse(n=>{if(n.isHuman)hs.push(n)});const h=hs[0];if(!h)return {none:true};
@@ -34,6 +34,24 @@ const L=require('./lib');
   chk(mo.glb,'motocross : moto Blender intégrée (carrosserie, avant, roues)');
   chk(mo.plate,'motocross : plaque numéro texturée');
   chk(mo.d.every(x=>x<.06),'motocross : mains sur les poignées ('+mo.d.map(x=>(x*100).toFixed(1)+' cm').join(', ')+')');
+  /* équipement Blender (gear.glb) : planches, fixations, palonnier, voilure ; repli procédural */
+  const ge=await p.evaluate(async()=>{const o={};
+    for(const s of ['longboard','snowboard','wakeboard','wingsuit']){await __ll.startRun({sport:s,mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;
+      for(let i=0;i<30;i++)c.update(1/60,c.auto?c.auto():{x:0,y:1,a:false,g:false});let g=null;c._rig.traverse(n=>{if(n.glbGear)g=n});
+      const names=[];g&&g.traverse(n=>{if(n.name&&/^(lb|sb|wk|ws)_/.test(n.name))names.push(n.name)});o[s]={ok:!!g,names:[...new Set(names)].sort()}}
+    /* longboard étiré à la longueur de la planche choisie */
+    const lb=buildLongboard(Object.assign({},__ll.profile.look,{gear:Object.assign({},__ll.profile.look.gear,{board:'drop105'})}));o.lbScale=lb.getObjectByName('lb_deck').scale.z;o.lbLen=lb.len;
+    /* palonnier orienté vers le bateau */
+    await __ll.startRun({sport:'wakeboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<30;i++)c.update(1/60,c.auto());
+    const h=c._rig.handle||(()=>{let x;c._rig.traverse(n=>{if(n.handle)x=n.handle});return x})();o.aim=!!(h&&h.userData.aim);
+    const fl=buildFlyer(Object.assign({},__ll.profile.look,{pattern:3}));let vc=0;fl.wing.traverse(n=>{if(n.isMesh&&n.geometry.attributes.color)vc++});o.wingVC=vc;
+    const pr=buildWake(Object.assign({},__ll.profile.look,{proc:true}));o.proc=!pr.glbGear&&!pr.getObjectByName('wk_board');return o});
+  chk(ge.longboard.ok&&['lb_deck','lb_truck','lb_wheel'].every(n=>ge.longboard.names.includes(n)),'longboard Blender ('+ge.longboard.names.join(', ')+')');
+  chk(ge.snowboard.ok&&ge.snowboard.names.includes('sb_board')&&ge.snowboard.names.includes('sb_binding'),'snowboard Blender ('+ge.snowboard.names.join(', ')+')');
+  chk(ge.wakeboard.ok&&['wk_board','wk_binding','wk_handle'].every(n=>ge.wakeboard.names.includes(n))&&ge.aim,'wakeboard Blender, palonnier tourné vers le bateau');
+  chk(ge.wingsuit.ok&&ge.wingsuit.names.includes('ws_arms')&&ge.wingsuit.names.includes('ws_legs')&&ge.wingVC>0,'voilure Blender colorée par motif ('+ge.wingVC+' maillages)');
+  chk(Math.abs(ge.lbScale-ge.lbLen)<1e-6&&ge.lbLen>1,'plateau étiré à la longueur de la planche ('+ge.lbLen+' m)');
+  chk(ge.proc,'équipement : repli procédural (look.proc)');
   /* éco : variante légère */
   const lo=await p.evaluate(()=>{__ll.profile.settings.quality='eco';__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
     let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});let t=0;h.glb.traverse(n=>{if(n.isMesh&&n.visible&&n.parent.visible){const g=n.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3}});__ll.profile.settings.quality='normal';return t});

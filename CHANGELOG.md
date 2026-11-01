@@ -1,5 +1,18 @@
 # Journal des versions · Ligne Libre
 
+## 0.24.0 · 1er novembre 2026 · Planches et voilure modélisées
+
+Équipement (nouveau modèle Blender `assets/glb/gear.glb`, script `assets/blender/gear.py`)
+- Longboard : plateau à concave et kicktails (dessous à la couleur du plateau, grip, tranche bois), trucks complets (platine, kingpin, gommes à la couleur d'accent, hanger, axe), roues à lèvre arrondie et noyau ; le plateau suit la longueur de la planche choisie.
+- Snowboard : ligne de cotes, spatule et talon relevés, cambre, carres métal ; fixations avec plateau, disque, talonnière, spoiler et deux sangles (couleur d'accent).
+- Wakeboard : rocker continu, quatre ailerons, bande centrale d'accent, chaussons fermés lacés ; le palonnier (barre gainée et patte d'oie) s'oriente vers le bateau.
+- Wingsuit : voilure gonflée en caissons (profil épais, nervures, entrées d'air) entre bras et corps et entre les jambes ; les quatre motifs du garage (uni, bicolore, dégradé, rayures) sont repris sur la nouvelle voilure.
+- La voilure (y compris celle de repli) suit maintenant les os des bras : elle flottait 10 à 25 cm derrière les bras. Les points de contact du wingsuit ne changent pas.
+- Repli automatique sur les anciennes formes si le modèle ne charge pas ou en mode procédural.
+
+Tests
+- `tests/glb.js` : 6 contrôles de plus (pièces présentes dans chaque sport, plateau étiré, palonnier orienté, couleurs de la voilure, repli). Le test utilisait l'identifiant `downhill` au lieu de `longboard` et vérifiait donc la scène de démo : corrigé.
+
 ## 0.23.3 · 1er novembre 2026 · Dépôt professionnel
 
 Dépôt

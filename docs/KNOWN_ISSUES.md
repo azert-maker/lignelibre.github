@@ -7,7 +7,7 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 1 | 🟠 | Performances avec les modèles Blender mesurées seulement en rendu logiciel (i/s en baisse de 2 à 30 % en éco, 25 à 45 % en haute) | mesurer sur vrais appareils ; si besoin, bascule automatique vers `rider_lo` puis vers le procédural quand la qualité auto descend |
 | 2 | 🟡 | Skatepark : ambiance Venice Beach en place (0.22), mais modules du parc encore procéduraux | kit Blender Venice (voir ASSETS.md) |
 | 3 | 🟡 | Le jeu a besoin d'internet au premier chargement (Three.js, GLTFLoader, SkeletonUtils, polices) | si GLTFLoader ne charge pas, le jeu reste jouable avec les modèles procéduraux ; option future : tout embarquer |
-| 4 | 🟡 | Fichier HTML : 4,5 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces) | compression Draco ou quantification des sommets à évaluer |
+| 4 | 🟡 | Fichier HTML : 5,8 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces, snowpark, équipement) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
 | 6 | ⚪ | Clip « celebrate » branché à l'arrivée avec médaille en parkour, snowboard et downhill (0.23) ; pas en BMX, motocross, wakeboard (rider assis ou tenu par la corde) | clip dédié sur véhicule |
 | 7 | 🟡 | IK des mains sur BMX et motocross seulement (wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains |
@@ -32,4 +32,6 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 26 | ⚪ | Profils existants : les pièces gagnées avec l'ancienne économie (bien plus généreuse) sont conservées | décision volontaire : rien n'est retiré au joueur |
 | 27 | ⚪ | Accueil : sur un écran très bas (moins de 390 px de haut), les boutons secondaires (Multijoueur, Garage…) demandent de faire défiler ; Jouer reste visible | mise en page dédiée si besoin |
 | 28 | ⚪ | Les choix de l'écran « Personnaliser » (météo, vent, longueur, monde) sont mémorisés par sport et repris par Jouer : penser à les remettre si on veut revenir aux réglages par défaut | bouton « par défaut » à ajouter si les joueurs s'y perdent |
-
+| 29 | ⚪ | Voilure du wingsuit rigide (0.24) : elle suit le corps mais ne se plie pas avec les bras quand le rider tourne ; les rayures sont adoucies par l'interpolation des couleurs par sommet | voilure skinnée sur le squelette du rider |
+| 30 | ⚪ | Snowboard en poudreuse : la planche disparaît dans la neige fraîche (voulu, comme avant 0.24) ; visible sur piste damée et en l'air | aucun |
+| 31 | 🟡 | Équipement : ≈ 5 300 triangles par sport de glisse, sans variante éco | décimer une variante éco si les mesures sur vrais appareils le demandent |
