@@ -1,5 +1,20 @@
 # Journal des versions · Ligne Libre
 
+## 0.23.3 · 1er novembre 2026 · Dépôt professionnel
+
+Dépôt
+- Sources du jeu déplacées dans `src/` (la racine ne contient plus que la configuration et la documentation) ; `build.sh` adapté, sortie identique.
+- Documents publics en anglais et remis à leur place : `CONTRIBUTING.md`, `SECURITY.md` et `CODE_OF_CONDUCT.md` avaient été mélangés (le guide de contribution contenait une copie du README).
+- Doublons retirés : `README_Version3.md`, workflow `.github/workflows/1v` (copie inactive de `pages.yml`), modèles d'issues Markdown par défaut (remplacés par les formulaires guidés, traduits en anglais).
+- README réécrit (anglais) ; image d'en-tête et image de partage (`docs/images/hero.jpg`, `social-preview.jpg`) sans interface.
+
+Qualité et sécurité
+- Lint de correction (ESLint) sur le jeu assemblé, le serveur et les tests ; a trouvé un vrai défaut : la poussière des rebonds de chute ne s'affichait jamais (variable inexistante), corrigé.
+- Installation verrouillée (`package-lock.json`, `npm ci`), `npm audit` en CI (0 vulnérabilité après mise à jour d'ESLint et correctif `minimatch`).
+- CI : lint, audit, concurrence ; nouveau workflow CodeQL (`security-extended`) ; Dependabot pour npm.
+- Serveur multijoueur local durci : messages limités à 4,5 Ko avant lecture (au lieu de 100 Mo par défaut), débit limité, nombre de clients et de salons plafonné, identifiant de joueur déjà pris refusé (usurpation impossible) ; test `tests/server.js`.
+- Version en ligne : politique de sécurité du contenu (CSP) et politique de référent, vérifiées sans erreur.
+
 ## 0.23.2 · 29 octobre 2026 · Départ immédiat, pièces toutes dorées
 
 Lancement d'une partie
