@@ -1,24 +1,37 @@
 {
   "name": "ligne-libre",
-  "version": "0.23.2",
+  "version": "0.23.3",
   "private": true,
-  "description": "Jeu de sports extrêmes arcade 3D (Three.js), un seul fichier HTML.",
+  "description": "Browser-based 3D extreme sports arcade game (Three.js), built as a single HTML file.",
   "license": "MIT",
   "scripts": {
     "build": "LL_COPY_PARENT=0 sh build.sh && node --check dist/bundle.js",
-    "test": "node tests/all.js && node tests/glb.js && node tests/land.js && node tests/claw.js && node tests/shopclaw.js && node tests/feel.js && node tests/econ.js && node tests/v023.js && node tests/ux.js",
+    "test": "node tests/server.js && node tests/all.js && node tests/glb.js && node tests/land.js && node tests/claw.js && node tests/shopclaw.js && node tests/feel.js && node tests/econ.js && node tests/v023.js && node tests/ux.js",
     "test:bmx": "node tests/bmx3.js",
     "test:input": "node tests/kb.js && node tests/touch.js",
     "test:perf": "node tests/perf.js && node tests/leak.js",
     "assets": "python3 assets/blender/rider.py --render && python3 assets/blender/rider.py --lo && python3 assets/blender/bmx.py --render",
-    "lan": "node server/server.js"
+    "lan": "node server/server.js",
+    "lint": "eslint dist/bundle.js server tests",
+    "check": "npm run build && npm run lint"
   },
   "devDependencies": {
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
     "playwright": "1.63.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/azert-maker/lignelibre.github"
   },
-  "homepage": "https://azert-maker.github.io/lignelibre.github/"
+  "homepage": "https://azert-maker.github.io/lignelibre.github/",
+  "optionalDependencies": {
+    "ws": "^8.22.1"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
+  }
 }
