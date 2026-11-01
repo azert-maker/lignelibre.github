@@ -82,7 +82,15 @@ function veniceDecor(root,SZ,seedI,eco){const R=rngAt(seedI,21,5),HS=SZ/2;
   /* sol du parc : béton clair avec joints de dilatation (texture répétée) */
   const jt=canvasTex(128,128,(c,w,h)=>{c.fillStyle='#a8a196';c.fillRect(0,0,w,h);for(let i=0;i<600;i++){c.fillStyle=`rgba(${80+Math.random()*60|0},${70+Math.random()*50|0},60,${Math.random()*.06})`;c.fillRect(Math.random()*w,Math.random()*h,2+Math.random()*6,2+Math.random()*6)}
     c.fillStyle='rgba(40,36,32,.7)';c.fillRect(0,0,w,3);c.fillRect(0,0,3,h);c.fillStyle='rgba(255,255,255,.15)';c.fillRect(0,2,w,1);c.fillRect(2,0,1,h)},true);
-  jt.wrapS=jt.wrapT=THREE.RepeatWrapping;jt.repeat.set((SZ+40)/4,(SZ+40)/4);return {floorMap:jt}}
+  jt.wrapS=jt.wrapT=THREE.RepeatWrapping;jt.repeat.set((SZ+40)/4,(SZ+40)/4);
+  /* mobilier Blender (venice.glb, chargé en tâche de fond) : mâts d'éclairage aux angles du parc ; lampadaires, bancs,
+     poubelles peintes et fontaines le long de la promenade. Purement décoratif, hors des zones roulables. */
+  if(typeof glbLoad==='function')glbLoad('venice').then(gl=>{if(!gl||!root.parent)return;const RM=rngAt(seedI,23,7);
+    const fl=[];for(const [sx,sz] of [[1,1],[1,-1],[-1,1],[-1,-1]]){const x=sx*(HS+8),z=sz*(HS+8);fl.push([x,0,z,Math.atan2(-x,-z),1])}
+    const lamps=[],benches=[],bins=[],fts=[];const BIN=[0x2b8fb3,0xf2a3b9,0xf9e08b,0x7ec8a0,0xff8a5c,0x9fd3e8];const X=HS+17.4,span=SZ*1.3,step=eco?20:13;
+    for(let z=-span;z<=span;z+=step){lamps.push([X,0,z,-Math.PI/2,1]);if(z+step<=span){const zm=z+step/2;benches.push([X+.2,0,zm-1.4,-Math.PI/2,1]);bins.push([X+.1,0,zm+.6,RM()*6.3,1,BIN[Math.floor(RM()*BIN.length)]]);if(RM()<.25)fts.push([X+.3,0,zm+2.2,-Math.PI/2,1])}}
+    glbInstances(gl,'vk_flood',fl,root,{shadow:!eco});glbInstances(gl,'vk_lamp',lamps,root);glbInstances(gl,'vk_bench',benches,root);glbInstances(gl,'vk_bin',bins,root,{tint:['bin']});glbInstances(gl,'vk_fountain',fts,root)});
+  return {floorMap:jt}}
 
 /* ---------- Lauterbrunnen (wingsuit) : décor par tronçon de vallée ---------- */
 let _chalet=null,_church=null;
@@ -138,3 +146,34 @@ function grandstandGeo(len){const P=[];const rows=6;for(let r=0;r<rows;r++)P.pus
 let _fogTex=null;function fogSeaTex(){if(_fogTex)return _fogTex;_fogTex=canvasTex(256,256,(c,w,h)=>{c.fillStyle='#e9eef3';c.fillRect(0,0,w,h);for(let i=0;i<70;i++){const x=Math.random()*w,y=Math.random()*h,r=18+Math.random()*50;const gr=c.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=gr;
   for(const dx of [-w,0,w])for(const dy of [-h,0,h]){c.beginPath();c.arc(x+dx,y+dy,r,0,7);c.fill()}}},true);_fogTex.wrapS=_fogTex.wrapT=THREE.RepeatWrapping;_fogTex.repeat.set(10,10);return _fogTex}
 function fogSea(){const m=new THREE.Mesh(new THREE.PlaneGeometry(3600,3600),new THREE.MeshBasicMaterial({map:fogSeaTex(),transparent:true,opacity:.96,depthWrite:false}));m.rotation.x=-Math.PI/2;m.renderOrder=1;return m}
+
+/* ---------- toits de Paris (parkour) : habillage des immeubles, visuel seul ----------
+   brisis en zinc à joints debout sur le dernier étage, corniche crème en dessous, lucarnes Blender sur les façades
+   dégagées ; les souches de cheminée (boîtes « chim » du jeu) reçoivent le modèle Blender avec ses mitrons. */
+function parisRoofs(root,roofs,o){const eco=!!o.eco,R=mulberry((o.seed||1)*7+3);
+  const seam=canvasTex(64,64,(c,w,h)=>{c.fillStyle='#8d98a3';c.fillRect(0,0,w,h);for(let i=0;i<220;i++){c.fillStyle=`rgba(255,255,255,${Math.random()*.06})`;c.fillRect(Math.random()*w,Math.random()*h,2,6)}
+    c.fillStyle='rgba(30,36,44,.55)';c.fillRect(0,0,3,h);c.fillStyle='rgba(255,255,255,.35)';c.fillRect(3,0,1,h)},true);
+  const zinc=new THREE.MeshLambertMaterial({map:seam}),cream=new THREE.MeshLambertMaterial({color:0xe6dcc6});
+  const ZP=[],ZU=[],CP=[];const BH=2.9,CH=.22,CD=.2;const dorm=[];
+  const quad=(A,p,U,u)=>{for(const k of [0,1,2,0,2,3]){A.push(...p[k]);if(U)U.push(...u[k])}};
+  for(const b of roofs){const {x0,x1,z0,z1,y1}=b,yb=y1-BH,e=.03;
+    /* 4 façades : [p0, p1, normale x, normale z, longueur] */
+    const F=[[[x0,z1+e],[x1,z1+e],0,1,x1-x0],[[x1,z0-e],[x0,z0-e],0,-1,x1-x0],[[x1+e,z1],[x1+e,z0],1,0,z1-z0],[[x0-e,z0],[x0-e,z1],-1,0,z1-z0]];
+    for(const [a,c,nx,nz,len] of F){const w=len/.5;
+      quad(ZP,[[a[0],yb,a[1]],[c[0],yb,c[1]],[c[0],y1,c[1]],[a[0],y1,a[1]]],ZU,[[0,0],[w,0],[w,1],[0,1]]);
+      /* corniche : boîte allongée sous le brisis */
+      const ox=nx*CD/2,oz=nz*CD/2,yc=yb-CH;const a2=[a[0]+ox*2,a[1]+oz*2],c2=[c[0]+ox*2,c[1]+oz*2];
+      quad(CP,[[a2[0],yc,a2[1]],[c2[0],yc,c2[1]],[c2[0],yb,c2[1]],[a2[0],yb,a2[1]]]);quad(CP,[[a[0],yb,a[1]],[a2[0],yb,a2[1]],[c2[0],yb,c2[1]],[c[0],yb,c[1]]]);quad(CP,[[a2[0],yc,a2[1]],[a[0],yc,a[1]],[c[0],yc,c[1]],[c2[0],yc,c2[1]]]);
+      /* lucarnes : seulement si la façade donne sur un vide (rue ou écart large), pas contre un voisin */
+      const n=Math.floor((len-2)/3.2);if(n<1)continue;const yaw=Math.atan2(nx,nz);
+      for(let i=0;i<n;i++){const t=(i+.5)/n,px=a[0]+(c[0]-a[0])*t,pz=a[1]+(c[1]-a[1])*t;
+        if(o.clear&&!o.clear(px+nx*2.2,pz+nz*2.2,y1))continue;dorm.push([px,yb+.15,pz,yaw,.92])}}}
+  const mk=(P,U,mat)=>{if(!P.length)return;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));if(U)g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));g.computeVertexNormals();const m=new THREE.Mesh(g,mat);m.receiveShadow=true;m.material.side=THREE.DoubleSide;root.add(m);return m};
+  /* budget : 90 lucarnes au plus (tirées au hasard), aucune en qualité éco */
+  if(eco)dorm.length=0;else{for(let i=dorm.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[dorm[i],dorm[j]]=[dorm[j],dorm[i]]}dorm.length=Math.min(dorm.length,90)}
+  mk(ZP,ZU,zinc);mk(CP,null,cream);
+  if(typeof glbLoad==='function')glbLoad('paris').then(gl=>{if(!gl||!root.parent)return;
+    glbInstances(gl,'pa_dormer',dorm,root);
+    if(o.chims&&o.chims.length&&o.chimMesh){const L=o.chims.map(b=>[(b.x0+b.x1)/2,b.y0,(b.z0+b.z1)/2,Math.floor(R()*4)*Math.PI/2,1]);
+      if(glbInstances(gl,'pa_chimney',L,root,{shadow:!eco}))o.chimMesh.visible=false}});
+  return {dormers:dorm.length}}

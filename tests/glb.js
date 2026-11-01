@@ -52,6 +52,20 @@ const L=require('./lib');
   chk(ge.wingsuit.ok&&ge.wingsuit.names.includes('ws_arms')&&ge.wingsuit.names.includes('ws_legs')&&ge.wingVC>0,'voilure Blender colorée par motif ('+ge.wingVC+' maillages)');
   chk(Math.abs(ge.lbScale-ge.lbLen)<1e-6&&ge.lbLen>1,'plateau étiré à la longueur de la planche ('+ge.lbLen+' m)');
   chk(ge.proc,'équipement : repli procédural (look.proc)');
+  /* décors 0.25 : skatepark habillé et mobilier de Venice (BMX), toits de Paris (parkour), relief de la route (chute du longboard) */
+  const dc=await p.evaluate(async()=>{const o={};
+    await __ll.startRun({sport:'bmx',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();await glbLoad('venice');await new Promise(r=>setTimeout(r,50));
+    let pd=null;const inst={};scene.traverse(n=>{if(n.name==='parkDress')pd=n;if(/_inst$/.test(n.name))inst[n.name]=n.children[0].count});
+    o.pipes=pd?pd.children.filter(m=>!m.material.map).length:0;o.tags=pd?pd.children.filter(m=>m.material.map).length:0;o.venice=inst;
+    await __ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();await glbLoad('paris');await new Promise(r=>setTimeout(r,50));
+    const pi={};let chimHidden=null;scene.traverse(n=>{if(/^pa_.*_inst$/.test(n.name))pi[n.name]=n.children[0].count});
+    const nChim=__ll.cur._boxes().filter(b=>b.t==='chim').length;scene.traverse(n=>{if(n.isInstancedMesh&&n.count===nChim&&n.material.color&&n.material.color.getHex()===0xa65a3f)chimHidden=!n.visible});o.paris=pi;o.nChim=nChim;o.chimHidden=chimHidden;
+    await __ll.startRun({sport:'longboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<120;i++)c.update(1/60,c.auto());
+    const v=new THREE.Vector3();c._rig.getWorldPosition(v);o.roadErr=typeof c._h==='function'?Math.abs(c._h(v.x,v.z)-v.y):9;return o});
+  chk(dc.pipes>=2&&dc.pipes<=3&&dc.tags>0,'skatepark : coping, cornières et garde-corps fusionnés ('+dc.pipes+' maillages) et '+dc.tags+' tags');
+  chk(['vk_flood_inst','vk_lamp_inst','vk_bench_inst','vk_bin_inst'].every(k=>dc.venice[k]>0),'Venice : mobilier Blender instancié ('+Object.entries(dc.venice).map(([k,v])=>k.slice(3,-5)+' '+v).join(', ')+')');
+  chk(dc.paris.pa_dormer_inst>0&&dc.paris.pa_dormer_inst<=90&&(dc.nChim===0||(dc.paris.pa_chimney_inst===dc.nChim&&dc.chimHidden)),'Paris : '+dc.paris.pa_dormer_inst+' lucarnes, '+(dc.paris.pa_chimney_inst||0)+' souches Blender à la place des '+dc.nChim+' boîtes');
+  chk(dc.roadErr<.02,'longboard : relief de la route exporté pour la chute physique (écart '+(dc.roadErr*100).toFixed(1)+' cm)');
   /* éco : variante légère */
   const lo=await p.evaluate(()=>{__ll.profile.settings.quality='eco';__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
     let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});let t=0;h.glb.traverse(n=>{if(n.isMesh&&n.visible&&n.parent.visible){const g=n.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3}});__ll.profile.settings.quality='normal';return t});

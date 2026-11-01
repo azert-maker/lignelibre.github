@@ -22,13 +22,15 @@ Conventions : mètres ; dans Blender Z en haut, le personnage regarde +X, son c�
 | Machine à pinces (fournie) | `assets/glb/claw.glb` | 22 579 (meuble 10 791, mécanisme 1 034, 15 peluches) | textures 512 px WEBP | 777 Ko | nœuds barre > chariot > tête > 3 doigts | animée par le jeu (déplacement, descente, ouverture) | ✅ intégrée et testée |
 | Modules de snowpark (fournis) | `assets/glb/snowpark.glb` | 210 à 2 500 par module (8 modules) | 1 texture « trim » 256×512 | 631 Ko | aucun | statiques | ✅ intégrés (rails du snowboard, décor Whistler) |
 | Équipement de glisse et voilure | `assets/glb/gear.glb` | 13 960 au total : plateau 2 152, truck 708, roue 440, snowboard 2 336, fixation 1 436, wakeboard 2 936, chausson 948, palonnier 420, voilure bras 1 840 + jambes 744 (soit ≈ 5 300 par sport de glisse) | 21 nommés et recolorés : deck, grip, ply, bushing, wheel, top, base, edge, strap, board, lace, wing (couleurs par sommet selon le motif)… | 296 Ko | pièces rigides posées sur le rig (`dressLongboard`, `dressSnowboard`, `dressWake`, `dressFlyer`) ; plateau et wakeboard modélisés sur 1 m et étirés à la longueur de la planche | aucune ; battement de la voilure et orientation du palonnier faits par le jeu | ✅ 0.24, testé en jeu |
+| Mobilier de Venice Beach | `assets/glb/venice.glb` | 988 : banc 108, poubelle 316, lampadaire 224, mât d'éclairage 200, fontaine 140 | 7 : concrete, wood, metal, bin (teinte par instance), binrim, glass, pole | 35 Ko | aucun | statique, instancié (`glbInstances`) | ✅ 0.25, BMX |
+| Toits de Paris | `assets/glb/paris.glb` | 376 : souche de cheminée 272 (même boîte que la collision), lucarne 104 | 6 : plaster, brick, pot, zinc, frame, glass | 18 Ko | aucun | statique, instancié | ✅ 0.25, parkour |
 | BMX freestyle | `assets/glb/bmx.glb` | 7 678 (cadre 2 230, avant 1 148, roues 1 868 ×2, pédalier 564) | 7 : frame, chrome, dark, tire, rim, grip, seat | 144 Ko | pièces rigides sur les pivots du jeu (tailwhip, barspin, axes, boîtier) | animées par le jeu : roues, pédalier, tailwhip, barspin, braquage | ✅ v1, testé en jeu |
 
 Variantes de casque dans `rider.glb` : `helmet_full` (intégral, aussi utilisé pour « Carbone » avec une teinte sombre brillante) et `helmet_open` (bol, cheveux visibles).
 
 ## Rendus de contrôle
 
-`assets/renders/` : `helmet_front.jpg` et `helmet_34.jpg` (casque intégral v2), `rider_34.jpg` (trois-quarts), `rider_face.jpg` (visage sans casque), `rider_celebrate.jpg` (clip), `bmx_side.jpg`, `bmx_34.jpg`, `gear_34.jpg` (longboard, snowboard, wakeboard et palonnier, voilure).
+`assets/renders/` : `helmet_front.jpg` et `helmet_34.jpg` (casque intégral v2), `rider_34.jpg` (trois-quarts), `rider_face.jpg` (visage sans casque), `rider_celebrate.jpg` (clip), `bmx_side.jpg`, `bmx_34.jpg`, `gear_34.jpg` (longboard, snowboard, wakeboard et palonnier, voilure), `venice_props.jpg`, `paris_props.jpg`.
 
 ## Licences
 
@@ -70,8 +72,8 @@ Le 28 octobre, le propriétaire du projet a confirmé que ces modèles sont libr
 | 1 | ~~Planches (longboard, snowboard, wakeboard) + palonnier~~ | Downhill, Snowboard, Wakeboard | fait en 0.24 (`gear.glb`) | | |
 | 2 | Clips Blender de réception et de chute | tous | rendre la compression et la chute plus organiques | 19 os du rig, 0,3 à 1 s, en place | ressort procédural + corps rigide |
 | 3 | Combinaison wingsuit skinnée (voilure pondérée sur bras et jambes) | Wingsuit | la voilure rigide de 0.24 ne se plie pas avec les bras en virage | même squelette, voilure pondérée sur bras et jambes | voilure rigide `ws_arms` / `ws_legs` (0.24) |
-| 4 | Kit Venice Beach (bowl, coping, bancs, poubelles, tags sous licence) | BMX | identité du lieu au sol | modules < 2 000 triangles, textures 512 | parc procédural + palmiers |
-| 5 | Kit toits de Paris (lucarnes, mansardes, cheminées à mitrons) | Parkour | silhouette Eiffel et couleurs en place, toits encore plats | modules instanciables | blocs procéduraux recolorés |
+| 4 | Kit Venice Beach : reste un vrai bowl en béton (coping, mobilier et tags faits en 0.25) | BMX | identité du lieu au sol | doit suivre le relief exact du parc | parc procédural habillé (0.25) |
+| 5 | ~~Kit toits de Paris (lucarnes, mansardes, cheminées à mitrons)~~ | Parkour | fait en 0.25 (`paris.glb` + brisis procédural) | | |
 | 6 | Bouées, ponton, phare | Wakeboard (Lake Havasu) | montagnes rouges, palmiers et pont en place | légers, eau existante | décor 0.23 |
 | 7 | Bottes de paille, bâches publicitaires sans marque, tour de chronométrage | Motocross (Glen Helen) | tribune et couleurs en place | instanciation | décor 0.23 |
 

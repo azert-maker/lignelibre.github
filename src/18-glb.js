@@ -10,7 +10,7 @@
 const GLB={ready:false,models:{},err:null,stats:{}};
 function b64ToBuf(s){const bin=atob(s),n=bin.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 /* modèles décodés seulement quand on en a besoin (la machine à pinces n'apparaît qu'au garage) */
-const GLB_LAZY=['claw','snowpark'];const GLB_PEND={};
+const GLB_LAZY=['claw','snowpark','venice','paris'];const GLB_PEND={};
 function glbLoad(n){if(GLB.models[n])return Promise.resolve(GLB.models[n]);if(GLB_PEND[n])return GLB_PEND[n];
   if(typeof ASSET_GLB==='undefined'||!ASSET_GLB[n]||!THREE.GLTFLoader)return Promise.resolve(null);
   return GLB_PEND[n]=new Promise(res=>{try{new THREE.GLTFLoader().parse(b64ToBuf(ASSET_GLB[n]),'',gl=>{GLB.models[n]=gl;res(gl)},e=>{GLB.err=n+': '+String(e&&e.message||e);res(null)})}catch(e){GLB.err=n+': '+e.message;res(null)}})}
@@ -167,3 +167,15 @@ function dressFlyer(g,L,colAt){
       m.geometry=m.geometry.clone();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);const cc=colAt(v,leg);c[i*3]=cc.r;c[i*3+1]=cc.g;c[i*3+2]=cc.b}
       m.geometry.setAttribute('color',new THREE.BufferAttribute(c,3))})}
   g.wing.visible=false;g.add(w);g.wing=w;g.glbGear=true;return true}
+
+/* Instancie un objet d'un GLB (chaque primitive devient un InstancedMesh) : list = [[x,y,z,yaw,échelle,teinte?], …].
+   matFor(nomMatériau, matériauSource) peut renvoyer un matériau de remplacement ; la teinte par instance s'applique
+   aux matériaux nommés dans tint. */
+function glbInstances(gl,name,list,root,o){o=o||{};const src=gl&&gl.scene.getObjectByName(name);if(!src||!list.length)return null;const grp=new THREE.Group();grp.name=name+'_inst';
+  src.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(src.matrixWorld).invert(),M4=new THREE.Matrix4(),L4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),c=new THREE.Color();
+  src.traverse(n=>{if(!n.isMesh)return;const nm=n.material.name||'';let mat=o.matFor&&o.matFor(nm,n.material);
+    if(!mat)mat=nm==='glass'?new THREE.MeshBasicMaterial({color:n.material.color||0xffffff}):new THREE.MeshLambertMaterial({color:n.material.color?n.material.color.getHex():0xffffff});
+    const tint=o.tint&&o.tint.includes(nm);if(tint)mat.color.set(0xffffff);
+    const im=new THREE.InstancedMesh(n.geometry,mat,list.length);L4.copy(inv).multiply(n.matrixWorld);
+    list.forEach((t,i)=>{q.setFromAxisAngle(Y,t[3]||0);const s=t[4]||1;M4.compose(new THREE.Vector3(t[0],t[1],t[2]),q,new THREE.Vector3(s,s,s)).multiply(L4);im.setMatrixAt(i,M4);if(tint)im.setColorAt(i,c.set(t[5]??0x2b8fb3))});
+    im.castShadow=!!o.shadow;grp.add(im)});root.add(grp);return grp}
