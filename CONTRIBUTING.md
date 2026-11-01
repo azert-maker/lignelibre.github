@@ -1,174 +1,80 @@
-# Ligne Libre
+# Contributing to Ligne Libre
 
-<p align="center">
-  <img src="docs/images/pieces-7-sports.jpg" alt="Ligne Libre" width="1000" />
-</p>
+Thanks for your interest. Ligne Libre is a browser game maintained by one person, so small, well-scoped contributions are the ones that land.
 
-<p align="center">
-  <a href="https://azert-maker.github.io/lignelibre.github/">
-    <img alt="Play now" src="https://img.shields.io/badge/PLAY%20NOW-4F46E5?style=for-the-badge&logo=github" />
-  </a>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.23.1-2563eb?style=for-the-badge" />
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-16a34a?style=for-the-badge" />
-  <img alt="Stack" src="https://img.shields.io/badge/Three.js-WebGL-f59e0b?style=for-the-badge" />
-  <img alt="Status" src="https://img.shields.io/badge/status-active-22c55e?style=for-the-badge" />
-</p>
+- [Report a bug](#report-a-bug)
+- [Suggest an idea](#suggest-an-idea)
+- [Set up the project](#set-up-the-project)
+- [Make a change](#make-a-change)
+- [Contribute assets](#contribute-assets)
+- [Security and privacy](#security-and-privacy)
 
-<p align="center">
-  <strong>Browser-based 3D extreme sports arcade</strong> · 7 sports · 7 locations · one-file web build
-</p>
+## Report a bug
 
-Ligne Libre is a browser-based 3D arcade sports game built around fast action, expressive movement, and strong replayability. It combines multiple extreme sports disciplines into a single playable experience designed to feel immediate, accessible, and fun from the first run.
+Open a **Bug report** issue (guided form): browser and device, sport, steps to reproduce, expected and actual result. Check [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) first.
 
-## Play now
+Security problems and serious exploits never go in a public issue: see [`SECURITY.md`](SECURITY.md).
 
-- Live demo: https://azert-maker.github.io/lignelibre.github/
-- Works in modern browsers
-- Desktop and mobile friendly
-- Internet connection required on first load to fetch assets
+## Suggest an idea
 
-## Why it stands out
+1. Read the public roadmap in the [README](README.md#roadmap): what is planned and what is not promised.
+2. Search existing issues; if the idea exists, add your use case or a 👍.
+3. Otherwise open an **Idea** issue: summary, sport or system, why it is better for players, optional visual reference.
 
-- 7 sports with distinct mechanics and rhythm
-- 7 handcrafted locations with their own identity
-- coins, progression, upgrade loop, and cosmetic rewards
-- physics-based landings, reactions, and crash moments
-- replay system, ghost tracking, and score-based runs
-- a compact, portable project architecture that is easy to run and expand
+Accepted ideas get the `accepted` label; declined ones get `wontfix` with an explanation.
 
-## Featured sports
+## Set up the project
 
-| Sport | Setting | Hook |
-|---|---|---|
-| Wingsuit | Alpine valley | glide lines, close-to-ground flying, ring runs |
-| Downhill longboard | Coastal mountain road | speed, slides, edge control |
-| Snowboard | Mountain resort | jumps, rails, rotations |
-| BMX | Urban park | balance, tricks, grinds |
-| Motocross | Off-road terrain | boosts, landings, whip control |
-| Wakeboard | Lake course | traction, pop, wake-to-wake flow |
-| Parkour | Rooftop city | chaining moves and wall runs |
-
-## Quick start
-
-### Run the game online
-
-```text
-https://azert-maker.github.io/lignelibre.github/
-```
-
-### Build locally
+Requirements: Node.js 18 or newer, `sh` and `base64` (present on Linux, macOS, and Git Bash on Windows).
 
 ```bash
-npm install
-npm run build
-npx serve dist/site
-```
-
-Then open:
-
-```text
-http://localhost:3000
-```
-
-### Run tests
-
-```bash
+git clone https://github.com/azert-maker/lignelibre.github.git
+cd lignelibre.github
+npm ci                          # Playwright, ESLint, ws (LAN server)
+npx playwright install chromium # browser used by the tests
+npm run build                   # writes dist/ (see README)
+npm run lint
 npm test
 ```
 
-## Project structure
+How the code is organised:
 
-```text
-.
-├── .github/                # workflows, issue templates, repo automation
-├── assets/                 # 3D assets, textures, third-party content
-├── archive/                # archived builds and legacy output
-├── docs/                   # roadmap, publication docs, issue notes
-├── server/                 # local multiplayer server
-├── tests/                  # automated test suite
-├── 01-head.html            # base markup and styles
-├── 02-body.html            # HUD and interface elements
-├── 10-core.js              # core simulation, rendering, inputs, profile
-├── 15-fx.js                # effects, particles, ambience
-├── 16-sfx-data.js          # audio and sound data
-├── 18-glb.js               # bundled GLB assets
-├── 20-gear.js              # gear, upgrades, character logic
-├── 30-ads-net.js           # demo ads and local network layer
-├── 35-valley.js            # valley and terrain logic
-├── 36-places.js            # location-specific world logic
-├── 37-coins.js             # coin systems and reward flow
-├── 40-wingsuit.js          # wingsuit mode
-├── 41-downhill.js          # downhill mode
-├── 44-snowboard.js         # snowboard mode
-├── 45-park.js              # shared park logic
-├── 46-bmx.js               # BMX mode
-├── 47-moto.js              # motocross mode
-├── 48-wake.js              # wakeboard mode
-├── 49-parkour.js           # parkour mode
-├── 50-ui.js                # menus and UI systems
-├── 52-claw.js              # claw machine system
-├── 55-engage.js            # onboarding and engagement systems
-├── 57-progress.js          # progression systems
-├── 58-replay.js            # replay and ghost systems
-├── 60-main.js              # main game loop and flow
-├── build.sh                # build pipeline
-├── CHANGELOG.md            # project history
-├── CODE_OF_CONDUCT.md      # community standards
-├── CONTRIBUTING.md         # contribution guide
-├── LICENSE                 # MIT license
-├── LICENSE-ASSETS.md       # asset restrictions
-├── README.md               # repository landing page
-├── SECURITY.md             # security reporting policy
-├── package.json            # scripts and dependencies
-├── .gitignore              # ignore rules
-└── .github/                # GitHub automation
-```
+- `src/` holds the game as numbered modules (`10-core.js` … `60-main.js`). `build.sh` concatenates them **in that order** into one inline `<script>`, so modules share globals: there is no import/export.
+- Each sport is a factory `MODES[id] = (cfg, look, ctx) => ({ update, auto, snapshot, restore, coins, ... })`; the README lists the main hooks.
+- `src/17-assets.js` is generated (3D models embedded as base64): never edit or commit it.
+- `tests/` drives the real game in headless Chromium through `window.__ll`.
 
-## Roadmap
+## Make a change
 
-| Phase | Status | Focus |
-|---|---|---|
-| Current | Active | player feedback, economy balancing, mobile optimization |
-| Next | Planned | more detailed boards and wingsuit handling, landing animations |
-| Later | Planned | online multiplayer, weekly challenges, new cosmetic sets |
-| Not a priority | Deferred | new sports, native app, real monetization |
+1. For anything bigger than a small fix, open an issue first so we can agree on the approach.
+2. Fork, then branch: `fix/<topic>`, `feat/<topic>`, `asset/<topic>`, `docs/<topic>`.
+3. Keep the pull request focused. The template lists the checks: build, lint, tests, manual play of the affected sport.
+4. CI runs build, lint, the full test suite and a dependency audit on every pull request.
 
-## Documentation
+Ground rules:
 
-- [CHANGELOG.md](CHANGELOG.md)
-- [docs/ROADMAP.md](docs/ROADMAP.md)
-- [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)
-- [docs/PUBLICATION.md](docs/PUBLICATION.md)
-- [SECURITY.md](SECURITY.md)
-- [CONTRIBUTING.md](CONTRIBUTING.md)
+- The game must stay playable **without a server**, as a single HTML file.
+- No new runtime dependency without discussion (Three.js r128 only, pinned with SRI hashes in `build.sh`).
+- Sports are meant to feel different: do not unify their physics.
+- A change visible in game gets a line in `CHANGELOG.md`.
+- In-game text is French; code comments may be French or English.
 
-## Contributing
+Commit messages: short, imperative, `type(scope): summary`. Types: `feat`, `fix`, `asset`, `perf`, `test`, `docs`, `build`, `ci`, `refactor`. Examples: `fix(wake): NaN speed at dt=0`, `asset(bmx): 36-spoke wheels`.
 
-Contributions are welcome. If you want to help shape the game, improve systems, or report issues:
+## Contribute assets
 
-- open an issue with the `Idea` or `Bug` label
-- review [CONTRIBUTING.md](CONTRIBUTING.md)
-- follow the project code of conduct in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Only what **you have the right to share**, with source and license recorded in `docs/ASSETS.md`.
+- Accepted: your own work, CC0, CC-BY (credit recorded), or written permission from the creator.
+- Refused: protected characters, logos and brands (even modified), "found on the internet" files without a license.
+- Budget: scenery model under 5,000 triangles, 512 or 1024 px textures.
+- Assets are outside the MIT license of the code (see [`LICENSE-ASSETS.md`](LICENSE-ASSETS.md)).
 
-## License
+## Security and privacy
 
-- Code: [MIT](LICENSE)
-- Assets: see [LICENSE-ASSETS.md](LICENSE-ASSETS.md)
+- Never put tokens, passwords, API keys or credentials in the repository, an issue or a pull request.
+- Never commit player data: profiles stay in each player's browser.
+- No real-money payments and no paid-entry contests.
 
-## Why this repo feels like a real project
+## Code of conduct
 
-Ligne Libre has a strong core identity:
-- it is easy to understand
-- it is quick to try
-- it has a clear visual identity
-- it has a clearly defined progression
-- it has a public roadmap and structure
-- it feels like a playable product, not just a code dump
-
-That combination is what makes a repository feel premium on GitHub: clarity, personality, and momentum.
-
----
-
-<p align="center">
-  <sub>Built with curiosity, arcade energy, and a lot of coffee.</sub>
-</p>
+By participating you agree to [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).

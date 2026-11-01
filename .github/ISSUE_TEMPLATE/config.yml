@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Faille de sécurité ou exploit grave
+  - name: Security issue or serious exploit
     url: https://github.com/azert-maker/lignelibre.github/security/advisories/new
-    about: Signalement privé (jamais dans une issue publique). Voir SECURITY.md.
-  - name: Problèmes déjà connus
+    about: Private report (never in a public issue). See SECURITY.md.
+  - name: Known issues
     url: https://github.com/azert-maker/lignelibre.github/blob/main/docs/KNOWN_ISSUES.md
-    about: Vérifie ici avant de signaler un bug.
+    about: Check this list before reporting a bug.

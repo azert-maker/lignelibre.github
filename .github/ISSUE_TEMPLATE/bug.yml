@@ -1,18 +1,18 @@
-name: Bug
-description: Quelque chose ne marche pas comme prévu dans le jeu
+name: Bug report
+description: Something in the game does not work as expected
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Merci ! Un bug bien décrit est corrigé beaucoup plus vite.
-        Vérifie d'abord qu'il n'est pas déjà signalé (barre de recherche des issues) ou listé dans `docs/KNOWN_ISSUES.md`.
-        **Faille de sécurité ou exploit grave (pièces infinies, triche en multijoueur…) : ne l'écris pas ici**, suis `SECURITY.md`.
+        Thanks! A precise report gets fixed much faster.
+        Please check first that the bug is not already reported (issue search) or listed in `docs/KNOWN_ISSUES.md`.
+        **Security issue or serious exploit (infinite coins, multiplayer cheating, save tampering): do not post it here.** Follow `SECURITY.md`.
   - type: dropdown
-    id: sport
+    id: area
     attributes:
-      label: Sport ou écran concerné
+      label: Sport or screen
       options:
         - Wingsuit (Lauterbrunnen)
         - Downhill (Mount Tamalpais)
@@ -21,63 +21,63 @@ body:
         - Motocross (Glen Helen)
         - Wakeboard (Lake Havasu)
         - Parkour (Paris Rooftops)
-        - Menu / garage / boutique / machine à skins
-        - Multijoueur
-        - Autre
+        - Home / garage / shop / skin machine
+        - Multiplayer
+        - Other
     validations:
       required: true
   - type: input
-    id: navigateur
+    id: browser
     attributes:
-      label: Navigateur et appareil
-      placeholder: "ex. Chrome 130 sur Windows 11, Safari sur iPhone 13, Firefox sur Android"
+      label: Browser and device
+      placeholder: "e.g. Chrome 130 on Windows 11, Safari on iPhone 13, Firefox on Android"
     validations:
       required: true
   - type: dropdown
-    id: version
+    id: build
     attributes:
-      label: Où joues-tu ?
+      label: Where do you play?
       options:
-        - Version en ligne (GitHub Pages)
-        - Fichier HTML téléchargé
-        - Construit moi-même depuis le dépôt
+        - Online version (GitHub Pages)
+        - Downloaded HTML file
+        - Built from this repository
     validations:
       required: true
   - type: textarea
-    id: etapes
+    id: steps
     attributes:
-      label: Étapes pour reproduire
+      label: Steps to reproduce
       placeholder: |
-        1. Lancer le BMX en monde libre
-        2. Sauter sur le quarter de gauche
-        3. …
+        1. Pick BMX, free mode, press Play
+        2. Jump off the left quarter pipe
+        3. ...
     validations:
       required: true
   - type: textarea
-    id: attendu
+    id: expected
     attributes:
-      label: Résultat attendu
+      label: Expected result
     validations:
       required: true
   - type: textarea
-    id: obtenu
+    id: actual
     attributes:
-      label: Résultat obtenu
-      description: Une capture ou une courte vidéo aide beaucoup. Messages d'erreur de la console (F12) bienvenus.
+      label: Actual result
+      description: A screenshot or a short video helps a lot. Browser console errors (F12) are welcome.
     validations:
       required: true
   - type: dropdown
-    id: frequence
+    id: frequency
     attributes:
-      label: Fréquence
+      label: How often?
       options:
-        - À chaque fois
-        - Souvent
-        - Une seule fois
+        - Every time
+        - Often
+        - Only once
   - type: checkboxes
-    id: prive
+    id: privacy
     attributes:
-      label: Vérification
+      label: Privacy check
       options:
-        - label: Mon message ne contient ni mot de passe, ni PIN, ni donnée personnelle (adresse, téléphone…).
+        - label: My report contains no password, PIN, token or personal data (address, phone number...).
           required: true

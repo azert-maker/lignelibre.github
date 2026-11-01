@@ -39,18 +39,17 @@ Recherche sur **les 30 commits de l'historique** (pas seulement la dernière ver
 Définis dans `.github/labels.yml`. Création en une fois (GitHub CLI connecté à ton compte) :
 
 ```
-gh label create "idée" --color a2eeef --description "Proposition de joueur ou de contributeur" -R azert-maker/lignelibre.github
-gh label create "gameplay" --color 1d76db --description "Physique, commandes, figures, ressenti" -R azert-maker/lignelibre.github
-gh label create "3d" --color 5319e7 --description "Modèles, animations, Blender" -R azert-maker/lignelibre.github
+gh label create "idea" --color a2eeef --description "Suggestion from a player or contributor" -R azert-maker/lignelibre.github
+gh label create "gameplay" --color 1d76db --description "Physics, controls, tricks, game feel" -R azert-maker/lignelibre.github
+gh label create "3d" --color 5319e7 --description "Models, animations, Blender" -R azert-maker/lignelibre.github
 gh label create "ui" --color fbca04 --description "Menus, HUD, mobile" -R azert-maker/lignelibre.github
-gh label create "économie" --color 0e8a16 --description "Pièces, boutique, machine à skins" -R azert-maker/lignelibre.github
-gh label create "lieux" --color c2e0c6 --description "Décors et ambiance des cartes" -R azert-maker/lignelibre.github
+gh label create "economy" --color 0e8a16 --description "Coins, shop, skin machine" -R azert-maker/lignelibre.github
+gh label create "locations" --color c2e0c6 --description "Scenery and map atmosphere" -R azert-maker/lignelibre.github
 gh label create "docs" --color 0075ca --description "Documentation" -R azert-maker/lignelibre.github
-gh label create "accepté" --color 2ea44f --description "Validé, prêt à être fait" -R azert-maker/lignelibre.github
-gh label create "pas prévu" --color e4e669 --description "Lu et réfléchi, mais pas pour ce projet" -R azert-maker/lignelibre.github
+gh label create "accepted" --color 2ea44f --description "Approved, ready to be built" -R azert-maker/lignelibre.github
 ```
 
-`bug`, `question` et `good first issue` existent déjà par défaut sur GitHub. Sans GitHub CLI : onglet Issues > Labels > New label.
+`bug`, `question`, `good first issue` et `wontfix` existent déjà par défaut sur GitHub. Les formulaires d'issues utilisent `bug`, `idea` et `question`. Sans GitHub CLI : onglet Issues > Labels > New label.
 
 ## Checklist avant passage en public
 
@@ -78,3 +77,17 @@ gh label create "pas prévu" --color e4e669 --description "Lu et réfléchi, mai
 6. **Créer les labels** (commandes ci-dessus).
 7. **Protéger `main`** (conseillé) : Settings > Branches > Add rule : pull request obligatoire pour les autres, CI verte.
 8. **Facultatif** : renommer le dépôt en `ligne-libre` (l'URL deviendrait `…github.io/ligne-libre/` ; GitHub redirige l'ancien nom du dépôt, pas l'ancienne URL Pages).
+
+## Présentation du dépôt (réglages GitHub, 1er novembre 2026)
+
+À faire dans la page d'accueil du dépôt, roue dentée « About » :
+
+- **Description** : `Browser-based 3D extreme sports arcade game: 7 sports, 7 locations, one HTML file. Built with Three.js.`
+- **Website** : `https://azert-maker.github.io/lignelibre.github/`
+- **Topics** : `browser-game`, `threejs`, `webgl`, `javascript`, `arcade-game`, `extreme-sports`, `html5-game`, `game-development`, `blender`, `github-pages`, `indie-game`, `playwright`
+
+Image de partage : Settings > General > Social preview > Edit > téléverser `docs/images/social-preview.jpg` (1280×640).
+
+Sécurité (Settings > Code security) : activer Secret scanning, Push protection, Private vulnerability reporting, Dependabot alerts. CodeQL tourne par le workflow `codeql.yml` (désactiver le « Default setup » s'il est déjà actif, sinon les deux se contredisent).
+
+Protection de `main` (Settings > Branches ou Rules) : pull request obligatoire pour les autres contributeurs, statut « Build, lint, test » obligatoire, pas de force-push.
