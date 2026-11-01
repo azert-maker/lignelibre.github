@@ -1,26 +1,27 @@
-## Ce que change cette pull request
+## What this pull request changes
 
-<!-- Une phrase ou deux. Lien vers l'issue : « Corrige #12 » ou « Lié à #34 ». -->
+<!-- One or two sentences. Link the issue: "Fixes #12" or "Related to #34". -->
 
 ## Type
 
-- [ ] Correction de bug
+- [ ] Bug fix
 - [ ] Gameplay
 - [ ] 3D / assets
 - [ ] Interface
-- [ ] Économie
+- [ ] Economy
 - [ ] Documentation
-- [ ] Autre
+- [ ] Tooling / CI
 
-## Vérifications
+## Checks
 
-- [ ] `npm run build` passe
-- [ ] `npm test` passe (ou : j'explique ci-dessous pourquoi un test change)
-- [ ] J'ai joué au(x) sport(s) touché(s) et c'est jouable
-- [ ] `CHANGELOG.md` mis à jour si le changement se voit en jeu
-- [ ] Aucun secret, jeton, mot de passe ou donnée personnelle dans le code
-- [ ] Assets ajoutés : source et licence notées (`docs/ASSETS.md`), et j'ai le droit de les partager
+- [ ] `npm run build` passes
+- [ ] `npm run lint` passes
+- [ ] `npm test` passes (or I explain below why a test changes)
+- [ ] I played the affected sport(s) and they are playable
+- [ ] `CHANGELOG.md` updated if the change is visible in game
+- [ ] No secret, token, password or personal data in the code
+- [ ] New assets: source and license recorded in `docs/ASSETS.md`, and I have the right to share them
 
-En proposant cette contribution, j'accepte qu'elle soit publiée sous la licence MIT du code (ou, pour un asset, sous les conditions de `LICENSE-ASSETS.md`).
+By submitting this contribution, I agree that code is published under the MIT license and assets under the terms of `LICENSE-ASSETS.md`.
 
-## Captures (si visuel)
+## Screenshots (for visual changes)

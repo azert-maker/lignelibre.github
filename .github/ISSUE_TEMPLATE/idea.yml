@@ -1,0 +1,56 @@
+name: Idea
+description: Suggest gameplay, a location, a skin, a UI improvement...
+title: "[Idea] "
+labels: ["idea"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every idea is read, but not every idea will be built: the public roadmap in the README says what is planned and what is not promised.
+        One idea per issue makes discussion easier.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: The idea in one or two sentences.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Sport or system
+      multiple: true
+      options:
+        - Wingsuit
+        - Downhill
+        - Snowboard
+        - BMX
+        - Motocross
+        - Wakeboard
+        - Parkour
+        - New sport
+        - Locations / scenery
+        - Character / skins / 3D
+        - Economy / shop / skin machine
+        - Interface / controls
+        - Multiplayer
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: Why is it better for players?
+      description: What does it add to the fun, readability or progression?
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details (optional)
+      description: How it would work, controls, edge cases.
+  - type: textarea
+    id: reference
+    attributes:
+      label: Visual reference (optional)
+      description: Sketch, screenshot, video link. Do not attach images you do not have the rights to if they are meant to end up in the game.

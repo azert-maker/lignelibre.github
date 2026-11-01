@@ -1,41 +1,22 @@
-# Security Policy
+# Code of Conduct
 
-Ligne Libre takes security seriously and encourages responsible disclosure of vulnerabilities.
+Ligne Libre is open to players and contributors of every age and skill level. To keep it that way:
 
-## Supported versions
-
-The project is currently supported in its latest main branch.
-
-## Reporting a vulnerability
-
-If you believe you have found a security issue, please report it privately and responsibly.
-
-Please use one of the following options:
-
-- Open a private security advisory through GitHub
-- Contact the repository owner directly through a private channel
-- Reach out via GitHub issues only if the issue is not sensitive and does not expose private data
-
-Please include:
-
-- a summary of the issue
-- the affected component or module
-- the impact and risk level
-- steps to reproduce
-- any suggested mitigation
-
-## Response expectations
-
-We will do our best to respond as quickly as possible. Security reports are reviewed on a case-by-case basis.
-
-## Responsible disclosure
-
-We ask that you do not disclose a vulnerability publicly until it has been reviewed and a fix is ready.
+1. **Be respectful.** No harassment, insults, mockery, discriminatory or sexual remarks, and no pressure on anyone. Criticise ideas, never people.
+2. **Be constructive.** "This is bad" helps nobody; "the BMX jump is too short because..." helps everyone.
+3. **Handle exploits carefully.** Anything that breaks multiplayer, saves or other players' experience is reported privately ([`SECURITY.md`](SECURITY.md)), not in public, until it is fixed.
+4. **No secrets, no personal data.** No passwords, PINs, tokens, addresses, phone numbers, or photos of people without their consent, whether yours or someone else's.
+5. **Only share what you have the right to share.** No models, sounds or images taken elsewhere without a license.
+6. **No spam and no advertising.**
 
 ## Scope
 
-This policy applies to the project code, the build process, and related tooling.
+Issues, pull requests, discussions, commit messages and any other space of this repository.
 
-## Important note
+## Enforcement
 
-We do not accept exploitation or abuse of the game economy, progression systems, or game balance as a valid security issue unless it is a real system-level vulnerability affecting integrity or safety.
+The maintainer may hide or delete messages, lock discussions, close contributions, or block accounts that do not follow this code. Decisions aim to be proportionate and consistent.
+
+## Reporting
+
+Use GitHub's **Report content** option on the message concerned, or a private report through the **Security** tab (see [`SECURITY.md`](SECURITY.md)). Reports are handled confidentially.
