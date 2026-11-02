@@ -46,9 +46,12 @@ const PROFILE_DEFAULT={
 /* fusion profonde des profils importés : propriétés propres seulement, jamais __proto__ / constructor / prototype (pollution de prototype) */
 function deepMerge(a,b){for(const k of Object.keys(b)){if(k==='__proto__'||k==='constructor'||k==='prototype')continue;const v=b[k];
   if(v&&typeof v==='object'&&!Array.isArray(v)){const cur=Object.prototype.hasOwnProperty.call(a,k)&&a[k]&&typeof a[k]==='object'?a[k]:{};a[k]=deepMerge(cur,v)}else if(!Object.prototype.hasOwnProperty.call(a,k)||a[k]===undefined)a[k]=v}return a}
-/* clé de sport sûre (liste blanche des modes chargés, jamais une clé héritée) et fabrique de mode validée */
-function isSportKey(s){return typeof s==='string'&&s!=='__proto__'&&s!=='constructor'&&s!=='prototype'&&Object.prototype.hasOwnProperty.call(MODES,s)}
-function modeOf(s){if(!isSportKey(s))return null;const f=MODES[s];return typeof f==='function'?f:null}
+/* clé de sport sûre (liste blanche des modes chargés, jamais une clé héritée) et fabrique de mode validée ;
+   sportKey renvoie la chaîne de la liste des modes (jamais la valeur reçue) : un nom venu du réseau ou d'un profil
+   ne sert jamais directement de clé. */
+function sportKey(s){if(typeof s!=='string')return null;for(const id of Object.keys(MODES))if(id===s)return id;return null}
+function isSportKey(s){return sportKey(s)!==null}
+function modeOf(s){const id=sportKey(s);if(id===null)return null;const f=MODES[id];return typeof f==='function'?f:null}
 const profile=deepMerge(load(PROFILE_KEY,{}),JSON.parse(JSON.stringify(PROFILE_DEFAULT)));
 /* filets : champs ajoutés après coup (profils anciens) */
 for(const k of ['streak','bestStreak','tutorialStep'])if(typeof profile[k]!=='number')profile[k]=0;for(const k of ['lastPlayDay','dailyDone','classCode'])if(typeof profile[k]!=='string')profile[k]='';

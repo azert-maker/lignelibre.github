@@ -63,7 +63,7 @@ const ACH=[
  {id:'pk_combo',s:'parkour',l:'Combo ×4',t:(n,c)=>c>=7,xp:400,c:40}];
 function achDone(id){return !!(profile.ach&&profile.ach[id])}
 function achProg(a){const p=(profile.achP||{})[a.id]||0;return a.m?Math.min(a.m,Math.floor(p))+' / '+a.m+' m':a.n?Math.min(a.n,p)+' / '+a.n:''}
-function addXp(sport,g){if(!isSportKey(sport))return;profile.xp=profile.xp||{};const before=sportLvl(sport);profile.xp[sport]=(profile.xp[sport]||0)+g;const after=sportLvl(sport);
+function addXp(sport0,g){const sport=sportKey(sport0);if(sport===null)return;profile.xp=profile.xp||{};const before=sportLvl(sport);profile.xp[sport]=(profile.xp[sport]||0)+g;const after=sportLvl(sport);
   if(after>before){const un=Object.keys(LVL_UNLOCK).filter(id=>{const u=LVL_UNLOCK[id];return (u[0]===sport||u[0]==='*')&&u[1]>before&&u[1]<=after});
     const lc=Math.min(80,after*8);profile.coins+=lc;toast('Niveau '+after+' '+SPORT_SHORT[sport]+' !',true);feed('Niveau '+after+' · +'+lc+' pièces');
     for(const id of un){const it=SHOP.find(s=>s.id===id);if(it)feed('Débloqué : '+it.name)}if(typeof sfx!=='undefined')sfx.finish()}

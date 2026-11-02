@@ -246,7 +246,7 @@ function finalizeRun(silent){if(!run||run.finalized)return;run.finalized=true;co
   const score=Math.round(st.score*(run.use.x15?1.5:1));let medal='n';
   if(course&&run.finished){medal=medalOf(run.final,cur.target);const key=cfg.sport+'|course|'+cfg.len+'|'+cfg.seed+'|'+JSON.stringify(cfg.params);
     if(!profile.records[key]||run.final<profile.records[key])profile.records[key]=+run.final.toFixed(2);
-    if(medal!=='n'&&isSportKey(cfg.sport)&&(medal==='g'||medal==='s'||medal==='b')){const sp=cfg.sport;if(!Object.prototype.hasOwnProperty.call(profile.medals,sp))profile.medals[sp]={};const m=profile.medals[sp];m[medal]=(m[medal]||0)+1}}
+    const sp=sportKey(cfg.sport);if(medal!=='n'&&sp!==null&&(medal==='g'||medal==='s'||medal==='b')){if(!Object.prototype.hasOwnProperty.call(profile.medals,sp))profile.medals[sp]={};const m=profile.medals[sp];m[medal]=(m[medal]||0)+1}}
   if(!course){const k=cfg.sport+'|free';if(score>(profile.records[k]||0)){profile.records[k]=score;run.rec=true}Board.submit(cfg.sport,score)}
   if(cfg.seed===dailySeed()+cfg.sport){const dk='daily|'+dayKey()+'|'+cfg.sport,old=profile.records[dk];
     if(course&&run.finished){if(!old||run.final<old){profile.records[dk]=+run.final.toFixed(2);run.engageBits=run.engageBits||[];run.engageBits.push('Record du parcours du jour')}}else if(!course&&score>(old||0))profile.records[dk]=score}
