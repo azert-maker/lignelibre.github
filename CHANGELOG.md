@@ -1,5 +1,25 @@
 # Journal des versions · Ligne Libre
 
+## 0.26.0 · 2 novembre 2026 · Le bowl de Venice, pièces sur la ligne, sécurité
+
+Pièces
+- Snowboard : les pièces étaient calculées sans les tremplins (enfoncées dedans) ; elles suivent maintenant la ligne du rider (son décalage dans la piste et son cap), 30 à 75 m devant au lieu de 45 à 115 m, et les pièces de saut sont plus basses (hauteur mesurée des sauts réels).
+- Wingsuit : pièces à la hauteur et dans le couloir où vole le rider (avant : 85 % de sa hauteur et un tiers de son décalage), 110 à 240 m devant.
+- Downhill : la ligne facile suit la position du rider sur la route (avant : toujours au milieu).
+- Wakeboard : la ligne facile est au décalage du rider derrière le bateau (avant : toujours hors du sillage, d'un côté imposé), et plus proche.
+- BMX et motocross : seul le module le plus dans l'axe (à moins de 30 m) reçoit des pièces, au lieu d'un tirage parmi trois jusqu'à 40 m ; pièces de saut du motocross abaissées d'environ 40 % (elles flottaient au-dessus des sauts possibles).
+
+Sécurité (alertes CodeQL de `main`)
+- Profil importé : la fusion ignore `__proto__`, `constructor` et `prototype` (pollution de prototype).
+- Sport reçu d'un salon ou d'un profil : liste blanche avant tout appel de mode ou écriture (XP, médailles, scores).
+- Lien avec `?ws=` : l'adresse est seulement pré-remplie, la connexion attend un clic ; toute adresse de serveur est réduite à `ws://` ou `wss://`, hôte et port.
+- Nouveau test `tests/security.js` (8 contrôles).
+
+BMX
+- Un bowl en fer à cheval dans le parc (case d'angle la plus éloignée du départ, sur les parcs moyens et grands) : fond plat, transition presque verticale de 2,2 m, coping en acier, frise de carreaux bleus et blancs sous le coping, deck autour. Ouverture de 70° côté arrivée pour y entrer en roulant.
+- Le relief est un vrai module du parc : on y roule, on sort en vert au-dessus du coping et on y retombe (vérifié par simulation).
+- Le pilote automatique et le mode parcours peuvent y passer. Ce changement modifie la disposition des parcs générés (une case de moins tirée au hasard).
+
 ## 0.25.0 · 1er novembre 2026 · Venice Beach et toits de Paris habillés
 
 BMX · Venice Beach

@@ -178,12 +178,12 @@ MODES.wakeboard=function(cfg,look,ctx){
     const d=Math.abs(St.X-(-apDir*0))-xr,near=(St.X*apDir<-xr+1.6&&St.X*apDir>-xr-1)&&Math.abs(St.U)>4;return {x:apDir,y:0,a:St.X*apDir<-xr-.2&&St.X*apDir>-xr-2.8,g:false}}
   /* pièces : couloir hors du sillage (facile), arc bonus au-dessus du sillage (wake to wake), au-dessus d'un kicker ou le long d'un slider */
   const coinPlan=(()=>{let sc=null,k=0;return {r:1.4,cy:.8,scale:1.3,every:.25,life:24,behind:20,cull:170,
-    spawn(api){const sr=B.s-LR;if(sc===null)sc=sr+35;if(sc>sr+70)return;const xr=LR*TAN+1.1,pat=k++%3;const P=s=>pathAt(s,{});const W=(s,lat,h,risk)=>{const p=P(s);api.add(p.x+Math.cos(p.h)*lat,h,p.z+Math.sin(p.h)*lat,risk)};
+    spawn(api){const sr=B.s-LR;if(sc===null||sc<sr+22)sc=sr+28;if(sc>sr+50)return;const xr=LR*TAN+1.1,pat=k++%3;const P=s=>pathAt(s,{});const W=(s,lat,h,risk)=>{const p=P(s);api.add(p.x+Math.cos(p.h)*lat,h,p.z+Math.sin(p.h)*lat,risk)};
       let done=false;
       if(pat===2){const f=feats.find(q=>{const d=q.s-sc;return d>-5&&d<45})||null;
         if(f){const fx=Math.sin(f.h),fz=-Math.cos(f.h);if(f.k==='kicker'){for(const [d,h] of [[5.5,1.5],[8,2],[10.5,1.6]])api.add(f.x+fx*d,h+.8,f.z+fz*d,true)}else{for(const d of [3,5.5,8,10.5])api.add(f.x+fx*d,.42+.6,f.z+fz*d,true)}done=true;sc=f.s+30}}
-      if(!done&&pat===1){const sd=k%2?1:-1;for(let i=0;i<4;i++){const u=i/3;W(sc+i*2.6,sd*lerp(-(xr+1),xr+1,u),.8+Math.sin(Math.PI*(.15+u*.7))*1.5,true)}done=true;sc+=60}
-      if(!done){const sd=(k>>1)%2?1:-1;for(let i=0;i<5;i++)W(sc+i*4,sd*(xr+2.5),.8,false);sc+=60}}}})();
+      if(!done&&pat===1){const sd=k%2?1:-1;for(let i=0;i<4;i++){const u=i/3;W(sc+i*2.6,sd*lerp(-(xr+1),xr+1,u),.8+Math.sin(Math.PI*(.15+u*.7))*1.5,true)}done=true;sc+=50}
+      if(!done){/* ligne facile : au décalage actuel du rider derrière le bateau (avant : toujours hors du sillage, d'un côté imposé) */const lat=clamp(St.X,-(xr+3),xr+3);for(let i=0;i<5;i++)W(sc+i*4,lat,.8,false);sc+=50}}}})();
   return {env,stats,name:'Wakeboard',vScale:55,coins:coinPlan,target:finishT,
     keys:[['← →','carre : traverser le sillage · en l\'air : rotations'],['Espace','maintenir = charger · relâcher sur la crête = pop'],['↑ / ↓','en l\'air : Tantrum / Backroll'],['Shift / F','grab (+ ← = Melon)'],['C','caméra']],
     touch:{u:'Tantrum',d:'Backroll',a:'Pop',g:'Grab'},

@@ -9,12 +9,12 @@ $$('[data-cam]').forEach(b=>b.onclick=()=>setCam(+b.dataset.cam));
 function defaultParams(id){const p={};SPORTS[id].params.forEach(x=>p[x.k]=x.bool?x.def===1:x.def);return p}
 /* aperçu en direct : le vrai mode piloté par son pilote automatique */
 let demo=null;
-function previewSport(id,w,force){coinsStop();if(!MODES[id])id=SPORT_IDS[0];w=w||(profile.last[id]&&profile.last[id].weather)||'soleil';
+function previewSport(id,w,force){coinsStop();if(!modeOf(id))id=SPORT_IDS[0];w=w||(profile.last[id]&&profile.last[id].weather)||'soleil';
   if(!force&&cur&&!run&&demo&&previewId===id){if(previewW!==w){previewW=w;applyEnv(cur.env,w)}return}
   if(cur)cur.dispose();ghostsClear();run=null;previewId=id;previewW=w;quiet=true;
   const dctx=Object.assign({},DUMMY,{crash(){if(demo)demo.reset=.8},finish(){if(demo)demo.reset=.8}});
   const params=Object.assign(defaultParams(id),{assist:0});
-  cur=MODES[id]({sport:id,mode:'free',len:12,weather:w,wind:0,params,seed:'demo-'+id+'-'+Math.floor(Math.random()*9)},profile.look,dctx);applyEnv(cur.env,w);
+  const mkDemo=modeOf(id);if(!mkDemo)return;cur=mkDemo({sport:id,mode:'free',len:12,weather:w,wind:0,params,seed:'demo-'+id+'-'+Math.floor(Math.random()*9)},profile.look,dctx);applyEnv(cur.env,w);
   demo={sport:id,reset:0};if(state!=='garage')state='demo';if(typeof showDemoTag==='function')showDemoTag()}
 
 /* ---------- HUD de partie ---------- */
@@ -34,7 +34,7 @@ function paintMp(){const course=curCfg.mode==='course';E.mp.innerHTML=standings(
 
 /* ---------- lancement ---------- */
 async function startRun(cfg,opt={}){
-  if(!cfg||!MODES[cfg.sport]){toast('Sport indisponible',true);return}
+  const mkMode=cfg&&modeOf(cfg.sport);if(!mkMode){toast('Sport indisponible',true);return}
   opt=opt||{};if(run&&!run.finalized&&state!=='menu')finalizeRun(true);
   touchStreakOnLaunch();profile.runs++;saveProfile();
   /* pub entre deux parties : seulement avec une vraie régie (la démo n'était qu'une attente de 5 s) */if(ADS_CONFIG.interstitialEvery&&ADS_CONFIG.provider!=='demo'&&!opt.multi&&profile.runs>1&&profile.runs%ADS_CONFIG.interstitialEvery===0&&Ads.available()){state='ad';await Ads.interstitial('Entre deux parties')}
@@ -43,7 +43,7 @@ async function startRun(cfg,opt={}){
   curCfg=cfg;run={cfg,use:opt.use||{},multi:!!opt.multi,pen:0,continues:0,snaps:[],snapT:0,finished:false,dnf:false,cp:0,final:0,finalized:false,coins:0,netT:0,doubled:false,engageBits:[]};run.goal=pickSessionGoal(cfg);
   const ctx={boost:!!run.use.boost,crash:onCrash,finish:onFinish,cam:()=>camMode,hud:setHud,
     bonus:(p,l)=>{p=Math.round(p);cur.stats.score+=p;feed('+'+fmt(p)+' '+l)},checkpoint:(i,n)=>{run.cp=i;if(!sfx.trick(3))ding(880,.2)},trick:trickFn,land:landFx,comboBreak,slowmo,keep:()=>{if(combo.n>0)combo.t=runT}};SLOW.t=0;combo.n=0;combo.t=-9;combo.m=1;combo.best=1;combo.seen.clear();recent.length=0;FLOW.v=0;FLOW.t=0;document.body.classList.remove('od');
-  cur=MODES[cfg.sport](cfg,profile.look,ctx);coinsStart();FOVS.v=null;flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
+  cur=mkMode(cfg,profile.look,ctx);coinsStart();FOVS.v=null;flakes.wind((WIND[cfg.wind|0]||{v:0}).v*.35);recStart();ghostStart(cfg);applyEnv(cur.env,cfg.weather);
   $('#hMode').textContent=cur.name;E.inst.innerHTML=cur.inst;E.feed.innerHTML='';E.mp.innerHTML='';
   $('#keys').innerHTML=cur.keys.slice(0,4).map(k=>'<div><kbd>'+k[0]+'</kbd>'+k[1]+'</div>').join('');
   $('#tU span').textContent=cur.touch.u;$('#tD span').textContent=cur.touch.d;$('#tA').textContent=cur.touch.a||'';$('#tA').hidden=!cur.touch.a;$('#tG span').textContent=cur.touch.g||'Figure';$('#tG').hidden=cur.touch.g===false;
@@ -246,7 +246,7 @@ function finalizeRun(silent){if(!run||run.finalized)return;run.finalized=true;co
   const score=Math.round(st.score*(run.use.x15?1.5:1));let medal='n';
   if(course&&run.finished){medal=medalOf(run.final,cur.target);const key=cfg.sport+'|course|'+cfg.len+'|'+cfg.seed+'|'+JSON.stringify(cfg.params);
     if(!profile.records[key]||run.final<profile.records[key])profile.records[key]=+run.final.toFixed(2);
-    if(medal!=='n'){const m=profile.medals[cfg.sport]=profile.medals[cfg.sport]||{};m[medal]=(m[medal]||0)+1}}
+    const sp=sportKey(cfg.sport);if(medal!=='n'&&sp!==null&&(medal==='g'||medal==='s'||medal==='b')){if(!Object.prototype.hasOwnProperty.call(profile.medals,sp))profile.medals[sp]={};const m=profile.medals[sp];m[medal]=(m[medal]||0)+1}}
   if(!course){const k=cfg.sport+'|free';if(score>(profile.records[k]||0)){profile.records[k]=score;run.rec=true}Board.submit(cfg.sport,score)}
   if(cfg.seed===dailySeed()+cfg.sport){const dk='daily|'+dayKey()+'|'+cfg.sport,old=profile.records[dk];
     if(course&&run.finished){if(!old||run.final<old){profile.records[dk]=+run.final.toFixed(2);run.engageBits=run.engageBits||[];run.engageBits.push('Record du parcours du jour')}}else if(!course&&score>(old||0))profile.records[dk]=score}

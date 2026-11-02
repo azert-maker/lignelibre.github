@@ -27,7 +27,8 @@ Out of scope: editing your **own** local save (coins, unlocks). Profiles live in
 - The optional profile PIN is a salted SHA-256 hash. It separates profiles on a shared computer; it is **not** real authentication.
 - The online build contains no secret and no API key. It loads Three.js r128 and two of its example modules from cdnjs and jsDelivr, pinned with Subresource Integrity hashes, and fonts from Google Fonts.
 - The online build sets a Content-Security-Policy (meta tag, since GitHub Pages cannot send headers): scripts only from the page and those two CDNs, no plugins, no form submission. `'unsafe-inline'` is required because the whole game is one inline script.
-- Imported profiles are validated and sanitised; multiplayer names and room codes are escaped before display.
+- Imported profiles are validated and sanitised (no prototype pollution: `__proto__`, `constructor` and `prototype` keys are ignored); multiplayer names and room codes are escaped before display; sport ids from profiles or rooms are checked against the list of loaded sports.
+- A link with `?ws=` only pre-fills the LAN server address: the game never connects to a server on its own. Server addresses are reduced to `ws://` or `wss://`, host and port.
 - Ads: demo mode only (no ad network is connected).
 
 ## LAN multiplayer server

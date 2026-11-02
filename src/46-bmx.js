@@ -57,15 +57,19 @@ MODES.bmx=function(cfg,look,ctx){
   for(const [sx,sz] of [[1,-1],[1,1],[-1,1],[-1,-1]]){const a0=Math.atan2(sz,0),a1=Math.atan2(0,sx);let A0=Math.min(a0,a1),A1=Math.max(a0,a1);if(A1-A0>Math.PI){const t=A0;A0=A1;A1=t+2*Math.PI}
     park.addRadial('corner',sx*inner,sz*inner,A0,A1,0,QL,QH,{ang:1.18,L2:QL*1.45});}
   /* modules intérieurs : grille de cases, une « ligne » par case */
-  const IN=inner-6,CELLS=SZ<110?3:4,CW=2*IN/CELLS,lines=[];
+  const IN=inner-6,CELLS=SZ<110?3:4,CW=2*IN/CELLS,lines=[];let bowlDone=false;
   const KINDS=['gap','table','box','rail','spine','kicker','bank','gap','table'];
   for(let i=0;i<CELLS;i++)for(let j=0;j<CELLS;j++){const cx=-IN+CW*(i+.5),cz=-IN+CW*(j+.5);if(Math.abs(cx)<CW*.6&&cz>IN-CW*1.2)continue;/* zone de départ dégagée */
-    const k=KINDS[Math.floor(R()*KINDS.length)],yaw=[0,Math.PI/2,Math.PI,-Math.PI/2][Math.floor(R()*4)],fx=Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=Math.sin(yaw);
+    const k0=KINDS[Math.floor(R()*KINDS.length)],k=(i===0&&j===0&&CW>=20)?'bowl':k0,yaw=[0,Math.PI/2,Math.PI,-Math.PI/2][Math.floor(R()*4)],fx=Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=Math.sin(yaw);
     const at=(u,v)=>[cx+fx*u+rx*v,cz+fz*u+rz*v];let L0=0;
     if(k==='gap'){const gp=3+R()*2.5,kl=3.2,ll=5.2,tot=kl+gp+ll,[x0,z0]=at(-tot/2,0);park.add('kicker',x0,z0,yaw,kl,3.6,JH,{tag:'kicker'});const [x1,z1]=at(-tot/2+kl+gp,0);park.add('landing',x1,z1,yaw,ll,4,JH,{flat:.6,tag:'landing'});lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(tot/2+2,0)})}
     else if(k==='table'){const L=10+R()*3,[x0,z0]=at(-L/2,0);park.add('table',x0,z0,yaw,L,5.5,JH,{up:3.2,flat:L-3.2-4.2,tag:'table'});if(R()<.6){const [rx0,rz0]=at(-L/2+3.4,2.2);park.addRailRaw(rx0,rz0,rx0+fx*(L-3.4-4.4),rz0+fz*(L-3.4-4.4),JH+.35,JH+.35,'rail')}lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L/2+2,0)})}
     else if(k==='box'){const L=7+R()*2,[x0,z0]=at(-L/2,0);park.add('box',x0,z0,yaw,L,1.5,.45,{ramp:.8,tag:'box'});lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L/2+2,0)})}
     else if(k==='rail'){const L=7+R()*3,[x0,z0]=at(-L/2,0);park.addRail(x0,z0,yaw,L,.5,R()<.4?.5:.5);lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L/2+2,0)})}
+    else if(k==='bowl'&&!bowlDone){/* bowl de Venice (fer à cheval) dans la case d'angle la plus éloignée du départ : fond plat, transition presque verticale,
+       coping et frise de carreaux ; ouverture de 70° côté arrivée. */
+      bowlDone=true;const rIn=3.2,BL=3.3,BH=Math.min(QH,2.2),aE=Math.atan2(-fz,-fx),a0=aE+.6,a1=a0+2*Math.PI-1.2;
+      park.addRadial('corner',cx,cz,a0,a1,rIn,BL,BH,{ang:1.3,L2:BL+1.4,tag:'bowl'});const [x0,z0]=at(-(rIn+BL+3),0);lines.push({k:'bowl',cx,cz,yaw,x:x0,z:z0,ex:at(0,0)})}
     else if(k==='spine'){const L=3.1,H=1.6,[x0,z0]=at(-L-.6,0);park.add('quarter',x0,z0,yaw,L+.6,6,H,{ang:1.05,tag:'spine',vert:false});const [x1,z1]=at(L+.6,0);park.add('quarter',x1,z1,yaw+Math.PI,L+.6,6,H,{ang:1.05,tag:'spine',vert:false});lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L+3,0)})}
     else if(k==='kicker'){const [x0,z0]=at(-3,0);park.add('kicker',x0,z0,yaw,3.4,3.4,JH*1.1,{tag:'kicker'});lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(6,0)})}
     else{const L=7,[x0,z0]=at(-L/2,0);park.add('bank',x0,z0,yaw,L,5,JH+.3,{up:4.2,tag:'bank'});const [rx0,rz0]=at(-L/2+4.4,-2.4);park.addRailRaw(rx0,rz0,rx0+fx*2.4,rz0+fz*2.4,JH+.3+.4,JH+.3+.4,'rail');lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L/2+2,0)})}}
