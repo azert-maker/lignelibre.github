@@ -73,6 +73,11 @@ const L=require('./lib');
     g.wing.traverse(m=>{if(!m.isMesh||m.userData.leg)return;const a=m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3)best=Math.min(best,Math.hypot(a[i]-hand.x,a[i+1]-hand.y,a[i+2]-hand.z))});return {d,best}});
   chk(hw.d.every(x=>x<.05),'wakeboard : mains sur le palonnier ('+hw.d.map(x=>(x*100).toFixed(1)+' cm').join(', ')+')');
   chk(hw.best<.06,'wingsuit : la voilure suit la main en piqué ('+(hw.best*100).toFixed(1)+' cm)');
+  /* BMX : bowl de Venice roulable (on monte au-dessus du coping et on revient sans chuter) */
+  const bw=await p.evaluate(async()=>{await __ll.startRun({sport:'bmx',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur,m=c._park().mods.find(m=>m.tag==='bowl');if(!m)return null;
+    const a=(m.a0+m.a1)/2,aE=a+Math.PI,St=c._st();window.__llLastCrash=null;St.pos.set(m.cx+Math.cos(aE)*(m.rIn+6),0,m.cz+Math.sin(aE)*(m.rIn+6));St.yaw=Math.atan2(Math.cos(a),-Math.sin(a));St.vel.set(Math.cos(a)*9,0,Math.sin(a)*9);
+    let hmax=0,crash=false;for(let i=0;i<300;i++){c.update(1/60,{x:0,y:1,a:false,g:false});hmax=Math.max(hmax,St.pos.y);if(window.__llLastCrash){crash=true;break}}return {hmax,crash,H:m.H}});
+  chk(bw&&!bw.crash&&bw.hmax>bw.H,'BMX : bowl roulable, sortie en vert à '+(bw?bw.hmax.toFixed(1):'?')+' m sans chute');
   /* éco : variante légère */
   const lo=await p.evaluate(()=>{__ll.profile.settings.quality='eco';__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
     let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});let t=0;h.glb.traverse(n=>{if(n.isMesh&&n.visible&&n.parent.visible){const g=n.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3}});__ll.profile.settings.quality='normal';return t});

@@ -157,6 +157,9 @@ function tagTex(seed){const R=mulberry(seed);const t=canvasTex(256,128,(c,w,h)=>
   /* usure : le béton reprend le dessus par endroits */
   c.globalCompositeOperation='destination-out';for(let i=0;i<220;i++){c.fillStyle=`rgba(0,0,0,${R()*.4})`;c.fillRect(R()*w,R()*h,2+R()*7,2+R()*5)}c.globalCompositeOperation='source-over'});
   t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;return t}
+let _bowlTile=null;function bowlTileTex(){if(_bowlTile)return _bowlTile;_bowlTile=canvasTex(64,32,(c,w,h)=>{const C=['#1f6fa8','#2b86c4','#e9eef2'];
+  for(let y=0;y<2;y++)for(let x=0;x<4;x++){c.fillStyle=y===0?C[(x%2)]:C[2];c.fillRect(x*16,y*16,16,16);c.strokeStyle='rgba(30,30,30,.35)';c.lineWidth=1.2;c.strokeRect(x*16+.5,y*16+.5,15,15)}});
+  _bowlTile.wrapS=THREE.RepeatWrapping;_bowlTile.wrapT=THREE.ClampToEdgeWrapping;return _bowlTile}
 function parkDress(park,root,o){o=o||{};const eco=!!o.eco,R=mulberry(o.seed||1);
   const steel=new THREE.MeshPhongMaterial({color:0xd8dde2,shininess:110,specular:0xcccccc}),iron=new THREE.MeshLambertMaterial({color:0x6d747c});
   const g=new THREE.Group();g.name='parkDress';root.add(g);const up=new THREE.Vector3(0,1,0),d=new THREE.Vector3();
@@ -168,6 +171,15 @@ function parkDress(park,root,o){o=o||{};const eco=!!o.eco,R=mulberry(o.seed||1);
   const tags=[];const tagN=eco?3:6;for(let i=0;i<tagN;i++)tags.push(new THREE.MeshLambertMaterial({map:tagTex((o.seed||1)*31+i),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));
   let nTags=0;const maxTags=eco?6:16;
   for(const m of park.mods){
+    if(m.radial&&m.tag==='bowl'){/* bowl : frise de carreaux sous le coping (suit la courbe de la transition) et fond légèrement teinté */
+      const tile=bowlTileTex();const mat=new THREE.MeshLambertMaterial({map:tile,polygonOffset:true,polygonOffsetFactor:-2});
+      let uA=0;for(let i=0;i<=m.N;i++)if(m.prof[i]<=m.H-.32)uA=m.us[i];const uB=m.lipU,NA=Math.max(8,Math.round((m.a1-m.a0)*(m.rIn+uB)/.5)),NU=6;
+      const pos=[],uv=[];const Pt=(a,u)=>{const h=park.hAt(m,u)-m.y0,r=m.rIn+u-.012;return [m.cx+Math.cos(a)*r,m.y0+h+.004,m.cz+Math.sin(a)*r]};
+      for(let k=0;k<NA;k++){const b0=m.a0+(m.a1-m.a0)*k/NA,b1=m.a0+(m.a1-m.a0)*(k+1)/NA;for(let j=0;j<NU;j++){const u0=uA+(uB-uA)*j/NU,u1=uA+(uB-uA)*(j+1)/NU;
+        const q=[[b0,u0],[b1,u0],[b1,u1],[b0,u1]];for(const ix of [0,1,2,0,2,3]){pos.push(...Pt(q[ix][0],q[ix][1]));uv.push((q[ix][0]-m.a0)*(m.rIn+uB)/.6,(q[ix][1]-uA)/(uB-uA))}}}
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.computeVertexNormals();
+      const fr=new THREE.Mesh(geo,mat);fr.material.side=THREE.DoubleSide;g.add(fr);
+      const fl=new THREE.Mesh(new THREE.CircleGeometry(m.rIn+.4,40),new THREE.MeshLambertMaterial({color:0xbdb8ae,polygonOffset:true,polygonOffsetFactor:-1}));fl.rotation.x=-Math.PI/2;fl.position.set(m.cx,m.y0+.006,m.cz);g.add(fl)}
     if(m.radial){if(m.coping){const r=m.rIn+m.lipU,h=m.H,n=Math.max(4,Math.round((m.a1-m.a0)*r/.8));let pa=null;
         for(let k=0;k<=n;k++){const a=m.a0+(m.a1-m.a0)*k/n,p=[m.cx+Math.cos(a)*(r-.03),m.y0+h*(m.tf?m.tf(a):1)+.03,m.cz+Math.sin(a)*(r-.03)];if(pa)pipe(...pa,...p,.035,steel,8);pa=p}}continue}
     const P3=(u,v,h)=>[m.x+m.fx*u+m.rx*v,m.y0+h,m.z+m.fz*u+m.rz*v];

@@ -1,5 +1,12 @@
 # Journal des versions · Ligne Libre
 
+## 0.26.0 · 2 novembre 2026 · Le bowl de Venice
+
+BMX
+- Un bowl en fer à cheval dans le parc (case d'angle la plus éloignée du départ, sur les parcs moyens et grands) : fond plat, transition presque verticale de 2,2 m, coping en acier, frise de carreaux bleus et blancs sous le coping, deck autour. Ouverture de 70° côté arrivée pour y entrer en roulant.
+- Le relief est un vrai module du parc : on y roule, on sort en vert au-dessus du coping et on y retombe (vérifié par simulation).
+- Le pilote automatique et le mode parcours peuvent y passer. Ce changement modifie la disposition des parcs générés (une case de moins tirée au hasard).
+
 ## 0.25.0 · 1er novembre 2026 · Venice Beach et toits de Paris habillés
 
 BMX · Venice Beach
