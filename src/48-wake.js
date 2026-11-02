@@ -94,6 +94,10 @@ MODES.wakeboard=function(cfg,look,ctx){
     finishT=(PL-LR-20)/VB+1}
   /* ---------- rider ---------- */
   const rig=buildWake(look);castAll(rig,true,false);root.add(rig);const human=rig.human;
+  const _hpS=new THREE.Vector3(),_hpA=new THREE.Vector3(),_hpB=new THREE.Vector3(),_hpD=new THREE.Vector3();
+  /* mains sur le palonnier (IK deux os, comme le guidon du BMX) : poignées aux deux bouts de la barre */
+  {const glbH=!!rig.handle.userData.aim,grips=[-1,1].map(sd=>{const o=new THREE.Object3D();if(glbH)o.position.set(sd*.1,0,0);else o.position.set(0,sd*.1,0);rig.handle.add(o);return o});
+   human.ik={anchors:grips,w:1}}
   const ropeG=new THREE.BufferGeometry();ropeG.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,0,0,0],3));const rope=new THREE.Line(ropeG,new THREE.LineBasicMaterial({color:0xfff1a8}));rope.frustumCulled=false;root.add(rope);
   const spray=makeParticles(eco?60:220,.42,.85,root),sprayFade=new THREE.Color(0xdff6f4);const foam=makeParticles(eco?60:240,1.1,.55,root),foamFade=new THREE.Color(0x9fdcd8);
   const blob=makeBlob(root,1.4);
@@ -203,8 +207,11 @@ MODES.wakeboard=function(cfg,look,ctx){
       const sp=Math.hypot(VB,St.U),kmh=sp*3.6;if(live){stats.vmax=Math.max(stats.vmax,kmh);stats.time+=dt;stats.dist+=VB*dt}stats.score+=Math.abs(St.U)*dt*.4;land=Math.max(0,land-dt*2.2);
       /* rider : penché contre la corde, buste vers le bateau ; compression en charge ; tuck/flip en l'air */
       const ps=St.grind?{crouch:.45,lean:.1,twist:1.2,back:.7,spread:.2,side:.3}:St.air?(St.grab?{crouch:1,lean:.4,twist:.9,handDown:1}:St.raley>.1?{crouch:0,lean:-.6,twist:1.2,back:1.2,spread:.1,side:-.4}:{crouch:.7,lean:.2,twist:1,back:.8,spread:.3}):
-        {crouch:.4+St.charge*.5+land*.4,lean:-.15-Math.abs(St.edge)*.2,twist:1.15,back:.85,spread:.15,side:.35+St.edge*.25,look:.9};human.pose(ps);
-      /* poignée dans les mains + corde jusqu'au mât du bateau */const hp=V3t.set(.35,1.05,-.25).applyQuaternion(rig.quaternion).add(rig.position);rig.handle.position.set(.35,1.05,-.25);if(rig.handle.userData.aim)rig.handle.lookAt(B.tx,2.45,B.tz);
+        {crouch:.4+St.charge*.5+land*.4,lean:-.15-Math.abs(St.edge)*.2,twist:1.15,back:.85,spread:.15,side:.35+St.edge*.25,look:.9};human.pose(ps);if(human.ik)human.ik.w+=((St.air&&St.grab?0:1)-human.ik.w)*(live?1-Math.exp(-14*dt):1);/* grab : une main lâche le palonnier */
+      /* poignée dans les mains + corde jusqu'au mât du bateau *//* palonnier à bout de bras : milieu des épaules + 0,55 m vers le mât du bateau (les deux mains l'atteignent) */
+      if(human.ik){rig.updateMatrixWorld(true);const sa=human.bones.arms;_hpS.copy(sa[0].upper.getWorldPosition(_hpA)).add(sa[1].upper.getWorldPosition(_hpB)).multiplyScalar(.5);
+        _hpD.set(B.tx,2.45,B.tz).sub(_hpS).normalize();_hpS.addScaledVector(_hpD,.55);rig.worldToLocal(rig.handle.position.copy(_hpS))}else rig.handle.position.set(.35,1.05,-.25);
+      const hp=V3t.copy(rig.handle.position).applyQuaternion(rig.quaternion).add(rig.position);if(rig.handle.userData.aim)rig.handle.lookAt(B.tx,2.45,B.tz);
       const ra=ropeG.attributes.position.array;ra[0]=hp.x;ra[1]=hp.y;ra[2]=hp.z;ra[3]=B.tx;ra[4]=2.45;ra[5]=B.tz;ropeG.attributes.position.needsUpdate=true;
       /* gerbes : carre (rooster tail), écume du sillage du bateau */
       if(live&&!St.air&&!St.grind&&Math.abs(St.U)>2.5){sprayT+=dt;if(sprayT>(eco?.05:.016)){sprayT=0;const k=Math.abs(St.U)/8+overdrive()*.5;const sd=Math.sign(St.U);spray.spawn(RW.x-B.fx*.5,St.y+.1,RW.z-B.fz*.5,-B.rx*sd*(1.5+k*2)-B.fx*1.5+(Math.random()-.5),1+Math.random()*1.6*k,-B.rz*sd*(1.5+k*2)-B.fz*1.5+(Math.random()-.5),.8,.95,.98,1)}}

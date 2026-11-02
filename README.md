@@ -240,13 +240,12 @@ Ligne Libre is in active development by one person. It is playable today; it is 
 - Performance has been measured with software rendering only; low-end phones may need the *éco* quality preset.
 - Multiplayer is local only.
 - Ads are a demo; no ad network is connected.
-- The wingsuit wing is rigid: it follows the body but does not bend with the arms.
 - Game feel and economy need more feedback from real players.
 
 | | Focus |
 |---|---|
 | **Now** | player feedback, economy tuning, mobile performance |
-| **Next** | landing and crash animations, skinned wingsuit, a concrete bowl for Venice |
+| **Next** | landing and crash animations, a concrete bowl for Venice |
 | **Later** | online multiplayer (needs a hosted server), new cosmetics, weekly challenges |
 | **Not planned** | new sports, native mobile app, real money, paid contests, licensed characters or brands |
 

@@ -10,7 +10,7 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 4 | 🟡 | Fichier HTML : 5,9 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces, snowpark, équipement, Venice, Paris) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
 | 6 | ⚪ | Clip « celebrate » branché à l'arrivée avec médaille en parkour, snowboard et downhill (0.23) ; pas en BMX, motocross, wakeboard (rider assis ou tenu par la corde) | clip dédié sur véhicule |
-| 7 | 🟡 | IK des mains sur BMX et motocross seulement (wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains |
+| 7 | ⚪ | IK des mains sur BMX, motocross et wakeboard (0.25) ; le longboard n'en a pas besoin | aucun |
 | 8 | ⚪ | Réceptions : le downhill n'a pas de sauts et le wingsuit pas de réception (seulement la chute) ; les 5 autres sports sont branchés | à traiter si on ajoute des sauts au downhill |
 | 18 | 🟡 | Moto fournie : pas de variante légère (≈ 13 600 triangles aussi en éco, i/s en éco 41 → 33-38 en rendu logiciel) | confirmer la provenance ; décimer une variante éco si besoin |
 | 17 | ⚪ | Wakeboard et wingsuit gardent l'ancienne chute (eau et vol traités à part) ; le longboard a la chute physique depuis 0.25 | chute dédiée sur l'eau |
@@ -32,7 +32,7 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 26 | ⚪ | Profils existants : les pièces gagnées avec l'ancienne économie (bien plus généreuse) sont conservées | décision volontaire : rien n'est retiré au joueur |
 | 27 | ⚪ | Accueil : sur un écran très bas (moins de 390 px de haut), les boutons secondaires (Multijoueur, Garage…) demandent de faire défiler ; Jouer reste visible | mise en page dédiée si besoin |
 | 28 | ⚪ | Les choix de l'écran « Personnaliser » (météo, vent, longueur, monde) sont mémorisés par sport et repris par Jouer : penser à les remettre si on veut revenir aux réglages par défaut | bouton « par défaut » à ajouter si les joueurs s'y perdent |
-| 29 | ⚪ | Voilure du wingsuit rigide (0.24) : elle suit le corps mais ne se plie pas avec les bras quand le rider tourne ; les rayures sont adoucies par l'interpolation des couleurs par sommet | voilure skinnée sur le squelette du rider |
+| 29 | ⚪ | Voilure du wingsuit : depuis 0.25 elle suit les membres (déplacement des sommets), sans vraie rotation des caissons ; les rayures sont adoucies par l'interpolation des couleurs par sommet | voilure skinnée si les poses deviennent plus amples |
 | 30 | ⚪ | Snowboard en poudreuse : la planche disparaît dans la neige fraîche (voulu, comme avant 0.24) ; visible sur piste damée et en l'air | aucun |
 | 31 | 🟡 | Équipement : ≈ 5 300 triangles par sport de glisse, sans variante éco | décimer une variante éco si les mesures sur vrais appareils le demandent |
 | 32 | 🟡 | Décors 0.25 (Venice, Paris) mesurés en rendu logiciel seulement : parkour ≈ 16 → 13 i/s en qualité normale, éco ≈ 30 → 26 ; BMX inchangé en éco | mesurer sur vrais appareils ; réduire lucarnes et mobilier si besoin |

@@ -66,6 +66,13 @@ const L=require('./lib');
   chk(['vk_flood_inst','vk_lamp_inst','vk_bench_inst','vk_bin_inst'].every(k=>dc.venice[k]>0),'Venice : mobilier Blender instancié ('+Object.entries(dc.venice).map(([k,v])=>k.slice(3,-5)+' '+v).join(', ')+')');
   chk(dc.paris.pa_dormer_inst>0&&dc.paris.pa_dormer_inst<=90&&(dc.nChim===0||(dc.paris.pa_chimney_inst===dc.nChim&&dc.chimHidden)),'Paris : '+dc.paris.pa_dormer_inst+' lucarnes, '+(dc.paris.pa_chimney_inst||0)+' souches Blender à la place des '+dc.nChim+' boîtes');
   chk(dc.roadErr<.02,'longboard : relief de la route exporté pour la chute physique (écart '+(dc.roadErr*100).toFixed(1)+' cm)');
+  /* wakeboard : mains sur le palonnier ; wingsuit : la voilure suit les bras en piqué */
+  const hw=await p.evaluate(async()=>{await __ll.startRun({sport:'wakeboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<120;i++)c.update(1/60,c.auto());
+    const h=c._rig.human;c._rig.updateMatrixWorld(true);const d=[];for(let i=0;i<2;i++){const t=new THREE.Vector3(),w=new THREE.Vector3(),e=new THREE.Vector3();h.ik.anchors[i].getWorldPosition(t);h.bones.arms[i].hand.getWorldPosition(w);h.bones.arms[i].fore.getWorldPosition(e);d.push(w.addScaledVector(w.clone().sub(e).normalize(),.06).distanceTo(t))}
+    const g=buildFlyer(__ll.profile.look);g.human.snapPose(POSES.wingsuit_dive);g.updateMatrixWorld(true);const hand=g.human.bones.arms[1].hand.getWorldPosition(new THREE.Vector3());let best=9;
+    g.wing.traverse(m=>{if(!m.isMesh||m.userData.leg)return;const a=m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3)best=Math.min(best,Math.hypot(a[i]-hand.x,a[i+1]-hand.y,a[i+2]-hand.z))});return {d,best}});
+  chk(hw.d.every(x=>x<.05),'wakeboard : mains sur le palonnier ('+hw.d.map(x=>(x*100).toFixed(1)+' cm').join(', ')+')');
+  chk(hw.best<.06,'wingsuit : la voilure suit la main en piqué ('+(hw.best*100).toFixed(1)+' cm)');
   /* éco : variante légère */
   const lo=await p.evaluate(()=>{__ll.profile.settings.quality='eco';__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
     let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});let t=0;h.glb.traverse(n=>{if(n.isMesh&&n.visible&&n.parent.visible){const g=n.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3}});__ll.profile.settings.quality='normal';return t});

@@ -165,8 +165,42 @@ function dressFlyer(g,L,colAt){
   for(const [n,leg] of [['ws_arms',0],['ws_legs',1]]){const o=gearPut(n,w,mats,0,0,0);if(!o)return false;
     o.traverse(m=>{if(!m.isMesh)return;const p=m.geometry.attributes.position,c=new Float32Array(p.count*3),v=new THREE.Vector3();
       m.geometry=m.geometry.clone();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);const cc=colAt(v,leg);c[i*3]=cc.r;c[i*3+1]=cc.g;c[i*3+2]=cc.b}
-      m.geometry.setAttribute('color',new THREE.BufferAttribute(c,3))})}
-  g.wing.visible=false;g.add(w);g.wing=w;g.glbGear=true;return true}
+      m.geometry.setAttribute('color',new THREE.BufferAttribute(c,3));m.userData.leg=leg})}
+  g.wing.visible=false;g.add(w);g.wing=w;g.glbGear=true;
+  if(g.human&&g.human.bones)try{wingFollow(g,w)}catch(e){GLB.err='wingFollow: '+e.message}
+  return true}
+
+/* Voilure qui suit les membres : chaque sommet garde ses coordonnées de repos et reçoit, à chaque image, le déplacement
+   des os voisins (épaule, coude, poignet, hanche pour les ailes de bras ; hanches, genoux, chevilles pour l'aile de jambes),
+   pondéré par sa position sur l'envergure (u) et la corde (v). Translation seule : suffisant pour passer du plané
+   au piqué (bras ramenés, jambes serrées) sans que la voilure se détache du corps. */
+function wingFollow(g,w){const B=g.human.bones,A=B.arms,Lg=B.legs;if(!A||!Lg)return;
+  const J={sh:[A[0].upper,A[1].upper],el:[A[0].fore,A[1].fore],wr:[A[0].hand,A[1].hand],hp:[Lg[0].upper,Lg[1].upper],kn:[Lg[0].lower,Lg[1].lower],an:[Lg[0].foot,Lg[1].foot]};
+  const inv=new THREE.Matrix4(),tv=new THREE.Vector3();
+  const read=up=>{if(up)g.updateMatrixWorld(true);inv.copy(g.matrixWorld).invert();const o={};for(const k in J)o[k]=J[k].map(b=>b.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv));return o};
+  const R0=read(true),D={};for(const k in J)D[k]=[new THREE.Vector3(),new THREE.Vector3()];
+  const meshes=[];w.traverse(m=>{if(!m.isMesh)return;const p=m.geometry.attributes.position,n=p.count,rest=Float32Array.from(p.array),wt=new Float32Array(n*4),leg=m.userData.leg;
+    for(let i=0;i<n;i++){const x=rest[i*3],z=rest[i*3+2];
+      if(leg){const u=Math.min(1,Math.max(0,(x-R0.an[0].x)/((R0.an[1].x-R0.an[0].x)||1))),v=Math.min(1,Math.max(0,(z-R0.hp[0].z)/((R0.an[0].z-R0.hp[0].z)||1)));wt[i*4]=u;wt[i*4+1]=v}
+      else{const s=x<0?0:1,sh=R0.sh[s],wr=R0.wr[s];const u=Math.min(1,Math.max(0,(x-sh.x)/((wr.x-sh.x)||1)));
+        /* corde : 0 sur le bord d'attaque (bras), 1 au bord de fuite (vers la hanche) */
+        const zl=sh.z+(wr.z-sh.z)*u,zt=.4+(wr.z+.16*(.4-wr.z)-.4)*u;const v=Math.min(1,Math.max(0,(z-zl)/((zt-zl)||1)));wt[i*4]=u;wt[i*4+1]=v;wt[i*4+2]=s}}
+    meshes.push({p,rest,wt,leg,n})});
+  const L3=(a,b,t,o)=>o.copy(a).lerp(b,t),t1=new THREE.Vector3(),t2=new THREE.Vector3(),t3=new THREE.Vector3();
+  let last=-1;
+  w.userData.follow=function(){const now=performance.now();if(now-last<15)return;last=now;const C=read();let moved=0;
+    for(const k in J)for(let s=0;s<2;s++){D[k][s].copy(C[k][s]).sub(R0[k][s]);moved+=D[k][s].lengthSq()}
+    for(const M of meshes){const a=M.p.array,r=M.rest,wt=M.wt;
+      if(moved<1e-8){a.set(r);M.p.needsUpdate=true;continue}
+      for(let i=0;i<M.n;i++){const u=wt[i*4],v=wt[i*4+1];
+        if(M.leg){/* hanche → genou → cheville, interpolés de la jambe gauche (u=0) à la droite (u=1) */
+          const hp=L3(D.hp[0],D.hp[1],u,t1),kn=L3(D.kn[0],D.kn[1],u,t2),an=L3(D.an[0],D.an[1],u,t3);
+          if(v<.5)tv.copy(hp).lerp(kn,v*2);else tv.copy(kn).lerp(an,(v-.5)*2)}
+        else{const s=wt[i*4+2];const lead=u<.5?L3(D.sh[s],D.el[s],u*2,t1):L3(D.el[s],D.wr[s],(u-.5)*2,t1);
+          const trail=t2.copy(D.hp[s]).lerp(t3.copy(D.wr[s]).multiplyScalar(.84).addScaledVector(D.hp[s],.16),u);tv.copy(lead).lerp(trail,v)}
+        a[i*3]=r[i*3]+tv.x;a[i*3+1]=r[i*3+1]+tv.y;a[i*3+2]=r[i*3+2]+tv.z}
+      M.p.needsUpdate=true}};
+  const base=g.updateMatrixWorld;g.updateMatrixWorld=function(force){base.call(this,force);if(!wingFollow.busy){wingFollow.busy=true;try{w.userData.follow()}finally{wingFollow.busy=false}}}}
 
 /* Instancie un objet d'un GLB (chaque primitive devient un InstancedMesh) : list = [[x,y,z,yaw,échelle,teinte?], …].
    matFor(nomMatériau, matériauSource) peut renvoyer un matériau de remplacement ; la teinte par instance s'applique

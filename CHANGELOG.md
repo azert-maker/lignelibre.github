@@ -12,13 +12,19 @@ Parkour · toits de Paris
 - Dernier étage en brisis de zinc à joints debout, corniche crème en dessous, lucarnes Blender sur les façades qui donnent sur le vide (90 au plus, aucune en qualité éco).
 - Souches de cheminée Blender (`assets/glb/paris.glb`) en plâtre et brique avec leurs mitrons en terre cuite, à la place des boîtes ; même encombrement.
 
+Wakeboard
+- Les deux mains tiennent le palonnier (même IK que le guidon du BMX) ; le palonnier se place à bout de bras, dans l'axe de la corde, et une main le lâche pendant un grab.
+
+Wingsuit
+- La voilure suit les membres : en piqué (bras ramenés, jambes serrées) elle reste attachée aux poignets et aux chevilles au lieu de flotter à côté du corps.
+
 Downhill longboard
 - Chute physique comme dans les autres sports au sol : le rider est éjecté, culbute et s'immobilise sur la route, la planche glisse (le relief de la route est maintenant exporté).
 
 Performances (rendu logiciel, qualité normale) : BMX 76 → 97 appels de dessin, parkour 73 → 81 ; i/s en baisse d'environ 10 à 20 % en parkour. Les tubes du skatepark sont fusionnés en 2 maillages et le mobilier est instancié.
 
 Tests
-- `tests/glb.js` : 4 contrôles de plus (habillage du skatepark, mobilier de Venice, toits de Paris, relief de la route).
+- `tests/glb.js` : 6 contrôles de plus (habillage du skatepark, mobilier de Venice, toits de Paris, relief de la route, mains sur le palonnier, voilure en piqué).
 
 ## 0.24.0 · 1er novembre 2026 · Planches et voilure modélisées
 

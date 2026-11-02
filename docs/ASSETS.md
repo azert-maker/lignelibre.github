@@ -71,7 +71,7 @@ Le 28 octobre, le propriétaire du projet a confirmé que ces modèles sont libr
 |---|---|---|---|---|---|
 | 1 | ~~Planches (longboard, snowboard, wakeboard) + palonnier~~ | Downhill, Snowboard, Wakeboard | fait en 0.24 (`gear.glb`) | | |
 | 2 | Clips Blender de réception et de chute | tous | rendre la compression et la chute plus organiques | 19 os du rig, 0,3 à 1 s, en place | ressort procédural + corps rigide |
-| 3 | Combinaison wingsuit skinnée (voilure pondérée sur bras et jambes) | Wingsuit | la voilure rigide de 0.24 ne se plie pas avec les bras en virage | même squelette, voilure pondérée sur bras et jambes | voilure rigide `ws_arms` / `ws_legs` (0.24) |
+| 3 | Combinaison wingsuit skinnée | Wingsuit | utile seulement si les poses deviennent plus amples | même squelette | voilure `ws_arms` / `ws_legs` qui suit les membres (0.25) |
 | 4 | Kit Venice Beach : reste un vrai bowl en béton (coping, mobilier et tags faits en 0.25) | BMX | identité du lieu au sol | doit suivre le relief exact du parc | parc procédural habillé (0.25) |
 | 5 | ~~Kit toits de Paris (lucarnes, mansardes, cheminées à mitrons)~~ | Parkour | fait en 0.25 (`paris.glb` + brisis procédural) | | |
 | 6 | Bouées, ponton, phare | Wakeboard (Lake Havasu) | montagnes rouges, palmiers et pont en place | légers, eau existante | décor 0.23 |
