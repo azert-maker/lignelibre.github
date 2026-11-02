@@ -5,7 +5,7 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | # | Gravité | Problème | Contournement / plan |
 |---|---|---|---|
 | 1 | 🟠 | Performances avec les modèles Blender mesurées seulement en rendu logiciel (i/s en baisse de 2 à 30 % en éco, 25 à 45 % en haute) | mesurer sur vrais appareils ; si besoin, bascule automatique vers `rider_lo` puis vers le procédural quand la qualité auto descend |
-| 2 | ⚪ | Skatepark : modules procéduraux habillés en 0.25 (coping, cornières, garde-corps, tags, mobilier) ; pas encore de bowl en béton | bowl Blender qui suive le relief exact |
+| 2 | ⚪ | Skatepark : modules procéduraux habillés (0.25) et bowl en fer à cheval (0.26) ; le bowl n'existe pas sur le petit parc (cases trop étroites) | variante plus petite si besoin |
 | 3 | 🟡 | Le jeu a besoin d'internet au premier chargement (Three.js, GLTFLoader, SkeletonUtils, polices) | si GLTFLoader ne charge pas, le jeu reste jouable avec les modèles procéduraux ; option future : tout embarquer |
 | 4 | 🟡 | Fichier HTML : 5,9 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces, snowpark, équipement, Venice, Paris) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |

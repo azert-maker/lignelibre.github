@@ -245,7 +245,7 @@ Ligne Libre is in active development by one person. It is playable today; it is 
 | | Focus |
 |---|---|
 | **Now** | player feedback, economy tuning, mobile performance |
-| **Next** | landing and crash animations, a concrete bowl for Venice |
+| **Next** | landing and crash animations, lighter board models for the eco preset |
 | **Later** | online multiplayer (needs a hosted server), new cosmetics, weekly challenges |
 | **Not planned** | new sports, native mobile app, real money, paid contests, licensed characters or brands |
 
