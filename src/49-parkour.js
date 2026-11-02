@@ -60,14 +60,16 @@ MODES.parkour=function(cfg,look,ctx){
     const geo=new THREE.BoxGeometry(1,1,1);const mats={};for(const k in cols)mats[k]=new THREE.MeshLambertMaterial({color:cols[k]});
     /* obstacles regroupés par type en InstancedMesh (un appel de dessin par type au lieu d'un par objet) */
     const byT={};for(const b of boxes){if(b.t==='roof')continue;(byT[b.t]=byT[b.t]||[]).push(b)}
-    for(const t in byT){const L_=byT[t],im=new THREE.InstancedMesh(geo,mats[t]||mats.chim,L_.length);L_.forEach((b,i)=>{_dv.set((b.x0+b.x1)/2,(b.y0+b.y1)/2,(b.z0+b.z1)/2);_dq.identity();_ds.set(b.x1-b.x0,b.y1-b.y0,b.z1-b.z0);_dm.compose(_dv,_dq,_ds);im.setMatrixAt(i,_dm)});im.castShadow=!eco;im.receiveShadow=true;root.add(im)}
+    const imBy={};for(const t in byT){const L_=byT[t],im=new THREE.InstancedMesh(geo,mats[t]||mats.chim,L_.length);imBy[t]=im;L_.forEach((b,i)=>{_dv.set((b.x0+b.x1)/2,(b.y0+b.y1)/2,(b.z0+b.z1)/2);_dq.identity();_ds.set(b.x1-b.x0,b.y1-b.y0,b.z1-b.z0);_dm.compose(_dv,_dq,_ds);im.setMatrixAt(i,_dm)});im.castShadow=!eco;im.receiveShadow=true;root.add(im)}
     for(const b of boxes){if(b.t==='roof')continue;
       if(b.wr){/* panneau néon de wallrun, bien visible */const pm=new THREE.Mesh(new THREE.PlaneGeometry(b.z1-b.z0-1,4),new THREE.MeshBasicMaterial({color:0x2ee6ff,transparent:true,opacity:.85}));pm.rotation.y=b.face>0?Math.PI/2:-Math.PI/2;pm.position.set(b.face>0?b.x1+.02:b.x0-.02,b.y1-4.6,(b.z0+b.z1)/2);root.add(pm);
         const ar=textSprite('WALLRUN',0x2ee6ff,3);ar.position.set(b.face>0?b.x1+.4:b.x0-.4,b.y1-2,(b.z0+b.z1)/2);root.add(ar)}}
     /* rue en contrebas, enseignes, ciel nocturne de la ville au loin */
     const st=new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshLambertMaterial({color:0x56524d}));st.rotation.x=-Math.PI/2;st.position.y=-.02;root.add(st);
     const rr=rngAt(seedI,9,4),bm=new THREE.MeshLambertMaterial({color:0xc4b89f});for(let i=0;i<(eco?20:46);i++){const a=rr()*Math.PI*2,d=160+rr()*240,h=30+rr()*80,w=16+rr()*22;const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),bm);m.position.set(Math.cos(a)*d,h/2,Math.sin(a)*d+(course?-ROWS*7:0));root.add(m)}
-    const signC=[0xff3fbf,0x2ee6ff,0xffd23a];for(let i=0;i<Math.min(roofs.length,eco?8:18);i++){const b=roofs[Math.floor(rr()*roofs.length)];const s=new THREE.Mesh(new THREE.PlaneGeometry(4,1.2),new THREE.MeshBasicMaterial({color:signC[i%3]}));s.position.set(b.x0-.03,b.y1-2-rr()*4,(b.z0+b.z1)/2);s.rotation.y=-Math.PI/2;root.add(s)}}
+    const signC=[0xff3fbf,0x2ee6ff,0xffd23a];for(let i=0;i<Math.min(roofs.length,eco?8:18);i++){const b=roofs[Math.floor(rr()*roofs.length)];const s=new THREE.Mesh(new THREE.PlaneGeometry(4,1.2),new THREE.MeshBasicMaterial({color:signC[i%3]}));s.position.set(b.x0-.03,b.y1-2-rr()*4,(b.z0+b.z1)/2);s.rotation.y=-Math.PI/2;root.add(s)}
+    /* toits de Paris : brisis en zinc, corniche, lucarnes et souches de cheminée Blender (visuel seul) */
+    if(typeof parisRoofs==='function')try{parisRoofs(root,roofs,{eco,seed:seedI,chims:byT.chim||[],chimMesh:imBy.chim,clear:(x,z,y)=>!roofs.some(o=>x>=o.x0-.2&&x<=o.x1+.2&&z>=o.z0-.2&&z<=o.z1+.2&&o.y1>y-3.5)})}catch(e){console.warn('parisRoofs',e)}}
   parisDecor(root,Math.min(...rowZ)-BW,eco);
   /* ---------- départ, portes (parcours), spots (libre) ---------- */
   const startB=roofs.find(o=>o.r===0&&o.c===Math.floor(COLS/2));

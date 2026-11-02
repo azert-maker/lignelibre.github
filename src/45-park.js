@@ -138,3 +138,52 @@ function makeSpots(root,o){const list=[];const R=o.rng;let mat=null;
       root.remove(sp.s);root.remove(sp.ring);sp.s.material.map.dispose();sp.s.material.dispose();ctx.bonus(sp.ch.bonus,'Spot : '+sp.ch.label);if(!sfx.trick(4))ding(990,.3);list.splice(i,1);spawn();return true}return false}
   function update(t){for(const sp of list){sp.ring.rotation.z=t*1.5;sp.ring.position.y=sp.p.y+2.2+Math.sin(t*2)*.15}}
   for(let i=0;i<(o.n||2);i++)spawn();return {list,test,update,spawn}}
+
+/* ---------- habillage du skatepark (visuel seul, aucune incidence sur le relief) ----------
+   coping : tube d'acier sur la lèvre des quarters et des coins ; cornières d'acier sur les arêtes des box ;
+   garde-corps à l'arrière des decks du périmètre ; tags (motifs abstraits générés, aucune marque) sur les flancs. */
+const TAG_COLS=['#ff5a36','#2bb3ff','#ffd23a','#7ee08a','#c77dff','#ff7eb6','#f4f4f0'];
+const TAG_WORDS=['FLOW','RIDE','SESH','DROP','WAVE','LIGNE','OLLIE','ZEN','KRUZ','SK8','VNC','LL','AIR','GRIND','SUN'];
+function tagTex(seed){const R=mulberry(seed);const t=canvasTex(256,128,(c,w,h)=>{c.clearRect(0,0,w,h);
+  /* tag en lettres pleines : contour sombre, remplissage dégradé, reflet, ombre portée, éclats de bombe ; mots neutres choisis à la main */
+  const word=TAG_WORDS[Math.floor(R()*TAG_WORDS.length)],c1=TAG_COLS[Math.floor(R()*TAG_COLS.length)],c2=TAG_COLS[Math.floor(R()*TAG_COLS.length)];
+  const fs=Math.min(96,Math.floor(210/Math.max(2.2,word.length*.62)));c.font=`900 ${fs}px Impact, "Arial Black", sans-serif`;c.textAlign='center';c.textBaseline='middle';
+  c.save();c.translate(w/2,h/2+6);c.rotate((R()-.5)*.18);c.transform(1,0,(R()-.5)*.5,1,0,0);
+  c.lineJoin='round';c.fillStyle='rgba(0,0,0,.35)';c.fillText(word,5,5);
+  c.lineWidth=fs*.22;c.strokeStyle='#15161a';c.strokeText(word,0,0);
+  const gr=c.createLinearGradient(0,-fs/2,0,fs/2);gr.addColorStop(0,c1);gr.addColorStop(1,c2);c.fillStyle=gr;c.fillText(word,0,0);
+  c.lineWidth=fs*.05;c.strokeStyle='rgba(255,255,255,.75)';c.strokeText(word,-2,-3);c.restore();
+  for(let i=0;i<90;i++){c.fillStyle=R()<.5?c1:'#15161a';c.globalAlpha=.6;c.fillRect(w*.08+R()*w*.84,h*.1+R()*h*.8,1.5,1.5)}c.globalAlpha=1;
+  /* usure : le béton reprend le dessus par endroits */
+  c.globalCompositeOperation='destination-out';for(let i=0;i<220;i++){c.fillStyle=`rgba(0,0,0,${R()*.4})`;c.fillRect(R()*w,R()*h,2+R()*7,2+R()*5)}c.globalCompositeOperation='source-over'});
+  t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;return t}
+function parkDress(park,root,o){o=o||{};const eco=!!o.eco,R=mulberry(o.seed||1);
+  const steel=new THREE.MeshPhongMaterial({color:0xd8dde2,shininess:110,specular:0xcccccc}),iron=new THREE.MeshLambertMaterial({color:0x6d747c});
+  const g=new THREE.Group();g.name='parkDress';root.add(g);const up=new THREE.Vector3(0,1,0),d=new THREE.Vector3();
+  /* tous les tubes d'un même matériau sont fusionnés en un seul maillage (un appel de dessin par matériau) */
+  const acc=new Map(),M4=new THREE.Matrix4(),Q=new THREE.Quaternion(),S1=new THREE.Vector3(1,1,1),C=new THREE.Vector3();
+  const pipe=(ax,ay,az,bx,by,bz,r,mat,seg)=>{d.set(bx-ax,by-ay,bz-az);const L=d.length();if(L<.05)return;const cg=new THREE.CylinderGeometry(r,r,L,seg||8,1,true).toNonIndexed();
+    Q.setFromUnitVectors(up,d.normalize());M4.compose(C.set((ax+bx)/2,(ay+by)/2,(az+bz)/2),Q,S1);cg.applyMatrix4(M4);
+    let a=acc.get(mat);if(!a){a={p:[],n:[]};acc.set(mat,a)}a.p.push(...cg.attributes.position.array);a.n.push(...cg.attributes.normal.array);cg.dispose()};
+  const tags=[];const tagN=eco?3:6;for(let i=0;i<tagN;i++)tags.push(new THREE.MeshLambertMaterial({map:tagTex((o.seed||1)*31+i),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));
+  let nTags=0;const maxTags=eco?6:16;
+  for(const m of park.mods){
+    if(m.radial){if(m.coping){const r=m.rIn+m.lipU,h=m.H,n=Math.max(4,Math.round((m.a1-m.a0)*r/.8));let pa=null;
+        for(let k=0;k<=n;k++){const a=m.a0+(m.a1-m.a0)*k/n,p=[m.cx+Math.cos(a)*(r-.03),m.y0+h*(m.tf?m.tf(a):1)+.03,m.cz+Math.sin(a)*(r-.03)];if(pa)pipe(...pa,...p,.035,steel,8);pa=p}}continue}
+    const P3=(u,v,h)=>[m.x+m.fx*u+m.rx*v,m.y0+h,m.z+m.fz*u+m.rz*v];
+    if(m.type==='quarter'&&m.coping){const u=m.lipU-.03,h=park.hAt(m,m.lipU)-m.y0+.03;pipe(...P3(u,-m.W/2,h),...P3(u,m.W/2,h),.035,steel,10);
+      /* garde-corps au bord arrière des decks du périmètre */
+      if(m.tag==='quarter'&&!eco){const ub=m.L-.08,hb=m.prof[m.N];for(const y of [.55,1.05])pipe(...P3(ub,-m.W/2,hb+y),...P3(ub,m.W/2,hb+y),.025,iron,6);
+        const np=Math.max(2,Math.round(m.W/2));for(let i=0;i<=np;i++){const v=-m.W/2+m.W*i/np;pipe(...P3(ub,v,hb),...P3(ub,v,hb+1.05),.025,iron,6)}}}
+    if(m.type==='box'){/* cornières : arêtes vives en acier sur le plat du box */const r0=Math.min(m.L/2,.8),h=m.H;for(const s of [-1,1])pipe(...P3(r0,s*(m.W/2-.02),h-.01),...P3(m.L-r0,s*(m.W/2-.02),h-.01),.03,steel,4)}
+    /* tags sur les flancs des modules intérieurs (pas sur le périmètre, tourné vers les tribunes) */
+    if(m.tag!=='quarter'&&m.tag!=='landing'&&nTags<maxTags&&Math.max(...m.prof)>=.4&&R()<.7){const s=R()<.5?-1:1,mat=tags[Math.floor(R()*tags.length)],Hm=Math.max(.3,...m.prof);
+      /* un tag de 2,4 × 1,2 m posé sur la longueur ; hors de ce cadre la texture est transparente (bords vides, ClampToEdge) */
+      const TW=Math.min(2.4,m.L*.8),TH=Math.min(1.2,Hm),uc=TW/2+R()*Math.max(0,m.L-TW);
+      const pos=[],uv=[];const v=s*(m.W/2+.012);for(let i=0;i<m.N;i++){const u0=m.us[i],u1=m.us[i+1],h0=m.prof[i],h1=m.prof[i+1];
+        const q=[[u0,0],[u1,0],[u1,h1],[u0,h0]].map(([u,h])=>[P3(u,v,h),[.5+(u-uc)/TW*(s<0?-1:1),(h-.05)/TH]]);
+        for(const ix of [0,1,2,0,2,3]){pos.push(...q[ix][0]);uv.push(...q[ix][1])}}
+      const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.computeVertexNormals();
+      const tm=new THREE.Mesh(geo,mat);tm.material.side=THREE.DoubleSide;g.add(tm);nTags++}}
+  for(const [mat,a] of acc){const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(a.p,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(a.n,3));const m=new THREE.Mesh(geo,mat);m.castShadow=!eco;g.add(m)}
+  return g}

@@ -59,7 +59,7 @@ The game interface is in French.
 - **Progression**: levels per sport, trick challenges, daily challenge and daily course, streaks.
 - **Shop and skin machine**: gear that changes physics is bought directly; the animated skin machine only gives cosmetics, with published odds and a pity counter. No real money anywhere.
 - **Replay, ghost of your best run** and clip export.
-- **3D models made in Blender** (rider with a 19-bone rig, BMX, motocross bike, boards and wingsuit wing) with a procedural fallback if a model fails to load.
+- **3D models made in Blender** (rider with a 19-bone rig, BMX, motocross bike, boards and wingsuit wing, Venice Beach and Paris rooftop props) with a procedural fallback if a model fails to load.
 - **Local multiplayer** (2–4 players on the same network) through a small WebSocket server.
 - **Desktop and mobile**: keyboard, touch controls, quality presets.
 - **Saves stay in the browser**, with profile export and import.
@@ -240,13 +240,12 @@ Ligne Libre is in active development by one person. It is playable today; it is 
 - Performance has been measured with software rendering only; low-end phones may need the *éco* quality preset.
 - Multiplayer is local only.
 - Ads are a demo; no ad network is connected.
-- The wingsuit wing is rigid: it follows the body but does not bend with the arms.
 - Game feel and economy need more feedback from real players.
 
 | | Focus |
 |---|---|
 | **Now** | player feedback, economy tuning, mobile performance |
-| **Next** | landing and crash animations, skinned wingsuit, richer Venice and Paris sets |
+| **Next** | landing and crash animations, a concrete bowl for Venice |
 | **Later** | online multiplayer (needs a hosted server), new cosmetics, weekly challenges |
 | **Not planned** | new sports, native mobile app, real money, paid contests, licensed characters or brands |
 
