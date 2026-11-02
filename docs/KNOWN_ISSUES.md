@@ -5,15 +5,15 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | # | Gravité | Problème | Contournement / plan |
 |---|---|---|---|
 | 1 | 🟠 | Performances avec les modèles Blender mesurées seulement en rendu logiciel (i/s en baisse de 2 à 30 % en éco, 25 à 45 % en haute) | mesurer sur vrais appareils ; si besoin, bascule automatique vers `rider_lo` puis vers le procédural quand la qualité auto descend |
-| 2 | 🟡 | Skatepark : ambiance Venice Beach en place (0.22), mais modules du parc encore procéduraux | kit Blender Venice (voir ASSETS.md) |
+| 2 | ⚪ | Skatepark : modules procéduraux habillés en 0.25 (coping, cornières, garde-corps, tags, mobilier) ; pas encore de bowl en béton | bowl Blender qui suive le relief exact |
 | 3 | 🟡 | Le jeu a besoin d'internet au premier chargement (Three.js, GLTFLoader, SkeletonUtils, polices) | si GLTFLoader ne charge pas, le jeu reste jouable avec les modèles procéduraux ; option future : tout embarquer |
-| 4 | 🟡 | Fichier HTML : 4,5 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces) | compression Draco ou quantification des sommets à évaluer |
+| 4 | 🟡 | Fichier HTML : 5,9 Mo (GLB embarqués : rider, rider léger, BMX, moto, machine à pinces, snowpark, équipement, Venice, Paris) | compression Draco ou quantification des sommets à évaluer |
 | 5 | 🟡 | Les fantômes réseau et les autres joueurs utilisent le modèle complet (pas forcément le LOD léger) | passer `lod:'lo'` aux constructeurs de fantômes |
 | 6 | ⚪ | Clip « celebrate » branché à l'arrivée avec médaille en parkour, snowboard et downhill (0.23) ; pas en BMX, motocross, wakeboard (rider assis ou tenu par la corde) | clip dédié sur véhicule |
-| 7 | 🟡 | IK des mains sur BMX et motocross seulement (wake, longboard gardent la pose d'origine) | généraliser l'ancrage des mains |
+| 7 | ⚪ | IK des mains sur BMX, motocross et wakeboard (0.25) ; le longboard n'en a pas besoin | aucun |
 | 8 | ⚪ | Réceptions : le downhill n'a pas de sauts et le wingsuit pas de réception (seulement la chute) ; les 5 autres sports sont branchés | à traiter si on ajoute des sauts au downhill |
 | 18 | 🟡 | Moto fournie : pas de variante légère (≈ 13 600 triangles aussi en éco, i/s en éco 41 → 33-38 en rendu logiciel) | confirmer la provenance ; décimer une variante éco si besoin |
-| 17 | ⚪ | Downhill longboard, wakeboard et wingsuit gardent l'ancienne chute (pas de fonction de relief exportée pour le longboard ; eau et vol traités à part) | exporter `_h` dans le longboard |
+| 17 | ⚪ | Wakeboard et wingsuit gardent l'ancienne chute (eau et vol traités à part) ; le longboard a la chute physique depuis 0.25 | chute dédiée sur l'eau |
 | 15 | 🟡 | Chute physique : corps rigide (pas de vrai ragdoll membre par membre) ; le rider peut traverser un mur ou un module vertical | v2 : collisions avec les boîtes du parc |
 | 16 | ⚪ | Le replay ne rejoue pas la compression de réception (pose enregistrée sans le ressort) | enregistrer `landState` dans les images du replay |
 | 19 | ⚪ | Skins : sur le modèle procédural de repli, seules les couleurs s'appliquent (pas les motifs ni les finitions) | sans impact tant que les GLB chargent |
@@ -32,4 +32,8 @@ Gravité : 🔴 bloquant · 🟠 important · 🟡 mineur · ⚪ cosmétique
 | 26 | ⚪ | Profils existants : les pièces gagnées avec l'ancienne économie (bien plus généreuse) sont conservées | décision volontaire : rien n'est retiré au joueur |
 | 27 | ⚪ | Accueil : sur un écran très bas (moins de 390 px de haut), les boutons secondaires (Multijoueur, Garage…) demandent de faire défiler ; Jouer reste visible | mise en page dédiée si besoin |
 | 28 | ⚪ | Les choix de l'écran « Personnaliser » (météo, vent, longueur, monde) sont mémorisés par sport et repris par Jouer : penser à les remettre si on veut revenir aux réglages par défaut | bouton « par défaut » à ajouter si les joueurs s'y perdent |
-
+| 29 | ⚪ | Voilure du wingsuit : depuis 0.25 elle suit les membres (déplacement des sommets), sans vraie rotation des caissons ; les rayures sont adoucies par l'interpolation des couleurs par sommet | voilure skinnée si les poses deviennent plus amples |
+| 30 | ⚪ | Snowboard en poudreuse : la planche disparaît dans la neige fraîche (voulu, comme avant 0.24) ; visible sur piste damée et en l'air | aucun |
+| 31 | 🟡 | Équipement : ≈ 5 300 triangles par sport de glisse, sans variante éco | décimer une variante éco si les mesures sur vrais appareils le demandent |
+| 32 | 🟡 | Décors 0.25 (Venice, Paris) mesurés en rendu logiciel seulement : parkour ≈ 16 → 13 i/s en qualité normale, éco ≈ 30 → 26 ; BMX inchangé en éco | mesurer sur vrais appareils ; réduire lucarnes et mobilier si besoin |
+| 33 | ⚪ | Tags du skatepark : mots neutres tirés d'une liste fixe ; aucun tag d'artiste réel | tags sous licence d'artistes si un jour on en a |

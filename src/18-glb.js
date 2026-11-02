@@ -10,7 +10,7 @@
 const GLB={ready:false,models:{},err:null,stats:{}};
 function b64ToBuf(s){const bin=atob(s),n=bin.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u.buffer}
 /* modèles décodés seulement quand on en a besoin (la machine à pinces n'apparaît qu'au garage) */
-const GLB_LAZY=['claw','snowpark'];const GLB_PEND={};
+const GLB_LAZY=['claw','snowpark','venice','paris'];const GLB_PEND={};
 function glbLoad(n){if(GLB.models[n])return Promise.resolve(GLB.models[n]);if(GLB_PEND[n])return GLB_PEND[n];
   if(typeof ASSET_GLB==='undefined'||!ASSET_GLB[n]||!THREE.GLTFLoader)return Promise.resolve(null);
   return GLB_PEND[n]=new Promise(res=>{try{new THREE.GLTFLoader().parse(b64ToBuf(ASSET_GLB[n]),'',gl=>{GLB.models[n]=gl;res(gl)},e=>{GLB.err=n+': '+String(e&&e.message||e);res(null)})}catch(e){GLB.err=n+': '+e.message;res(null)}})}
@@ -122,3 +122,94 @@ function dressMoto(g,L,numTex){
   const ud=N('moto_front').userData;/* les extras donnent le pivot des leviers ; la main se pose ~9 cm plus à l'extérieur, sur la poignée */
   m.grips=[ud.gripL,ud.gripR].map(a=>a?new THREE.Vector3(a[0]+Math.sign(a[0])*.09,a[1]-.015,a[2]).sub(pF):null);
   g.glbMoto=true;return true}
+
+/* Équipement de glisse et voilure (assets/blender/gear.py) : chaque pièce a son origine là où le jeu la pose ;
+   les planches de longueur variable (longboard, wakeboard) sont modélisées sur 1 m et étirées en z.
+   Les maillages procéduraux restent dans le groupe, masqués : en cas d'échec, rien ne change. */
+function gearMats(map){const cache=new Map();
+  return src=>{if(cache.has(src))return cache.get(src);const nm=src.name||'',d=map[nm],col=d&&d.vc?0xffffff:d&&d.c!=null?d.c:(src.color?src.color.getHex():0xffffff);
+    const m=d&&d.phong?new THREE.MeshPhongMaterial({color:col,shininess:d.phong,specular:d.spec??0x555555,side:THREE.DoubleSide}):new THREE.MeshLambertMaterial({color:col,side:THREE.DoubleSide,vertexColors:!!(d&&d.vc)});
+    cache.set(src,m);return m}}
+function gearPut(name,parent,mats,x,y,z,ry){const gl=GLB.models.gear,src=gl&&gl.scene.getObjectByName(name);if(!src)return null;
+  const o=src.clone(true);o.position.set(x||0,y||0,z||0);o.quaternion.identity();o.rotation.set(0,ry||0,0);o.scale.set(1,1,1);
+  o.traverse(m=>{if(m.isMesh){m.material=Array.isArray(m.material)?m.material.map(mats):mats(m.material);m.castShadow=true}});parent.add(o);return o}
+function gearHide(g,keep){for(const c of g.children)if(c.isMesh&&!keep.includes(c))c.visible=false}
+function gearHas(...n){const gl=GLB.models.gear;return !!gl&&n.every(k=>gl.scene.getObjectByName(k))}
+const darker=(c,k)=>new THREE.Color(c).multiplyScalar(k).getHex();
+
+function dressLongboard(g,L,deckY){
+  if(!gearHas('lb_deck','lb_truck','lb_wheel'))return false;const len=g.len;
+  const mats=gearMats({deck:{c:L.deck,phong:50},grip:{c:0x1f2023},ply:{c:0xc9a06a},metal:{c:0xb4bac2,phong:90,spec:0x999999},bushing:{c:L.accent},wheel:{c:L.wheel,phong:20,spec:0x222222},core:{c:0xe8e6e0}});
+  gearHide(g,[]);const d=gearPut('lb_deck',g,mats,0,deckY+.012,0);d.scale.z=len;
+  for(const s of [-1,1]){const z=s*(len/2-.15);gearPut('lb_truck',g,mats,0,.035,z,s>0?Math.PI:0);
+    for(const x of [-.13,.13])gearPut('lb_wheel',g,mats,x,.035,z,x<0?Math.PI:0)}
+  g.glbGear=true;return true}
+function dressSnowboard(g,L){
+  if(!gearHas('sb_board','sb_binding'))return false;
+  const mats=gearMats({top:{c:L.deck,phong:60},base:{c:darker(L.deck,.35),phong:40},edge:{c:0xa8aeb5,phong:100,spec:0xaaaaaa},binding:{c:0x16191d},metal:{c:0xb4bac2,phong:90},strap:{c:L.accent}});
+  /* la planche affleure la neige comme l'ancienne (dessus à ~3 cm) */
+  gearHide(g,[]);gearPut('sb_board',g,mats,0,.015,0);
+  for(const z of [-.24,.24])gearPut('sb_binding',g,mats,0,.034,z);g.glbGear=true;return true}
+function dressWake(g,L){
+  if(!gearHas('wk_board','wk_binding','wk_handle'))return false;const len=g.len;
+  const mats=gearMats({board:{c:L.boardCol??0xf3f1ea,phong:60},boardbase:{c:0x2a2f36},lace:{c:L.accent},fin:{c:0x101215},boot:{c:0x1e2229},grip_h:{c:0x14161a},rope:{c:0xfff1a8}});
+  gearHide(g,[]);const b=gearPut('wk_board',g,mats,0,.012,0);b.scale.z=len;
+  for(const z of [-.27,.27])gearPut('wk_binding',g,mats,0,.036,z);
+  /* palonnier : le modèle a la barre en z et la patte d'oie vers +x ; une fois tourné, son +z vise la corde (lookAt) */
+  const h=new THREE.Group();g.add(h);gearPut('wk_handle',h,mats,0,0,0,-Math.PI/2);h.userData.aim=true;
+  if(g.handle)g.handle.visible=false;g.handle=h;g.glbGear=true;return true}
+function dressFlyer(g,L,colAt){
+  if(!gearHas('ws_arms','ws_legs')||!g.wing)return false;
+  const mats=gearMats({wing:{vc:true},rib:{c:0x2a2d33},inlet:{c:0x0e1013}});
+  const w=new THREE.Group();
+  for(const [n,leg] of [['ws_arms',0],['ws_legs',1]]){const o=gearPut(n,w,mats,0,0,0);if(!o)return false;
+    o.traverse(m=>{if(!m.isMesh)return;const p=m.geometry.attributes.position,c=new Float32Array(p.count*3),v=new THREE.Vector3();
+      m.geometry=m.geometry.clone();for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);const cc=colAt(v,leg);c[i*3]=cc.r;c[i*3+1]=cc.g;c[i*3+2]=cc.b}
+      m.geometry.setAttribute('color',new THREE.BufferAttribute(c,3));m.userData.leg=leg})}
+  g.wing.visible=false;g.add(w);g.wing=w;g.glbGear=true;
+  if(g.human&&g.human.bones)try{wingFollow(g,w)}catch(e){GLB.err='wingFollow: '+e.message}
+  return true}
+
+/* Voilure qui suit les membres : chaque sommet garde ses coordonnées de repos et reçoit, à chaque image, le déplacement
+   des os voisins (épaule, coude, poignet, hanche pour les ailes de bras ; hanches, genoux, chevilles pour l'aile de jambes),
+   pondéré par sa position sur l'envergure (u) et la corde (v). Translation seule : suffisant pour passer du plané
+   au piqué (bras ramenés, jambes serrées) sans que la voilure se détache du corps. */
+function wingFollow(g,w){const B=g.human.bones,A=B.arms,Lg=B.legs;if(!A||!Lg)return;
+  const J={sh:[A[0].upper,A[1].upper],el:[A[0].fore,A[1].fore],wr:[A[0].hand,A[1].hand],hp:[Lg[0].upper,Lg[1].upper],kn:[Lg[0].lower,Lg[1].lower],an:[Lg[0].foot,Lg[1].foot]};
+  const inv=new THREE.Matrix4(),tv=new THREE.Vector3();
+  const read=up=>{if(up)g.updateMatrixWorld(true);inv.copy(g.matrixWorld).invert();const o={};for(const k in J)o[k]=J[k].map(b=>b.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv));return o};
+  const R0=read(true),D={};for(const k in J)D[k]=[new THREE.Vector3(),new THREE.Vector3()];
+  const meshes=[];w.traverse(m=>{if(!m.isMesh)return;const p=m.geometry.attributes.position,n=p.count,rest=Float32Array.from(p.array),wt=new Float32Array(n*4),leg=m.userData.leg;
+    for(let i=0;i<n;i++){const x=rest[i*3],z=rest[i*3+2];
+      if(leg){const u=Math.min(1,Math.max(0,(x-R0.an[0].x)/((R0.an[1].x-R0.an[0].x)||1))),v=Math.min(1,Math.max(0,(z-R0.hp[0].z)/((R0.an[0].z-R0.hp[0].z)||1)));wt[i*4]=u;wt[i*4+1]=v}
+      else{const s=x<0?0:1,sh=R0.sh[s],wr=R0.wr[s];const u=Math.min(1,Math.max(0,(x-sh.x)/((wr.x-sh.x)||1)));
+        /* corde : 0 sur le bord d'attaque (bras), 1 au bord de fuite (vers la hanche) */
+        const zl=sh.z+(wr.z-sh.z)*u,zt=.4+(wr.z+.16*(.4-wr.z)-.4)*u;const v=Math.min(1,Math.max(0,(z-zl)/((zt-zl)||1)));wt[i*4]=u;wt[i*4+1]=v;wt[i*4+2]=s}}
+    meshes.push({p,rest,wt,leg,n})});
+  const L3=(a,b,t,o)=>o.copy(a).lerp(b,t),t1=new THREE.Vector3(),t2=new THREE.Vector3(),t3=new THREE.Vector3();
+  let last=-1;
+  w.userData.follow=function(){const now=performance.now();if(now-last<15)return;last=now;const C=read();let moved=0;
+    for(const k in J)for(let s=0;s<2;s++){D[k][s].copy(C[k][s]).sub(R0[k][s]);moved+=D[k][s].lengthSq()}
+    for(const M of meshes){const a=M.p.array,r=M.rest,wt=M.wt;
+      if(moved<1e-8){a.set(r);M.p.needsUpdate=true;continue}
+      for(let i=0;i<M.n;i++){const u=wt[i*4],v=wt[i*4+1];
+        if(M.leg){/* hanche → genou → cheville, interpolés de la jambe gauche (u=0) à la droite (u=1) */
+          const hp=L3(D.hp[0],D.hp[1],u,t1),kn=L3(D.kn[0],D.kn[1],u,t2),an=L3(D.an[0],D.an[1],u,t3);
+          if(v<.5)tv.copy(hp).lerp(kn,v*2);else tv.copy(kn).lerp(an,(v-.5)*2)}
+        else{const s=wt[i*4+2];const lead=u<.5?L3(D.sh[s],D.el[s],u*2,t1):L3(D.el[s],D.wr[s],(u-.5)*2,t1);
+          const trail=t2.copy(D.hp[s]).lerp(t3.copy(D.wr[s]).multiplyScalar(.84).addScaledVector(D.hp[s],.16),u);tv.copy(lead).lerp(trail,v)}
+        a[i*3]=r[i*3]+tv.x;a[i*3+1]=r[i*3+1]+tv.y;a[i*3+2]=r[i*3+2]+tv.z}
+      M.p.needsUpdate=true}};
+  const base=g.updateMatrixWorld;g.updateMatrixWorld=function(force){base.call(this,force);if(!wingFollow.busy){wingFollow.busy=true;try{w.userData.follow()}finally{wingFollow.busy=false}}}}
+
+/* Instancie un objet d'un GLB (chaque primitive devient un InstancedMesh) : list = [[x,y,z,yaw,échelle,teinte?], …].
+   matFor(nomMatériau, matériauSource) peut renvoyer un matériau de remplacement ; la teinte par instance s'applique
+   aux matériaux nommés dans tint. */
+function glbInstances(gl,name,list,root,o){o=o||{};const src=gl&&gl.scene.getObjectByName(name);if(!src||!list.length)return null;const grp=new THREE.Group();grp.name=name+'_inst';
+  src.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(src.matrixWorld).invert(),M4=new THREE.Matrix4(),L4=new THREE.Matrix4(),q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),c=new THREE.Color();
+  src.traverse(n=>{if(!n.isMesh)return;const nm=n.material.name||'';let mat=o.matFor&&o.matFor(nm,n.material);
+    if(!mat)mat=nm==='glass'?new THREE.MeshBasicMaterial({color:n.material.color||0xffffff}):new THREE.MeshLambertMaterial({color:n.material.color?n.material.color.getHex():0xffffff});
+    const tint=o.tint&&o.tint.includes(nm);if(tint)mat.color.set(0xffffff);
+    const im=new THREE.InstancedMesh(n.geometry,mat,list.length);L4.copy(inv).multiply(n.matrixWorld);
+    list.forEach((t,i)=>{q.setFromAxisAngle(Y,t[3]||0);const s=t[4]||1;M4.compose(new THREE.Vector3(t[0],t[1],t[2]),q,new THREE.Vector3(s,s,s)).multiply(L4);im.setMatrixAt(i,M4);if(tint)im.setColorAt(i,c.set(t[5]??0x2b8fb3))});
+    im.castShadow=!!o.shadow;grp.add(im)});root.add(grp);return grp}

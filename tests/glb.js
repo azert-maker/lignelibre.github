@@ -6,7 +6,7 @@ const L=require('./lib');
   const g=await p.evaluate(()=>({ready:__ll.GLB.ready,err:__ll.GLB.err,models:Object.keys(__ll.GLB.models).sort(),parse:__ll.GLB.stats.parseMs}));
   chk(g.ready&&!g.err,'GLB décodés sans erreur ('+g.models.join(', ')+', '+g.parse+' ms)');
   chk(['bmx','rider','rider_lo'].every(k=>g.models.includes(k)),'modèles rider, rider_lo, bmx présents');
-  for(const s of ['wingsuit','downhill','snowboard','bmx','motocross','wakeboard','parkour']){
+  for(const s of ['wingsuit','longboard','snowboard','bmx','motocross','wakeboard','parkour']){
     const r=await p.evaluate(s=>{__ll.profile.settings.quality='normal';__ll.startRun({sport:s,mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
       const c=__ll.cur;for(let i=0;i<90;i++)c.update(1/60,c.auto?c.auto():{x:0,y:1,a:false,g:false});
       const hs=[];__ll.cur._rig.traverse(n=>{if(n.isHuman)hs.push(n)});const h=hs[0];if(!h)return {none:true};
@@ -34,6 +34,45 @@ const L=require('./lib');
   chk(mo.glb,'motocross : moto Blender intégrée (carrosserie, avant, roues)');
   chk(mo.plate,'motocross : plaque numéro texturée');
   chk(mo.d.every(x=>x<.06),'motocross : mains sur les poignées ('+mo.d.map(x=>(x*100).toFixed(1)+' cm').join(', ')+')');
+  /* équipement Blender (gear.glb) : planches, fixations, palonnier, voilure ; repli procédural */
+  const ge=await p.evaluate(async()=>{const o={};
+    for(const s of ['longboard','snowboard','wakeboard','wingsuit']){await __ll.startRun({sport:s,mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;
+      for(let i=0;i<30;i++)c.update(1/60,c.auto?c.auto():{x:0,y:1,a:false,g:false});let g=null;c._rig.traverse(n=>{if(n.glbGear)g=n});
+      const names=[];g&&g.traverse(n=>{if(n.name&&/^(lb|sb|wk|ws)_/.test(n.name))names.push(n.name)});o[s]={ok:!!g,names:[...new Set(names)].sort()}}
+    /* longboard étiré à la longueur de la planche choisie */
+    const lb=buildLongboard(Object.assign({},__ll.profile.look,{gear:Object.assign({},__ll.profile.look.gear,{board:'drop105'})}));o.lbScale=lb.getObjectByName('lb_deck').scale.z;o.lbLen=lb.len;
+    /* palonnier orienté vers le bateau */
+    await __ll.startRun({sport:'wakeboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<30;i++)c.update(1/60,c.auto());
+    const h=c._rig.handle||(()=>{let x;c._rig.traverse(n=>{if(n.handle)x=n.handle});return x})();o.aim=!!(h&&h.userData.aim);
+    const fl=buildFlyer(Object.assign({},__ll.profile.look,{pattern:3}));let vc=0;fl.wing.traverse(n=>{if(n.isMesh&&n.geometry.attributes.color)vc++});o.wingVC=vc;
+    const pr=buildWake(Object.assign({},__ll.profile.look,{proc:true}));o.proc=!pr.glbGear&&!pr.getObjectByName('wk_board');return o});
+  chk(ge.longboard.ok&&['lb_deck','lb_truck','lb_wheel'].every(n=>ge.longboard.names.includes(n)),'longboard Blender ('+ge.longboard.names.join(', ')+')');
+  chk(ge.snowboard.ok&&ge.snowboard.names.includes('sb_board')&&ge.snowboard.names.includes('sb_binding'),'snowboard Blender ('+ge.snowboard.names.join(', ')+')');
+  chk(ge.wakeboard.ok&&['wk_board','wk_binding','wk_handle'].every(n=>ge.wakeboard.names.includes(n))&&ge.aim,'wakeboard Blender, palonnier tourné vers le bateau');
+  chk(ge.wingsuit.ok&&ge.wingsuit.names.includes('ws_arms')&&ge.wingsuit.names.includes('ws_legs')&&ge.wingVC>0,'voilure Blender colorée par motif ('+ge.wingVC+' maillages)');
+  chk(Math.abs(ge.lbScale-ge.lbLen)<1e-6&&ge.lbLen>1,'plateau étiré à la longueur de la planche ('+ge.lbLen+' m)');
+  chk(ge.proc,'équipement : repli procédural (look.proc)');
+  /* décors 0.25 : skatepark habillé et mobilier de Venice (BMX), toits de Paris (parkour), relief de la route (chute du longboard) */
+  const dc=await p.evaluate(async()=>{const o={};
+    await __ll.startRun({sport:'bmx',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();await glbLoad('venice');await new Promise(r=>setTimeout(r,50));
+    let pd=null;const inst={};scene.traverse(n=>{if(n.name==='parkDress')pd=n;if(/_inst$/.test(n.name))inst[n.name]=n.children[0].count});
+    o.pipes=pd?pd.children.filter(m=>!m.material.map).length:0;o.tags=pd?pd.children.filter(m=>m.material.map).length:0;o.venice=inst;
+    await __ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();await glbLoad('paris');await new Promise(r=>setTimeout(r,50));
+    const pi={};let chimHidden=null;scene.traverse(n=>{if(/^pa_.*_inst$/.test(n.name))pi[n.name]=n.children[0].count});
+    const nChim=__ll.cur._boxes().filter(b=>b.t==='chim').length;scene.traverse(n=>{if(n.isInstancedMesh&&n.count===nChim&&n.material.color&&n.material.color.getHex()===0xa65a3f)chimHidden=!n.visible});o.paris=pi;o.nChim=nChim;o.chimHidden=chimHidden;
+    await __ll.startRun({sport:'longboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<120;i++)c.update(1/60,c.auto());
+    const v=new THREE.Vector3();c._rig.getWorldPosition(v);o.roadErr=typeof c._h==='function'?Math.abs(c._h(v.x,v.z)-v.y):9;return o});
+  chk(dc.pipes>=2&&dc.pipes<=3&&dc.tags>0,'skatepark : coping, cornières et garde-corps fusionnés ('+dc.pipes+' maillages) et '+dc.tags+' tags');
+  chk(['vk_flood_inst','vk_lamp_inst','vk_bench_inst','vk_bin_inst'].every(k=>dc.venice[k]>0),'Venice : mobilier Blender instancié ('+Object.entries(dc.venice).map(([k,v])=>k.slice(3,-5)+' '+v).join(', ')+')');
+  chk(dc.paris.pa_dormer_inst>0&&dc.paris.pa_dormer_inst<=90&&(dc.nChim===0||(dc.paris.pa_chimney_inst===dc.nChim&&dc.chimHidden)),'Paris : '+dc.paris.pa_dormer_inst+' lucarnes, '+(dc.paris.pa_chimney_inst||0)+' souches Blender à la place des '+dc.nChim+' boîtes');
+  chk(dc.roadErr<.02,'longboard : relief de la route exporté pour la chute physique (écart '+(dc.roadErr*100).toFixed(1)+' cm)');
+  /* wakeboard : mains sur le palonnier ; wingsuit : la voilure suit les bras en piqué */
+  const hw=await p.evaluate(async()=>{await __ll.startRun({sport:'wakeboard',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();const c=__ll.cur;for(let i=0;i<120;i++)c.update(1/60,c.auto());
+    const h=c._rig.human;c._rig.updateMatrixWorld(true);const d=[];for(let i=0;i<2;i++){const t=new THREE.Vector3(),w=new THREE.Vector3(),e=new THREE.Vector3();h.ik.anchors[i].getWorldPosition(t);h.bones.arms[i].hand.getWorldPosition(w);h.bones.arms[i].fore.getWorldPosition(e);d.push(w.addScaledVector(w.clone().sub(e).normalize(),.06).distanceTo(t))}
+    const g=buildFlyer(__ll.profile.look);g.human.snapPose(POSES.wingsuit_dive);g.updateMatrixWorld(true);const hand=g.human.bones.arms[1].hand.getWorldPosition(new THREE.Vector3());let best=9;
+    g.wing.traverse(m=>{if(!m.isMesh||m.userData.leg)return;const a=m.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3)best=Math.min(best,Math.hypot(a[i]-hand.x,a[i+1]-hand.y,a[i+2]-hand.z))});return {d,best}});
+  chk(hw.d.every(x=>x<.05),'wakeboard : mains sur le palonnier ('+hw.d.map(x=>(x*100).toFixed(1)+' cm').join(', ')+')');
+  chk(hw.best<.06,'wingsuit : la voilure suit la main en piqué ('+(hw.best*100).toFixed(1)+' cm)');
   /* éco : variante légère */
   const lo=await p.evaluate(()=>{__ll.profile.settings.quality='eco';__ll.startRun({sport:'parkour',mode:'free',len:12,weather:'soleil',wind:0,params:{},seed:'G1'},{});__ll.forcePlay();
     let h;__ll.cur._rig.traverse(n=>{if(n.isHuman)h=n});let t=0;h.glb.traverse(n=>{if(n.isMesh&&n.visible&&n.parent.visible){const g=n.geometry;t+=(g.index?g.index.count:g.attributes.position.count)/3}});__ll.profile.settings.quality='normal';return t});

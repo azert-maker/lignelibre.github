@@ -69,7 +69,8 @@ MODES.bmx=function(cfg,look,ctx){
     else if(k==='spine'){const L=3.1,H=1.6,[x0,z0]=at(-L-.6,0);park.add('quarter',x0,z0,yaw,L+.6,6,H,{ang:1.05,tag:'spine',vert:false});const [x1,z1]=at(L+.6,0);park.add('quarter',x1,z1,yaw+Math.PI,L+.6,6,H,{ang:1.05,tag:'spine',vert:false});lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L+3,0)})}
     else if(k==='kicker'){const [x0,z0]=at(-3,0);park.add('kicker',x0,z0,yaw,3.4,3.4,JH*1.1,{tag:'kicker'});lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(6,0)})}
     else{const L=7,[x0,z0]=at(-L/2,0);park.add('bank',x0,z0,yaw,L,5,JH+.3,{up:4.2,tag:'bank'});const [rx0,rz0]=at(-L/2+4.4,-2.4);park.addRailRaw(rx0,rz0,rx0+fx*2.4,rz0+fz*2.4,JH+.3+.4,JH+.3+.4,'rail');lines.push({k,cx,cz,yaw,x:x0,z:z0,ex:at(L/2+2,0)})}}
-  park.finalize();const LIM=inner+park.mods[0].L-.35;/* bord extérieur des decks */
+  park.finalize();if(typeof parkDress==='function')try{parkDress(park,root,{eco,seed:seedI})}catch(e){console.warn('parkDress',e)}
+  const LIM=inner+park.mods[0].L-.35;/* bord extérieur des decks */
   const groundH=(x,z)=>park.H(x,z);
   /* ---------- rider ---------- */
   const rig=buildBmx(look);castAll(rig,true,false);root.add(rig);const human=rig.human,BK=rig.bike;const GP=rig.phys;

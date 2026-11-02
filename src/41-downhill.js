@@ -32,6 +32,13 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
     return [lerp(X[i],X[i+1],t)+Math.cos(h)*o,lerp(Y[i],Y[i+1],t),lerp(Z[i],Z[i+1],t)+Math.sin(h)*o,h]}
   const OFFS=[-40,-20,-(HW+4.6),-(HW+2),ROCK,-HW,-(HW-.15),-.1,.1,HW-.15,HW,HW+1,HW+3.6,18+HW,40+HW];
   const OH=[21,10.5,4.5,2.8,-.25,0,0,0,0,0,0,-.05,-1.6,-12,-32];
+  /* relief en un point (x, z) quelconque près du rider : abscisse s la plus proche (recherche locale autour de L.s),
+     décalage latéral, puis profil en travers OFFS/OH. Sert à la chute physique (rider éjecté, planche qui glisse). */
+  function roadGround(x,z){const s0=isFinite(L.s)?L.s:0;let bs=s0,bd=1e18;
+    for(let s=Math.max(0,s0-30);s<=s0+60;s+=1.5){const p=at(s,0),d=(p[0]-x)**2+(p[2]-z)**2;if(d<bd){bd=d;bs=s}}
+    for(let k=0;k<6;k++){const st=.6/(1<<k);for(const s of [bs-st,bs+st]){if(s<0)continue;const p=at(s,0),d=(p[0]-x)**2+(p[2]-z)**2;if(d<bd){bd=d;bs=s}}}
+    const p=at(bs,0),h=p[3],o=(x-p[0])*Math.cos(h)+(z-p[2])*Math.sin(h);
+    let i=0;while(i<OFFS.length-2&&OFFS[i+1]<o)i++;const t=clamp((o-OFFS[i])/(OFFS[i+1]-OFFS[i]),0,1);return p[1]+OH[i]+(OH[i+1]-OH[i])*t}
   const NZ_=[8,4,1,0,0,0,0,0,0,0,0,0,0,-4,-8];
   const snowy=cfg.weather==='neige';
   /* Neige : en météo « neige légère », bas-côtés et pentes passent en neige (route déneigée), grain + paillettes */
@@ -211,7 +218,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
     netState(){const a=at(L.s,L.o);return {p:[+a[0].toFixed(2),+a[1].toFixed(2),+a[2].toFixed(2)],q:rig.quaternion.toArray().map(v=>+v.toFixed(3))}},
     ghost(lk){const o=buildLongboard(lk);if(!luge)o.human.pose({crouch:.6,lean:.7,twist:.8,back:.5});const tag=textSprite(lk.name,lk.accent,3.2);tag.position.y=2.4;o.add(tag);root.add(o);return o},
     overStats(){return [['Distance',(stats.dist/1000).toFixed(2)+' km'],['Vitesse max',Math.round(stats.vmax)+' km/h'],['Virages propres',stats.turnsClean],['Slides',stats.slides],['Temps',fmtT(stats.time)]]},
-    _rig:rig,_dust:dust,_L:()=>L,_recX:()=>L.s,_world:(f,all)=>{updateChunks(f.e,!!all);peaks.position.set(f.p.x,f.p.y-160,f.p.z)},dispose(){scene.remove(root);disposeTree(root)}
+    _h:roadGround,_rig:rig,_dust:dust,_L:()=>L,_recX:()=>L.s,_world:(f,all)=>{updateChunks(f.e,!!all);peaks.position.set(f.p.x,f.p.y-160,f.p.z)},dispose(){scene.remove(root);disposeTree(root)}
   };
 }};
 MODES.longboard=makeRoadMode('board');

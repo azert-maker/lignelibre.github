@@ -1,5 +1,44 @@
 # Journal des versions · Ligne Libre
 
+## 0.25.0 · 1er novembre 2026 · Venice Beach et toits de Paris habillés
+
+BMX · Venice Beach
+- Coping en tube d'acier sur la lèvre des quarters et des coins, cornières d'acier sur les arêtes des box, garde-corps à l'arrière des decks du périmètre.
+- Tags sur les flancs des modules : lettres pleines générées (mots neutres choisis à la main, aucune marque ni signature réelle), usés par endroits.
+- Mobilier Blender (`assets/glb/venice.glb`) : mâts d'éclairage aux 4 angles du parc ; lampadaires, bancs, poubelles peintes de couleurs variées et fontaines le long de la promenade.
+- Tout est décoratif : le relief roulable ne change pas (« ce qu'on voit est ce qu'on touche » reste vrai).
+
+Parkour · toits de Paris
+- Dernier étage en brisis de zinc à joints debout, corniche crème en dessous, lucarnes Blender sur les façades qui donnent sur le vide (90 au plus, aucune en qualité éco).
+- Souches de cheminée Blender (`assets/glb/paris.glb`) en plâtre et brique avec leurs mitrons en terre cuite, à la place des boîtes ; même encombrement.
+
+Wakeboard
+- Les deux mains tiennent le palonnier (même IK que le guidon du BMX) ; le palonnier se place à bout de bras, dans l'axe de la corde, et une main le lâche pendant un grab.
+
+Wingsuit
+- La voilure suit les membres : en piqué (bras ramenés, jambes serrées) elle reste attachée aux poignets et aux chevilles au lieu de flotter à côté du corps.
+
+Downhill longboard
+- Chute physique comme dans les autres sports au sol : le rider est éjecté, culbute et s'immobilise sur la route, la planche glisse (le relief de la route est maintenant exporté).
+
+Performances (rendu logiciel, qualité normale) : BMX 76 → 97 appels de dessin, parkour 73 → 81 ; i/s en baisse d'environ 10 à 20 % en parkour. Les tubes du skatepark sont fusionnés en 2 maillages et le mobilier est instancié.
+
+Tests
+- `tests/glb.js` : 6 contrôles de plus (habillage du skatepark, mobilier de Venice, toits de Paris, relief de la route, mains sur le palonnier, voilure en piqué).
+
+## 0.24.0 · 1er novembre 2026 · Planches et voilure modélisées
+
+Équipement (nouveau modèle Blender `assets/glb/gear.glb`, script `assets/blender/gear.py`)
+- Longboard : plateau à concave et kicktails (dessous à la couleur du plateau, grip, tranche bois), trucks complets (platine, kingpin, gommes à la couleur d'accent, hanger, axe), roues à lèvre arrondie et noyau ; le plateau suit la longueur de la planche choisie.
+- Snowboard : ligne de cotes, spatule et talon relevés, cambre, carres métal ; fixations avec plateau, disque, talonnière, spoiler et deux sangles (couleur d'accent).
+- Wakeboard : rocker continu, quatre ailerons, bande centrale d'accent, chaussons fermés lacés ; le palonnier (barre gainée et patte d'oie) s'oriente vers le bateau.
+- Wingsuit : voilure gonflée en caissons (profil épais, nervures, entrées d'air) entre bras et corps et entre les jambes ; les quatre motifs du garage (uni, bicolore, dégradé, rayures) sont repris sur la nouvelle voilure.
+- La voilure (y compris celle de repli) suit maintenant les os des bras : elle flottait 10 à 25 cm derrière les bras. Les points de contact du wingsuit ne changent pas.
+- Repli automatique sur les anciennes formes si le modèle ne charge pas ou en mode procédural.
+
+Tests
+- `tests/glb.js` : 6 contrôles de plus (pièces présentes dans chaque sport, plateau étiré, palonnier orienté, couleurs de la voilure, repli). Le test utilisait l'identifiant `downhill` au lieu de `longboard` et vérifiait donc la scène de démo : corrigé.
+
 ## 0.23.3 · 1er novembre 2026 · Dépôt professionnel
 
 Dépôt
