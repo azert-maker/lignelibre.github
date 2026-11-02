@@ -82,10 +82,10 @@ function coinParkPlan(park,o){o=o||{};const st={next:1.5,last:null};const J=o.ju
     spawn(api,p,dir){if(api.time<st.next||api.live>4)return;st.next=api.time+(o.every||6);
       const ground=(x,z)=>park.H(x,z);const cand=[];
       for(const m of park.mods){if(m.radial||m===st.last)continue;if(!/kicker|quarter|table|fmx|box|whoops|step|bank/.test(m.tag+m.type))continue;
-        const dx=m.x-p.x,dz=m.z-p.z,d=Math.hypot(dx,dz);if(d<7||d>40)continue;if((dx*dir.x+dz*dir.z)/d<.55)continue;if(m.fx*dir.x+m.fz*dir.z<.3)continue;cand.push({m,d})}
-      for(const r of park.rails){if(r===st.last||r.kind==='ledge'&&Math.random()<.5)continue;const dx=r.x0-p.x,dz=r.z0-p.z,d=Math.hypot(dx,dz);if(d<6||d>36)continue;if((dx*dir.x+dz*dir.z)/d<.55)continue;if(r.fx*dir.x+r.fz*dir.z<.4)continue;cand.push({r,d})}
+        const dx=m.x-p.x,dz=m.z-p.z,d=Math.hypot(dx,dz);if(d<7||d>(o.reach||30))continue;const al=(dx*dir.x+dz*dir.z)/d;if(al<.78)continue;if(m.fx*dir.x+m.fz*dir.z<.5)continue;cand.push({m,d:d*(2-al)})}
+      for(const r of park.rails){if(r===st.last||r.kind==='ledge'&&Math.random()<.5)continue;const dx=r.x0-p.x,dz=r.z0-p.z,d=Math.hypot(dx,dz);if(d<6||d>(o.reach||30)-4)continue;const al=(dx*dir.x+dz*dir.z)/d;if(al<.78)continue;if(r.fx*dir.x+r.fz*dir.z<.5)continue;cand.push({r,d:d*(2-al)})}
       if(!cand.length){/* rien devant : petite ligne droite dans l'axe */const pts=[];for(let i=1;i<=4;i++){const x=p.x+dir.x*(8+i*3),z=p.z+dir.z*(8+i*3);pts.push([x,ground(x,z)+cy,z])}if(o.free!==false)api.line(pts,false);return}
-      cand.sort((a,b)=>a.d-b.d);const c=cand[Math.min(cand.length-1,Math.floor(Math.random()*Math.min(3,cand.length)))];
+      /* le module le plus dans l'axe et le plus proche (avant : tiré au hasard parmi 3, souvent hors de la trajectoire) */cand.sort((a,b)=>a.d-b.d);const c=cand[0];
       const ex=c.m?c.m.x:c.r.x0,ez=c.m?c.m.z:c.r.z0;const appr=[];for(const t of [.4,.62,.84]){const x=lerp(p.x,ex,t),z=lerp(p.z,ez,t);appr.push([x,ground(x,z)+cy,z])}api.line(appr,false);
       if(c.r){const r=c.r;st.last=r;const pts=[];for(const t of [.22,.44,.66,.88])pts.push([r.x0+r.dx*t,r.y0+r.dy*t+cy*.75,r.z0+r.dz*t]);api.line(pts,true);return}
       const m=c.m;st.last=m;const pts=[];

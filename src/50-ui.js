@@ -217,7 +217,7 @@ function paintRanking(){$('#rankTabs').innerHTML=SPORT_IDS.map(k=>`<button class
 const Board=(()=>{let db=null,uid=null,tried=false;
   async function init(){if(tried)return;tried=true;try{if(!window.claude||!claude.use)return;const [d,u]=await Promise.all([claude.use('db'),claude.use('user')]);if(!d||!u)return;uid=await u.id();if(uid)db=d}catch(e){db=null}}
   return {async submit(sport,score){await init();if(!db||!uid)return;try{const ref=db.doc('scores/'+uid);const s=await ref.get();const cur=s.exists?s.data():{};
-      if((cur[sport]||0)>=score&&cur.n===profile.look.name)return;await ref.set(Object.assign({},cur,{n:profile.look.name,[sport]:Math.max(score,cur[sport]||0),at:Date.now()}))}catch(e){}},
+      if(!isSportKey(sport))return;if((cur[sport]||0)>=score&&cur.n===profile.look.name)return;await ref.set(Object.assign({},cur,{n:profile.look.name,[sport]:Math.max(score,cur[sport]||0),at:Date.now()}))}catch(e){}},
     async render(sport,el){await init();if(!el)return;if(!db){const loc=profile.history.filter(h=>h.sport===sport&&h.mode==='free').sort((a,b)=>b.score-a.score).slice(0,10);
         el.innerHTML='<p class="note">Pas de classement en ligne ici. Voici ton top local sur cet appareil.</p>'+(loc.length?`<table class="rtable"><thead><tr><th>#</th><th>Monde</th><th>Score</th></tr></thead><tbody>${loc.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.seed.slice(0,14))}</td><td>${fmt(r.score)}</td></tr>`).join('')}</tbody></table>`:'');return}
       try{const q=await db.collection('scores').orderBy(sport,'desc').limit(20).get();const rows=q.docs.map(d=>({id:d.id,...d.data()})).filter(r=>r[sport]>0);
@@ -267,7 +267,7 @@ Net.onRoom(list=>{roomPeers=list;onRoomPeers()});
 function paintMulti(){const k=Net.kind;
   $('#multiBody').innerHTML=`<div class="grp"><span class="lbl">Potes sur ce réseau (local) <b>${k==='ws'?'connecté':'non connecté'}</b></span>
     <p class="note">Même Wi-Fi : un PC lance <code>node server.js</code>, les autres saisissent son adresse ci-dessous (ex. ws://192.168.1.23:8080).</p>
-    <div class="row"><input class="txt" id="mWs" placeholder="ws://192.168.1.23:8080" value="${esc(load('ll3_ws','')||S().wsUrl||'')}" style="max-width:260px"><button class="btn small" id="mWsGo">Se connecter</button></div>
+    <div class="row"><input class="txt" id="mWs" placeholder="ws://192.168.1.23:8080" value="${esc(NET_CONFIG.suggest||load('ll3_ws','')||S().wsUrl||'')}" style="max-width:260px"><button class="btn small" id="mWsGo">Se connecter</button></div>
     <p class="note" id="mWsMsg">${Net.error?esc(Net.error):''}</p></div>
   <div class="grp"><span class="lbl">Ton pseudo</span><input class="txt" id="mName" maxlength="16" value="${esc(profile.look.name)}"></div>
   ${k?`<div class="grp"><span class="lbl">Créer</span><p class="note">Choisis le sport, le parcours et la météo : tout le salon jouera le même monde.</p><div class="row"><button class="btn primary" id="mCreate">Créer un salon</button></div></div>

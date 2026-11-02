@@ -205,7 +205,7 @@ MODES.motocross=function(cfg,look,ctx){
     if(St.air){if(St.airT<.1)apTrick=St.vel.y>4?Math.floor(Math.random()*4):0;const t=St.airT,up=St.vel.y>.5;return {x:apTrick===1&&up&&t>.15?1:0,y:0,a:false,g:apTrick===2&&up&&t>.2}}
     const want=Math.atan2(tx-St.pos.x,-(tz-St.pos.z)),dY=wrapA(want-St.yaw);const vT=course?(St.apCurve>.9?11:St.apCurve>.5?14:19):apI&&apI.ph===1?(apI.l.k==='fmx'?19:15):11;return {x:clamp(dY*2,-1,1),y:Math.abs(dY)>.9&&sp>9?-1:sp<vT?1:0,a:false,g:false}}
   /* pièces : ligne propre au sol, arc bonus au-dessus des tables et doubles, crêtes des whoops */
-  const coinPlan=coinParkPlan(park,{every:6.5,r:1.7,cy:1.0,scale:1.45,refH:1.8,jump:[[4,1.7],[9,2.8],[14,2.3]]});
+  const coinPlan=coinParkPlan(park,{every:6.5,r:1.7,cy:1.0,scale:1.45,refH:1.8,jump:[[4,1],[9,1.6],[14,1.3]]});
   return {env,stats,name:'Motocross',vScale:100,coins:coinPlan,target:finishT,
     keys:[['↑ / ↓','gaz / frein · en l\'air : plonger / cabrer (backflip)'],['← →','braquer · en l\'air : whip'],['Shift / F','figure freestyle en l\'air (+ ← → / ↓)'],['Espace','maintenir = précharger la suspension · relâcher = saut'],['C','caméra']],
     touch:{u:'Gaz',d:'Frein',a:'Saut',g:'Freestyle'},

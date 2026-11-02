@@ -5,7 +5,7 @@
  * Lancement :  node server.js        (PORT=9000 node server.js pour changer de port)
  * Le serveur affiche les adresses à donner aux autres : ws://IP-DU-PC:8080
  * Côté jeu : Multijoueur > « Potes sur ce réseau » > coller l'adresse > Se connecter
- *            ou ouvrir ligne-libre.html?ws=ws://IP-DU-PC:8080
+ *            (ou ouvrir ligne-libre.html?ws=ws://IP-DU-PC:8080 : l'adresse est pré-remplie, cliquer Se connecter)
  * Salons : un joueur crée un salon (code à 5 lettres), les autres le rejoignent.
  * 2 à 4 joueurs par salon. Pas de chat : le serveur relaie seulement l'état
  * de chaque joueur (pseudo, couleurs, position, score) 15 fois par seconde.

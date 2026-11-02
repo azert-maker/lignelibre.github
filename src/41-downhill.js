@@ -35,7 +35,7 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
   /* relief en un point (x, z) quelconque près du rider : abscisse s la plus proche (recherche locale autour de L.s),
      décalage latéral, puis profil en travers OFFS/OH. Sert à la chute physique (rider éjecté, planche qui glisse). */
   function roadGround(x,z){const s0=isFinite(L.s)?L.s:0;let bs=s0,bd=1e18;
-    for(let s=Math.max(0,s0-30);s<=s0+60;s+=1.5){const p=at(s,0),d=(p[0]-x)**2+(p[2]-z)**2;if(d<bd){bd=d;bs=s}}
+    for(let s=Math.max(0,s0-30);s<=s0+160;s+=1.5){const p=at(s,0),d=(p[0]-x)**2+(p[2]-z)**2;if(d<bd){bd=d;bs=s}}
     for(let k=0;k<6;k++){const st=.6/(1<<k);for(const s of [bs-st,bs+st]){if(s<0)continue;const p=at(s,0),d=(p[0]-x)**2+(p[2]-z)**2;if(d<bd){bd=d;bs=s}}}
     const p=at(bs,0),h=p[3],o=(x-p[0])*Math.cos(h)+(z-p[2])*Math.sin(h);
     let i=0;while(i<OFFS.length-2&&OFFS[i+1]<o)i++;const t=clamp((o-OFFS[i])/(OFFS[i+1]-OFFS[i]),0,1);return p[1]+OH[i]+(OH[i+1]-OH[i])*t}
@@ -120,9 +120,9 @@ function makeRoadMode(variant){return function(cfg,look,ctx){const luge=false;/*
   const crash=(t,x)=>{ding(90,.7);buzz([40,30,60]);ctx.crash(t,x)};
   /* pièces : dans un virage, 5 pièces sur la corde (intérieur, +dir = droite) dont la sortie serrée en bonus ; en ligne droite, ligne centrale ou 3 pièces bonus au bord */
   const coinPlan=(()=>{let sc=null,k=0;return {r:1.25,cy:.75,scale:1.25,every:.25,life:20,behind:25,cull:220,
-    spawn(api){if(sc===null)sc=L.s+45;if(sc>L.s+95)return;const t=nextTurn(sc);const inT=t&&t.i0*STEP<sc+35&&t.th>.45;
+    spawn(api){if(sc===null||sc<L.s+30)sc=L.s+40;if(sc>L.s+80)return;const t=nextTurn(sc);const inT=t&&t.i0*STEP<sc+35&&t.th>.45;
       if(inT){const s0=Math.max(sc,t.i0*STEP),len=Math.max(20,(t.i1-t.i0)*STEP);for(let i=0;i<5;i++){const s=s0+len*(.15+i*.17),deep=i>=2&&i<=3,a=at(s,t.dir*HW*(deep?.78:.5));api.add(a[0],a[1]+.75,a[2],deep)}sc=s0+len+40}
-      else{if(k++%2===0){for(let i=0;i<5;i++){const a=at(sc+i*6,0);api.add(a[0],a[1]+.75,a[2],false)}}else{const sd=(k>>1)%2?1:-1;for(let i=0;i<3;i++){const a=at(sc+i*6,sd*(HW-.7));api.add(a[0],a[1]+.75,a[2],true)}}sc+=110}}}})();
+      else{if(k++%2===0){const lo=clamp(L.o,-(HW-.8),HW-.8);for(let i=0;i<5;i++){const a=at(sc+i*6,lo);api.add(a[0],a[1]+.75,a[2],false)}}else{const sd=(k>>1)%2?1:-1;for(let i=0;i<3;i++){const a=at(sc+i*6,sd*(HW-.7));api.add(a[0],a[1]+.75,a[2],true)}}sc+=90}}}})();
   return {env,stats,name:luge?'Street luge':'Downhill',vScale:luge?160:140,target:course?LEN/24:0,
     keys:luge?[['← →','se pencher pour tourner'],['↓','tête baissée : plus aéro (6 s = figure)'],['↑','se redresser (frein à air)'],['Espace','freiner avec les pieds'],['C','caméra']]:[['← →','carver (frôle la glissière = figure)'],['↓','tuck : position aéro'],['Espace + ← →','slide : Coleman, Pendulum (change de côté)'],['↑ + Espace','stand-up slide'],['C','caméra']],
     coins:coinPlan,

@@ -74,7 +74,8 @@ const Ads=(()=>{
    Clients (tous les PC, y compris le serveur) :
      3. Ouvrir ligne-libre.html, puis Multijoueur > « Potes sur ce réseau »,
         coller l'adresse ws://… et « Se connecter »  (ou ouvrir le jeu avec
-        ?ws=ws://192.168.1.23:8080 dans l'URL). L'adresse est mémorisée sur le PC.
+        ?ws=ws://192.168.1.23:8080 dans l'URL : l'adresse est alors pré-remplie, il reste à cliquer « Se connecter »).
+        L'adresse est mémorisée sur le PC. Un lien ne connecte jamais le jeu tout seul à un serveur.
      4. Un joueur « Crée un salon » (choisit sport / météo / monde), les autres
         le rejoignent avec le code à 5 lettres ou dans la liste des salons.
    Protocole : join {room,id} · state {s} · leave ; le serveur rediffuse l'état
@@ -83,7 +84,12 @@ const Ads=(()=>{
    Échec fréquent : pare-feu Windows du PC serveur (autoriser Node sur réseau
    privé), Wi-Fi d'école qui isole les appareils, ou page servie en https.
 --------------------------------------------------------------------------------- */
-const NET_CONFIG={wsUrl:new URLSearchParams(location.search).get('ws')||load('ll3_ws','')||(profile.settings&&profile.settings.wsUrl)||''};
+/* ?ws= dans l'URL ne fait que pré-remplir le champ (suggest) : la connexion attend un clic du joueur.
+   Avant 0.26, un lien piégé pouvait connecter le jeu à un serveur inconnu dès l'ouverture (CodeQL : client-side request forgery). */
+const NET_CONFIG={wsUrl:load('ll3_ws','')||(profile.settings&&profile.settings.wsUrl)||'',suggest:String(new URLSearchParams(location.search).get('ws')||'').slice(0,200)};
+/* adresse de serveur : ws:// ou wss://, hôte et port seulement (pas d'identifiants, pas de chemin) ; sinon null */
+function wsAddress(raw){try{const u=new URL(String(raw||'').trim());if(u.protocol!=='ws:'&&u.protocol!=='wss:')return null;if(u.username||u.password)return null;
+  if(!/^[a-z0-9.-]+$|^\[[0-9a-f:.]+\]$/i.test(u.hostname))return null;if(u.pathname&&u.pathname!=='/')return null;if(u.search||u.hash)return null;return u.protocol+'//'+u.host+'/'}catch(e){return null}}
 const Net=(()=>{
   let kind=null,lobby=null,room=null,code=null,ws=null,wsPeers=[],myId=Math.random().toString(36).slice(2,10),lobbyPeersCb=null,roomPeersCb=null,readyCbs=[],lastErr='';
   const api={get kind(){return kind},get code(){return code},get inRoom(){return !!code},get error(){return lastErr},
@@ -96,7 +102,7 @@ const Net=(()=>{
     state(o){if(!code)return;if(room)room.presence(o).catch(()=>{});else if(kind==='ws')wsSend({t:'state',s:o})},
     peers(){if(room)return norm(room.peers());if(kind==='ws')return wsPeers;return []},
     /* connexion manuelle à un serveur local : cb(true|false, message) */
-    connect(url,cb){url=String(url||'').trim();if(!/^wss?:\/\/[^\s]+$/i.test(url)){lastErr='Adresse invalide : elle doit commencer par ws:// (ex. ws://192.168.1.23:8080).';cb&&cb(false,lastErr);return}
+    connect(url,cb){url=wsAddress(url)||'';if(!url){lastErr='Adresse invalide : elle doit commencer par ws:// (ex. ws://192.168.1.23:8080).';cb&&cb(false,lastErr);return}
       /* page servie en https (GitHub Pages) : le navigateur bloque ws:// (contenu mixte) ; on l'explique au lieu d'échouer en silence */
       if(location.protocol==='https:'&&/^ws:/i.test(url)){lastErr='La version en ligne (https) ne peut pas joindre un serveur ws:// local. Télécharge le jeu et ouvre le fichier sur ton PC, ou utilise un serveur wss://.';cb&&cb(false,lastErr);return}
       if(room){room.leave().catch(()=>{});room=null}code=null;openWs(url,ok=>{cb&&cb(ok,lastErr)})}};
@@ -105,7 +111,8 @@ const Net=(()=>{
   function wsSend(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
   function openWs(url,cb){let opened=false,settled=false;const fin=ok=>{if(settled)return;settled=true;cb&&cb(ok)};
     try{if(ws){ws.onclose=null;ws.close()}}catch(e){}
-    try{ws=new WebSocket(url)}catch(e){lastErr='Connexion refusée par le navigateur (page en https ou adresse bloquée).';return fin(false)}
+    const safe=wsAddress(url);if(!safe){lastErr='Adresse invalide.';return fin(false)}
+    try{ws=new WebSocket(safe)}catch(e){lastErr='Connexion refusée par le navigateur (page en https ou adresse bloquée).';return fin(false)}
     const to=setTimeout(()=>{if(!opened){lastErr='Pas de réponse du serveur. Vérifie que server.js tourne et que le pare-feu (souvent celui du Wi-Fi d\'école) laisse passer le port.';try{ws.close()}catch(e){}fin(false)}},5000);
     ws.onopen=()=>{opened=true;clearTimeout(to);lastErr='';kind='ws';done=true;readyCbs.forEach(f=>f('ws'));readyCbs=[];fin(true)};
     ws.onerror=()=>{if(!opened){clearTimeout(to);lastErr='Impossible de joindre '+url+'. Serveur éteint, mauvaise adresse IP ou réseau filtré (pare-feu de l\'école).';fin(false)}};
